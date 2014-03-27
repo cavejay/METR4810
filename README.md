@@ -3,7 +3,22 @@ METR4810
 
 METR4810 -- Autonomous Racecar
 
-INSTRUCTIONS:
+		Current Objectives
+=	Setup track and take pictures w/ roborealm pc 
+=	
+=
+
+
+
+
+
+
+
+
+
+
+
+INSTRUCTIONS FOR SETUP:
 
 ## Way 1 ## Easy way
 - Downloads:
