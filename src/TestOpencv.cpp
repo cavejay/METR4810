@@ -2,6 +2,7 @@
 // version: 0.01a
 
 #include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
 #include <iostream>
 
 using namespace cv;
@@ -14,8 +15,11 @@ int main(int argc, char* argv[])
   cv::VideoCapture cap(0); // open the video camera no. 0
   if (!cap.isOpened())  // if not success, exit program
   {
-    cout << "Cannot open the video cam" << endl;
-    return -1;
+    cout << "Cannot open the video cam\nAttempting to Load Sample.avi" << endl;
+    VideoCapture cap("C:/Users/SHERMAL/Desktop/SampleVideo.avi"); // Load Video
+    double fps = cap.get(CV_CAP_PROP_FPS); //get the frames per seconds of the video
+    cout << "Frame per seconds : " << fps << endl;
+
   }
   double dWidth = cap.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
   double dHeight = cap.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
@@ -39,7 +43,7 @@ int main(int argc, char* argv[])
     cv::namedWindow( "Example Canny", cv::WINDOW_AUTOSIZE );
     cv::imshow( "Example Gray", frame_gry );
     cv::Canny( frame_gry, frame_cny, 10, 100, 3, true );
-    cv::
+    cv::imshow("Example Canny", frame_cny);
 
     if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
     {
