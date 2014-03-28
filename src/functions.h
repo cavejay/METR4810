@@ -23,6 +23,6 @@ VIDEO_FILE = 0
 
 // Functions
 int init_videocapture(VideoCapture& cap, int video_source, const string& file_loc = "C:/Sample.avi");
-
+void Draw_Circles(Mat& img, const vector<Vec3f>& circles);
 
 #endif /* FUNCTIONS_H_ */

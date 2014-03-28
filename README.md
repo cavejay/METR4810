@@ -4,17 +4,16 @@ METR4810
 METR4810 -- Autonomous Racecar
 
 		Current Objectives
+=	Segment track	
+=	Transform Track from each camera image
+=	Stitch transformed image together using stitch.cpp
+=	Path using <TBA>
+=	Track Car
+=	Control car along path
+=	celebrate
+	
+		Completed Objectives (W00t)
 [x]	Setup track and take pictures w/ roborealm pc 
-=	
-=
-
-
-
-
-
-
-
-
 
 
 

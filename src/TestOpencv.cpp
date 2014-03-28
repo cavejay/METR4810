@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
   Mat img1 = imread("img.jpg");
 
   // Initialize Variables
-  cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny;
+  cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, gray;
   if(!img1.empty())
   {
     cv::imshow("rawr",img1);
@@ -58,15 +58,23 @@ int main(int argc, char* argv[])
    *  I'm thinking only a single thread atm.
    *  The for(;;) also will go just above here :) */
 
-    cv::imshow("Basic Stream", frame_bgr); //show the frame in "MyVideo" window
-
+    // Gray
     cv::cvtColor( frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
-    cv::namedWindow( "Example Gray", cv::WINDOW_AUTOSIZE );
-    cv::namedWindow( "Example Canny", cv::WINDOW_AUTOSIZE );
     cv::imshow( "Example Gray", frame_gry );
+
+    // Canny
     cv::Canny( frame_gry, frame_cny, 10, 100, 3, true );
     cv::imshow("Example Canny", frame_cny);
 
+    //Circle
+    cvtColor(img1, gray, CV_BGR2GRAY);
+    // smooth it, otherwise a lot of false circles may be detected
+    GaussianBlur( gray, gray, Size(9, 9), 2, 2 );
+    vector<Vec3f> circles;
+    HoughCircles(gray, circles, CV_HOUGH_GRADIENT, 2, 10, 200, 100, 0,50);
+    Draw_Circles(img1,circles);
+    namedWindow( "circles", 1 );
+    imshow( "circles", img1 );
 
     /* Don't need this yet :)
     if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop

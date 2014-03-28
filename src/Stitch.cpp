@@ -24,7 +24,7 @@ int Stitch( int argc, char** argv )
  cvtColor( image1, gray_image1, CV_RGB2GRAY );
  cvtColor( image2, gray_image2, CV_RGB2GRAY );
 
-imshow("first image",image2);
+ imshow("first image",image2);
  imshow("second image",image1);
 
 if( !gray_image1.data || !gray_image2.data )

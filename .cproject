@@ -39,6 +39,8 @@
 									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\calib3d\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\nonfree\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\nonfree\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\flann\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\flann\include&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.include.files.781709221" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1916451613" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -62,6 +64,7 @@
 									<listOptionValue builtIn="false" value="libopencv_features2d248"/>
 									<listOptionValue builtIn="false" value="libopencv_calib3d248"/>
 									<listOptionValue builtIn="false" value="libopencv_nonfree248"/>
+									<listOptionValue builtIn="false" value="libopencv_flann248"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1973194854" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
