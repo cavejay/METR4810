@@ -4,6 +4,7 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include <iostream>
+#include "functions.h"
 
 using namespace cv;
 using namespace std;
@@ -12,19 +13,8 @@ int main(int argc, char* argv[])
 { // Run this from the command line with no inputs atm.
   // initialise a whole bunch of stuff
 
-  cv::VideoCapture cap(0); // open the video camera no. 0
-  if (!cap.isOpened())  // if not success, exit program
-  {
-    cout << "Cannot open the video cam\nAttempting to Load Sample.avi" << endl;
-    VideoCapture cap("C:/Users/SHERMAL/Desktop/SampleVideo.avi"); // Load Video
-    double fps = cap.get(CV_CAP_PROP_FPS); //get the frames per seconds of the video
-    cout << "Frame per seconds : " << fps << endl;
-
-  }
-  double dWidth = cap.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
-  double dHeight = cap.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
-  // Show what you're reporting.
-  cout << "Frame size : " << dWidth << " x " << dHeight << endl;
+  VideoCapture cap;
+  init_videocapture(cap,VIDEO_FILE, "C:/Sample.avi");
 
   // Initialize Variables
   cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny;
@@ -35,7 +25,14 @@ int main(int argc, char* argv[])
   for(;;)
   { /*  This is where we put all the looping stuff.
 	I'm thinking only a single thread atm. */
-    cap >> frame_bgr;
+
+
+    bool bSuccess = cap.read(frame_bgr);
+    if (!bSuccess) //if not success, break loop
+    {
+                      cout << "Cannot read the frame from video file" << endl;
+                     break;
+    }
     cv::imshow("Basic Stream", frame_bgr); //show the frame in "MyVideo" window
 
     cv::cvtColor( frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);

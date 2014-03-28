@@ -4,7 +4,7 @@ METR4810
 METR4810 -- Autonomous Racecar
 
 		Current Objectives
-=	Setup track and take pictures w/ roborealm pc 
+[x]	Setup track and take pictures w/ roborealm pc 
 =	
 =
 
