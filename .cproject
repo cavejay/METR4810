@@ -25,14 +25,20 @@
 								<option id="gnu.cpp.compiler.mingw.exe.debug.option.optimization.level.379964598" name="Optimization Level" superClass="gnu.cpp.compiler.mingw.exe.debug.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.mingw.exe.debug.option.debugging.level.1465751275" name="Debug Level" superClass="gnu.cpp.compiler.mingw.exe.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1256554780" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\core\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\highgui\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\imgproc\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\include\&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\core\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\imgproc\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\core\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\highgui\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\highgui\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\imgproc\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\imgproc\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\features2d\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\features2d\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\calib3d\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\calib3d\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\nonfree\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\nonfree\include&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.include.files.781709221" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1916451613" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -53,6 +59,9 @@
 									<listOptionValue builtIn="false" value="libopencv_core248"/>
 									<listOptionValue builtIn="false" value="libopencv_highgui248"/>
 									<listOptionValue builtIn="false" value="libopencv_imgproc248"/>
+									<listOptionValue builtIn="false" value="libopencv_features2d248"/>
+									<listOptionValue builtIn="false" value="libopencv_calib3d248"/>
+									<listOptionValue builtIn="false" value="libopencv_nonfree248"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1973194854" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>

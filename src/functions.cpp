@@ -11,7 +11,7 @@ int init_videocapture(VideoCapture& cap, int video_source, const string& file_lo
   switch (video_source)
   {
   case 0: // The source is a video file.
-    cap.open(file_loc); // Load Video file
+    cap.open("C:/Sample.avi"); // Load Video file
     if ( !cap.isOpened() )  // if not success, exit program
     {
       cout << "Cannot open the video file" << endl;

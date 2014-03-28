@@ -22,7 +22,7 @@ VIDEO_FILE = 0
 };
 
 // Functions
-int init_videocapture(VideoCapture& cap, int video_source, const string& file_loc = "C:\Sample.avi");
+int init_videocapture(VideoCapture& cap, int video_source, const string& file_loc = "C:/Sample.avi");
 
 
 #endif /* FUNCTIONS_H_ */
