@@ -8,7 +8,7 @@
 
 int init_videocapture(VideoCapture& cap, int video_source, const string& file_loc)
 {
-  switch (video_source)
+  switch (video_source) // Do different things for different video sources :)
   {
   case 0: // The source is a video file.
     cap.open("C:/Sample.avi"); // Load Video file
@@ -22,6 +22,7 @@ int init_videocapture(VideoCapture& cap, int video_source, const string& file_lo
       return 1;
     }
     break;
+
   case 1:
    cap.open(0); // Load Video camera #0
     if (!cap.isOpened())  // if not success, exit program
@@ -56,4 +57,31 @@ void Draw_Circles(Mat& img, const vector<Vec3f>& circles)
     }
 }
 
+
+void Dilation(const Mat& src, Mat& dst, int dilation_shape, double dilation_size)
+{
+  int dilation_type;
+  if( dilation_shape == 0 ){ dilation_type = MORPH_RECT; }
+  else if( dilation_shape == 1 ){ dilation_type = MORPH_CROSS; }
+  else if( dilation_shape == 2) { dilation_type = MORPH_ELLIPSE; }
+
+  Mat element = getStructuringElement( dilation_type, Size( 2*dilation_size + 1, 2*dilation_size+1 ), Point( dilation_size, dilation_size ) );
+  /// Apply the dilation operation
+  cv::dilate( src, dst, element);
+}
+
+
+void Erosion(const Mat& src, Mat& dst, int erosion_shape, double erosion_size)
+{
+  int erosion_type;
+  if( erosion_shape == 0 ){ erosion_type = MORPH_RECT; }
+  else if( erosion_shape == 1 ){ erosion_type = MORPH_CROSS; }
+  else if( erosion_shape == 2) { erosion_type = MORPH_ELLIPSE; }
+
+  Mat element = getStructuringElement( erosion_type,
+                                       Size( 2*erosion_size + 1, 2*erosion_size+1 ),
+                                       Point( erosion_size, erosion_size ) );
+  /// Apply the erosion operation
+  erode( src, dst, element);
+}
 

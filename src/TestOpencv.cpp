@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
   Mat img1 = imread("img.jpg");
 
   // Initialize Variables
-  cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, gray;
+  cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThresTrack;
   if(!img1.empty())
   {
     cv::imshow("rawr",img1);
@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
   frame_bgr = img1;
 
   // Make le windows
-  cv::namedWindow("Basic Stream",CV_WINDOW_AUTOSIZE); //create a window called "MyVideo"
+//  cv::namedWindow("Basic Stream",CV_WINDOW_AUTOSIZE); //create a window called "MyVideo"
 
   /*  This is where we put all the looping stuff.
    *  I'm thinking only a single thread atm.
@@ -66,15 +66,32 @@ int main(int argc, char* argv[])
     cv::Canny( frame_gry, frame_cny, 10, 100, 3, true );
     cv::imshow("Example Canny", frame_cny);
 
+    // Track as black
+    cv::cvtColor(frame_bgr, frame_hsv, cv::COLOR_BGR2HSV);
+    frame_hsv = frame_bgr;
+    vector<Mat> hsvchannels(frame_hsv.channels());
+    cout << frame_hsv.channels() << endl;
+    cv::split(frame_hsv, hsvchannels);
+    imshow("H", hsvchannels[0]);
+    imshow("V", hsvchannels[2]);
+    cv::threshold(hsvchannels[2], ThresTrack,150,255,cv::THRESH_BINARY);
+    Dilation(ThresTrack,ThresTrack,ED_RECTANGLE,0.5);
+    Erosion(ThresTrack,ThresTrack,ED_RECTANGLE,0.3);
+    Dilation(ThresTrack,ThresTrack,ED_RECTANGLE,0.8);
+    imshow("Threshold Test", ThresTrack);
+
     //Circle
-    cvtColor(img1, gray, CV_BGR2GRAY);
+    cvtColor(frame_bgr, frame_gry, CV_BGR2GRAY);
     // smooth it, otherwise a lot of false circles may be detected
-    GaussianBlur( gray, gray, Size(9, 9), 2, 2 );
+    GaussianBlur( frame_gry, frame_gry, Size(9, 9), 2, 2 );
     vector<Vec3f> circles;
-    HoughCircles(gray, circles, CV_HOUGH_GRADIENT, 2, 10, 200, 100, 0,50);
-    Draw_Circles(img1,circles);
-    namedWindow( "circles", 1 );
-    imshow( "circles", img1 );
+    HoughCircles(frame_gry, circles, CV_HOUGH_GRADIENT, 2, 10, 200, 100, 0,200);
+    Draw_Circles(frame_bgr,circles);
+    imshow( "circles", frame_bgr);
+
+
+
+
 
     /* Don't need this yet :)
     if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
