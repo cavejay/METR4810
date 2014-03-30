@@ -1,0 +1,14 @@
+1* The PWM signal can jump from a high angle to a low angle via single inputs of that low angle (through the Servo.h library)
+	This just means there is no need to run back through angles in the code (i.e. if we are at a full right turn and want to go left)
+
+2* The maximum allowed angle in the dagu 8g Servo Motor seems to be approx. 160 degrees
+	This has been communicated to Xavier
+
+3* A single Bump sensor has been used to simulate input in controlling the Servo
+	As soon as we get our hands on the bluetooth module, received signals from that would replace these
+	- I REPEAT, WE ARE NOT using a bump sensor for the actual project implementation
+
+4* As the calculations by Xavier on turning ability state we require around 270 degrees
+	This Servo is not feasible, we need a full rotational servo
+	UNLESS, we use one for each wheel
+	OR, we have a massive gear ratio (which again is not feasible given size restrictions)
