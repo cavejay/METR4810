@@ -4,7 +4,10 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 #include "functions.h"
+#include "opencv/highgui.h"
 
 using namespace cv;
 using namespace std;
@@ -19,7 +22,7 @@ int main(int argc, char* argv[])
   // initialise a whole bunch of stuff
 
 /* The following is similar to what will be used for the actual demo, while we're working with a video stream
- * It isn't needed for now though, as we've got made as skillz and are just working with stills :)
+ * It isn't needed for now though, as we've got mad as skillz and are just working with stills :)
 
   VideoCapture cap;
   int vidcap_result = init_videocapture(cap,VIDEO_FILE,"C:/Sample.avi");
@@ -67,27 +70,36 @@ int main(int argc, char* argv[])
     cv::imshow("Example Canny", frame_cny);
 
     // Track as black
+    cv::namedWindow("Thresholded Image", CV_WINDOW_AUTOSIZE);
+    int threshMag = 0;
+    int d_val;
+    int e_val;
+    int two50 = 255;
+    int fifty = 50;
     cv::cvtColor(frame_bgr, frame_hsv, cv::COLOR_BGR2HSV);
-    frame_hsv = frame_bgr;
     vector<Mat> hsvchannels(frame_hsv.channels());
     cout << frame_hsv.channels() << endl;
     cv::split(frame_hsv, hsvchannels);
-    imshow("H", hsvchannels[0]);
-    imshow("V", hsvchannels[2]);
+    cv::createTrackbar("threshold value", "Thresholded Image", &threshMag,two50, threshold);
+    cv::createTrackbar( "Dilation size", "Thresholded Image", &d_val, fifty, Dilation);
+    cv::createTrackbar( "Erosion size", "Thresholded Image", &e_val,fifty, Erosion);
+
+    cv::imshow("H", hsvchannels[0]);
+    cv::imshow("V", hsvchannels[2]);
     cv::threshold(hsvchannels[2], ThresTrack,150,255,cv::THRESH_BINARY);
     Dilation(ThresTrack,ThresTrack,ED_RECTANGLE,0.5);
     Erosion(ThresTrack,ThresTrack,ED_RECTANGLE,0.3);
     Dilation(ThresTrack,ThresTrack,ED_RECTANGLE,0.8);
-    imshow("Threshold Test", ThresTrack);
+    cv::imshow("Threshold Test", ThresTrack);
 
     //Circle
-    cvtColor(frame_bgr, frame_gry, CV_BGR2GRAY);
+    cv::cvtColor(frame_bgr, frame_gry, CV_BGR2GRAY);
     // smooth it, otherwise a lot of false circles may be detected
-    GaussianBlur( frame_gry, frame_gry, Size(9, 9), 2, 2 );
+    cv::GaussianBlur( frame_gry, frame_gry, Size(9, 9), 2, 2 );
     vector<Vec3f> circles;
-    HoughCircles(frame_gry, circles, CV_HOUGH_GRADIENT, 2, 10, 200, 100, 0,200);
+    cv::HoughCircles(frame_gry, circles, CV_HOUGH_GRADIENT, 2, 10, 200, 100, 0,200);
     Draw_Circles(frame_bgr,circles);
-    imshow( "circles", frame_bgr);
+    cv::imshow( "circles", frame_bgr);
 
 
 
