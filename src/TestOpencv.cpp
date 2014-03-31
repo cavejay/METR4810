@@ -15,7 +15,12 @@
 #include <stdlib.h>
 
 #include "functions.h"
+<<<<<<< HEAD
 #include "RR_API.h"
+=======
+#include "Rotate3d.h"
+#include <vector>
+>>>>>>> Working Affine Transforms/Rotations
 
 using namespace cv;
 using namespace std;
@@ -107,6 +112,7 @@ int main(int argc, char* argv[])
     // smooth it, otherwise a lot of false circles may be detected
     cv::GaussianBlur( frame_gry, frame_gry, Size(9, 9), 2, 2 );
     vector<Vec3f> circles;
+<<<<<<< HEAD
     cv::HoughCircles(frame_gry, circles, CV_HOUGH_GRADIENT, 2, 10, 200, 100, 0,200);
     Draw_Circles(frame_bgr,circles);
     cv::imshow( "circles", frame_bgr);
@@ -131,6 +137,42 @@ int main(int argc, char* argv[])
     {
         cout<<"aruco failed\nException :"<<ex.what()<<endl;
     }
+=======
+    HoughCircles(frame_gry, circles, CV_HOUGH_GRADIENT, 2, 10, 200, 100, 0,200);
+    Draw_Circles(frame_bgr, circles);
+    imshow( "circles", frame_bgr);
+
+
+
+    /* Beginning of section for rotation */
+
+
+
+    // Run the elements from rotate3d and show them
+    Mat src = imread("Sample_Pictures/S5.jpg");
+    Mat warp_dst, warp_rotate_dst;
+
+    cv::Mat* frameArray = new cv::Mat[2];
+
+    frameArray = Rotate(src);
+    warp_dst = frameArray[0];
+    warp_rotate_dst = frameArray[1];
+    namedWindow("Source image", CV_WINDOW_AUTOSIZE );
+    imshow("Source image", src );
+
+    namedWindow("Warp", CV_WINDOW_AUTOSIZE );
+    imshow("Warp", warp_dst );
+
+    namedWindow("Warp + Rotate", CV_WINDOW_AUTOSIZE );
+    imshow("Warp + Rotate", warp_rotate_dst );
+
+
+
+
+
+
+
+>>>>>>> Working Affine Transforms/Rotations
 
 
     /* Don't need this yet :)

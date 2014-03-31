@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "M:/BitBucket/METR4810/Roborealm_API/C++/MinGW/RR_API.h"
 
