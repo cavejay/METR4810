@@ -4,13 +4,17 @@ METR4810
 METR4810 -- Autonomous Racecar
 
 		Current Objectives
-=	Segment track	
 =	Transform Track from each camera image
-=	Stitch transformed image together using stitch.cpp
-=	Path using <TBA>
+		- How even do this? (Jono)
+=	Segment track
+		- threshold V of hsv (michael)
+=	Stitch transformed image together using stitch.cpp (Michael)
+= RoboRealm Integration (Michael)
+=	Path using <TBA> (Michael)
 =	Track Car
+		- Difference + ARTag + Aruco (Michael)
 =	Control car along path
-=	celebrate
+=	celebrate (erri1)
 	
 		Completed Objectives (W00t)
 [x]	Setup track and take pictures w/ roborealm pc 

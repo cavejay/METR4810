@@ -1,16 +1,25 @@
 // METR4810 Off-Board Software
 // version: 0.01a
 
+// OpenCV
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
+#include "opencv/highgui.h"
+
+// ARuCo
+#include "aruco.h"
+#include "cvdrawingutils.h"
+
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "functions.h"
-#include "opencv/highgui.h"
+#include "RR_API.h"
 
 using namespace cv;
 using namespace std;
+using namespace aruco;
 
 static void help()
 { // This is here for when this becomes a command-line program :)
@@ -25,7 +34,8 @@ int main(int argc, char* argv[])
  * It isn't needed for now though, as we've got mad as skillz and are just working with stills :)
 
   VideoCapture cap;
-  int vidcap_result = init_videocapture(cap,VIDEO_FILE,"C:/Sample.avi");
+  RR_API rr;
+  int vidcap_result = init_videocapture(VIDEO_FILE,cap,"C:/Sample.avi");
   if (vidcap_result == -1)
   {
     return -1;
@@ -80,9 +90,9 @@ int main(int argc, char* argv[])
     vector<Mat> hsvchannels(frame_hsv.channels());
     cout << frame_hsv.channels() << endl;
     cv::split(frame_hsv, hsvchannels);
-    cv::createTrackbar("threshold value", "Thresholded Image", &threshMag,two50, threshold);
-    cv::createTrackbar( "Dilation size", "Thresholded Image", &d_val, fifty, Dilation);
-    cv::createTrackbar( "Erosion size", "Thresholded Image", &e_val,fifty, Erosion);
+    cv::createTrackbar("threshold value", "Thresholded Image", &threshMag,two50, NULL);
+    cv::createTrackbar( "Dilation size", "Thresholded Image", &d_val, fifty, NULL);
+    cv::createTrackbar( "Erosion size", "Thresholded Image", &e_val,fifty, NULL);
 
     cv::imshow("H", hsvchannels[0]);
     cv::imshow("V", hsvchannels[2]);
@@ -101,8 +111,26 @@ int main(int argc, char* argv[])
     Draw_Circles(frame_bgr,circles);
     cv::imshow( "circles", frame_bgr);
 
-
-
+    try
+    {
+        aruco::MarkerDetector MDetector;
+        vector<Marker> Markers;
+        //read the input image
+        cv::Mat InImage;
+        InImage=cv::imread("img1.jpg");
+     //Ok, let's detect
+        MDetector.detect(InImage,Markers);
+        //for each marker, draw info and its boundaries in the image
+        for (unsigned int i=0;i<Markers.size();i++) {
+            cout<<Markers[i]<<endl;
+            Markers[i].draw(InImage,Scalar(0,0,255),2);
+        }
+        cv::imshow("in",InImage);
+        cv::waitKey(0);//wait for key to be pressed
+    } catch (std::exception &ex)
+    {
+        cout<<"aruco failed\nException :"<<ex.what()<<endl;
+    }
 
 
     /* Don't need this yet :)

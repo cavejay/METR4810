@@ -6,7 +6,9 @@
  */
 #include "functions.h"
 
-int init_videocapture(VideoCapture& cap, int video_source, const string& file_loc)
+
+
+int init_videocapture(int video_source, VideoCapture& cap, const string& file_loc)
 {
   switch (video_source) // Do different things for different video sources :)
   {
@@ -37,6 +39,23 @@ int init_videocapture(VideoCapture& cap, int video_source, const string& file_lo
       cout << "Frame size : " << dWidth << " x " << dHeight << endl;
       return 1;
     }
+  default: // Use the RR_API to make magic happen
+    cout << "No case was called for init_videocapture.\nClosing Program" << endl;
+    return -1;
+    break;
+  }
+  return 0;
+}
+
+int init_videocapture(int video_source, RR_API& rr, const string& file_loc)
+{
+  if(video_source == 2)
+  {
+//    rr.connect("127.0.0.1",80);
+
+  } else {
+    cout << "The 2nd variable must be a videoCapture object to run from a file or video camera.\nClosing Program" << endl;
+    return -1;
   }
   return 0;
 }
