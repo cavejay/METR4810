@@ -13,6 +13,9 @@
  */
 VStream::VStream (inputVars data)
 {
+  this->Host = data.Host;
+  this->file_loc = data.file_location;
+  this->cameraNumber = data.camera_number;
   _inputFormat = hashit(data.inputSource);
   switch(_inputFormat)
     {
@@ -89,17 +92,17 @@ int VStream::still()
  */
 int VStream::camera()
 {
-  cap.open(0); // Load Video camera #0
+  cap.open(cameraNumber); // Load Video camera #0
   if (!cap.isOpened())  // if not success, exit program
   {
     cout << "Cannot open camera '0' closing program" << endl;
     return -1;
   }
   else {
-    double dWidth = cap.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
-    double dHeight = cap.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
+    vidSize.width = cap.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
+    vidSize.height = cap.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
     // Show what you're reporting.
-    cout << "Frame size : " << dWidth << " x " << dHeight << endl;
+    cout << "Frame size : " << vidSize.width << " x " << vidSize.height << endl;
     return 1;
   }
 }
@@ -140,12 +143,12 @@ Mat VStream::pullImage(int port)
   return dst;
 }
 
-inputFormat hashit(String const& inString){
+inputFormat VStream::hashit(const String inString){
   if(inString == "still") return STILL_IMAGE;
   if(inString == "camera") return VIDEO_CAMERA;
   if(inString == "video") return VIDEO_FILE;
   if(inString == "roborealm") return ROBOREALM;
-  else {return -1;}
+  else {return BADNESS;}
 }
 
 Mat VStream::roboGrab(char* host, int port){

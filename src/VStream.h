@@ -29,7 +29,8 @@ enum inputFormat{
   VIDEO_FILE = 0,
   VIDEO_CAMERA = 1,
   ROBOREALM = 2,
-  STILL_IMAGE = 3
+  STILL_IMAGE = 3,
+  BADNESS = 100
 };
 
 class VStream
@@ -39,10 +40,12 @@ private:
   int roboHeight;
   int roboWidth;
   int ports[4] = {6060,6061,6062,6063};
+  int cameraNumber;
+  Size vidSize;
 
   int init_videocapture(int video_source, VideoCapture& cap, const string& file_loc);
   Mat roboGrab(char* host, int port);
-  inputFormat hashit(String const& inString);
+  inputFormat hashit(const String inString);
 
   // Types of inits
   int roborealm();

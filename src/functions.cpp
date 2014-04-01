@@ -14,31 +14,59 @@ inputVars getInputData(int argc, char* argv[])
     std::string arg = argv[i];
     if ((arg == "-h") || (arg == "--help")) {
 	show_usage(argv[0]);
-	return 0;
-    } else if ((arg == "-l") || (arg == "--filelocation")) {
-    	if (i + 1 < argc) { // Make sure we aren't at the end of argv!
-    	    destination = argv[i++]; // Increment 'i' so we don't get the argument as the next argv[i].
-    	} else { // Uh-oh, there was no argument to the destination option.
-    	      std::cerr << "--destination option requires one argument." << std::endl;
-    	    return 1;
-    	}
-    } else if ((arg == "-l") || (arg == "--filelocation")) {
-    	if (i + 1 < argc) { // Make sure we aren't at the end of argv!
-    	    destination = argv[i++]; // Increment 'i' so we don't get the argument as the next argv[i].
-    	} else { // Uh-oh, there was no argument to the destination option.
-    	      std::cerr << "--destination option requires one argument." << std::endl;
-    	    return 1;
-    	}
-    } else if ((arg == "-l") || (arg == "--filelocation")) {
+	toReturn.varsParsedSuccessfully = false;
+
+    } else if ((arg == "-s") || (arg == "--inputsource")) {
 	if (i + 1 < argc) { // Make sure we aren't at the end of argv!
-	    destination = argv[i++]; // Increment 'i' so we don't get the argument as the next argv[i].
+	    toReturn.inputSource = string(argv[i++]); // Increment 'i' so we don't get the argument as the next argv[i].
 	} else { // Uh-oh, there was no argument to the destination option.
 	      std::cerr << "--destination option requires one argument." << std::endl;
-	    return 1;
+	      toReturn.varsParsedSuccessfully = false;
 	}
+
+    } else if ((arg == "-H") || (arg == "--host")) {
+    	if (i + 1 < argc) {
+    	    toReturn.Host = argv[i++];
+    	} else {
+    	      std::cerr << "--host option requires one argument." << std::endl;
+    	      toReturn.varsParsedSuccessfully = false;
+    	}
+
+    } else if ((arg == "-d") || (arg == "--destination")) {
+    	if (i + 1 < argc) {
+    	    toReturn.file_location = string(argv[i++]);
+    	} else {
+    	      std::cerr << "--destination option requires one argument." << std::endl;
+    	      toReturn.varsParsedSuccessfully = false;
+    	}
+
+    } else if ((arg == "-c") || (arg == "--cameranumber")) {
+	if (i + 1 < argc) {
+	    toReturn.camera_number = atoi(argv[i++]);
+	} else {
+	      std::cerr << "--cameranumber option requires one argument." << std::endl;
+	      toReturn.varsParsedSuccessfully = false;
+	}
+
+    } else if ((arg == "-mt") || (arg == "--multithreading")) {
+    	if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+    	    toReturn.multithreading = true; // Increment 'i' so we don't get the argument as the next argv[i].
+    	}
+
+    } else if ((arg == "-sim") || (arg == "--simulation")) {
+  	if (i + 1 < argc) {
+  	    toReturn.Simulation = true;
+  	}
+
+    } else if ((arg == "-demo") || (arg == "--demonstration")) {
+      	if (i + 1 < argc) {
+      	    toReturn.demo_mode = true;
+      	}
+
     } else {
       cout << "Invalid input, this program must be run with commands" << endl;
       show_usage(argv[0]);
+      toReturn.varsParsedSuccessfully = false;
     }
   }
   return toReturn;
@@ -93,6 +121,46 @@ bool less_vectors(const std::vector<Point>& vec1,const std::vector<Point>& vec2)
  {
    return vec1.size() < vec2.size();
  }
+
+int getSearchRadius(int preferedPoints, Point2f carCenter, vector<Point> outside, vector<Point> inside)
+{
+  int value = 0;
+  int totalPoints = 0;
+  int circRadius = 0;
+  while(totalPoints < preferedPoints){
+    totalPoints = 0;
+    int Points1 = 0;
+    int Points2 = 0;
+
+    for (size_t i = 0; i < outside.size(); i++)
+    {
+      // Use pythagoras on the 2 dimensional plane to find the distances
+      value = sqrt(
+      pow((outside[i].x - carCenter.x), 2)
+      + pow((outside[i].y - carCenter.y), 2));
+      // If the value is within the circle radius
+      if (value < circRadius)
+      {
+	Points1 += 1;
+      }
+    }
+    for (size_t i = 0; i < inside.size(); i++)
+    {
+      // Use pythagoras on the 2 dimensional plane to find the distances
+      value = sqrt(
+      pow((inside[i].x - carCenter.x), 2)
+      + pow((inside[i].y - carCenter.y), 2));
+      // If the value is within the circle radius
+      if (value < circRadius)
+      {
+	Points2 += 1;
+      }
+    }
+    totalPoints = Points1 + Points2;
+    circRadius++;
+  }
+  return circRadius;
+}
 
 
 

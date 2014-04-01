@@ -38,24 +38,33 @@ void show_usage(std::string name){
   std::cerr << "Usage: " << name << " <option(s)> SOURCES"
 	    << "Options:\n"
 	    << "\t-h,--help\t\tShow this help message\n"
-	    << "\t-s,--inputsource INPUT SOURCE\t can be 'roborealm', 'still', 'video' or 'camera'\n"
-	    << "\t-d,--destination DESTINATION\tSpecify the path for the image or video file\n"
-	    << "\t-H,--host HOST\tSpecify the IP Address of the Roborealm Server\n"
+	    << "\t-s,--inputsource <input here>\t can be 'roborealm', 'still', 'video' or 'camera'\n"
+	    << "\t-H,--host <HOST IP>\tSpecify the IP Address of the Roborealm Server\n"
+	    << "\t-d,--destination <DESTINATION>\tSpecify the path for the image or video file\n"
+	    << "\t-c,--cameranumber <CAMERANUMBER>\tSpecify which system camera to use. 0 is default\n"
+	    << "\t-mt,--multithreading \tUsing this switch will run the program in multithreading mode\n"
+	    << "\t-sim,--showsimulation \tShows a simulation running on the given input source. This will ignore the car\n"
+	    << "\t-demo,--demonstration \tRuns a demo using the simulation and a pre-determined picture\n"
 	    << std::endl;
-	    std::cin();
+	    std::cin.get();
 }
 
 int main (int argc, char* argv[])
 {
-  if (argc < 5) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
+  if (argc > 200) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
       show_usage(argv[0]); // Inform the user of how to use the program
-      std::cin.get();
       exit(0);
   }
 
   // Translate the input commands into somthing useful
   inputVars in = getInputData(argc, argv);
+  if(!in.varsParsedSuccessfully){
+    exit(0);
+  }
 
+  // This overrides the cmdline for nowz
+  in.inputSource = "still";
+  in.file_location = "Sample_Pictures/demo-track.png";
 
 
   /*
@@ -112,7 +121,7 @@ int main (int argc, char* argv[])
      * Updated by Jonathan Holland
      *
      */
-    if(Vs.inputFormat != ROBOREALM){
+    if(Vs._inputFormat != ROBOREALM){
     	cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
     } else {
     	frame_gry = frame_bgr;
@@ -202,42 +211,7 @@ int main (int argc, char* argv[])
 
     // Assign a value to make the circle around the car
     int preferedPoints = 110;
-    int totalPoints = 0;
-    double circRadius = 0;
-    while(totalPoints < preferedPoints){
-    	totalPoints = 0;
-    	int Points1 = 0;
-    	int Points2 = 0;
-
-    	for (size_t i = 0; i < largest1.size(); i++)
-		{
-			// Use pythagoras on the 2 dimensional plane to find the distances
-			value = sqrt(
-			pow((largest1[i].x - carCenter.x), 2)
-			+ pow((largest1[i].y - carCenter.y), 2));
-			// If the value is within the circle radius
-			if (value < circRadius)
-			{
-			  Points1 += 1;
-			}
-		}
-    	for (size_t i = 0; i < largest2.size(); i++)
-		{
-			// Use pythagoras on the 2 dimensional plane to find the distances
-			value = sqrt(
-			pow((largest2[i].x - carCenter.x), 2)
-			+ pow((largest2[i].y - carCenter.y), 2));
-			// If the value is within the circle radius
-			if (value < circRadius)
-			{
-			  Points2 += 1;
-			}
-		}
-
-    	totalPoints = Points1 + Points2;
-    	circRadius++;
-
-    }
+    int circRadius = getSearchRadius(preferedPoints, carCenter, largest1, largest2);
     Rsim.set_searchRadius(circRadius);
 
     // Probably the outside of the track
