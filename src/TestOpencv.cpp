@@ -7,15 +7,15 @@
 #include "opencv/highgui.h"
 
 // ARuCo
-#include "aruco.h"
-#include "cvdrawingutils.h"
+#include "src/aruco.h"
+#include "src/cvdrawingutils.h"
 
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "functions.h"
-#include "RR_API.h"
+#include "C++/MinGW/RR_API.h"
 
 using namespace cv;
 using namespace std;
@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
         vector<Marker> Markers;
         //read the input image
         cv::Mat InImage;
-        InImage=cv::imread("img1.jpg");
+        InImage=cv::imread("img1.png");
      //Ok, let's detect
         MDetector.detect(InImage,Markers);
         //for each marker, draw info and its boundaries in the image

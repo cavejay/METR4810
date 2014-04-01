@@ -14,7 +14,8 @@
 #include <iostream>
 #include <string>
 
-#include "M:/BitBucket/METR4810/Roborealm_API/C++/MinGW/RR_API.h"
+#include "C++/MinGW/RR_API.h"
+
 
 using namespace cv;
 using namespace std;
