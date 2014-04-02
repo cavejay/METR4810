@@ -7,15 +7,15 @@
 #include "opencv/highgui.h"
 
 // ARuCo
-#include "aruco.h"
-#include "cvdrawingutils.h"
+#include "src/aruco.h"
+#include "src/cvdrawingutils.h"
 
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "functions.h"
-#include "RR_API.h"
+#include "C++/MinGW/RR_API.h"
 
 using namespace cv;
 using namespace std;
@@ -23,46 +23,68 @@ using namespace aruco;
 
 static void help()
 { // This is here for when this becomes a command-line program :)
-
+  cout << "This program is currently not meant to run from the command line.\n"
+      "Please read the source and either recompile with the right settings." << endl;
 }
 
 int main(int argc, char* argv[])
-{ // Run this from the command line with no inputs atm.
-  // initialise a whole bunch of stuff
+{
+  if(argc < 2){help();}
 
-/* The following is similar to what will be used for the actual demo, while we're working with a video stream
- * It isn't needed for now though, as we've got mad as skillz and are just working with stills :)
 
+  int CurrentlyUsing = FindInput(argv[0]);
   VideoCapture cap;
   RR_API rr;
-  int vidcap_result = init_videocapture(VIDEO_FILE,cap,"C:/Sample.avi");
-  if (vidcap_result == -1)
+
+  // initialise the appropriate video device. This is kinda messy but needed because I need it.
+  int vidcap_result;
+  if(CurrentlyUsing == ROBOREALM)
   {
-    return -1;
+    cout << "Using RoboRealm for Image aquisition" << endl;
+    char* host;
+    if(argv[1]){host = argv[1];} else {host = "127.0.0.1";} // If we're told where to connect to, do that. else connect to this computer
+    vidcap_result = init_videocapture(CurrentlyUsing,rr, host); // Initialise the magic rr system thingo
   } else
-  if (vidcap_result == 0)
+
+    if (CurrentlyUsing == STILL_IMAGE)
   {
-	cout << "The Variable for VIDEO_FILE was invalid" << endl;
+    cout << "Using a still image for Image aquisition" << endl;
+  } else if (CurrentlyUsing == VIDEO_CAMERA || CurrentlyUsing == VIDEO_FILE){
+    cout << "Using OpenCV's Video Capture method for Image aquisition" << endl;
+    string file_location = argv[1];
+    vidcap_result = init_videocapture(CurrentlyUsing,cap,file_location);
   } else {
-	cout << "VideoCapture has been properly defined and started" << endl;
+    cout << "CurrentlyUsing was an unexpected value. \nClosing program" << endl;
+    return -1;
   }
 
-*/
+  // If no video or anything was loaded correctly crash.
+  if (vidcap_result == -1) {return -1;}
+  else {
+	cout << "Video capture has been properly defined and started" << endl;
+  }
 
-  Mat img1 = imread("img.jpg");
+
+  Mat img; ///== imread("img.jpg");
+
+  // Start Loop
+  for(;;)
+  {
+    // Grab current image from which ever source has been specificied.
+    img = pullImage(CurrentlyUsing, rr, cap);
 
   // Initialize Variables
   cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThresTrack;
-  if(!img1.empty())
+  if(!img.empty())
   {
-    cv::imshow("rawr",img1);
+    cv::imshow("rawr",img);
     cout << "I got it yo\n";
   } else {
     cout << "Yo, the image is empty???\n";
     return -1;
   }
 
-  frame_bgr = img1;
+  frame_bgr = img;
 
   // Make le windows
 //  cv::namedWindow("Basic Stream",CV_WINDOW_AUTOSIZE); //create a window called "MyVideo"
@@ -117,7 +139,7 @@ int main(int argc, char* argv[])
         vector<Marker> Markers;
         //read the input image
         cv::Mat InImage;
-        InImage=cv::imread("img1.jpg");
+        cap >> InImage;
      //Ok, let's detect
         MDetector.detect(InImage,Markers);
         //for each marker, draw info and its boundaries in the image
@@ -126,21 +148,21 @@ int main(int argc, char* argv[])
             Markers[i].draw(InImage,Scalar(0,0,255),2);
         }
         cv::imshow("in",InImage);
-        cv::waitKey(0);//wait for key to be pressed
+//        cv::waitKey(0);//wait for key to be pressed
     } catch (std::exception &ex)
     {
         cout<<"aruco failed\nException :"<<ex.what()<<endl;
     }
 
 
-    /* Don't need this yet :)
+//    Don't need this yet :)
     if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
     {
       cout << "esc key is pressed by user" << endl;
       break;
     }
-    */
-  waitKey();
+  }
+//  waitKey();
 //  return 0;
 
 }
