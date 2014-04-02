@@ -9,13 +9,15 @@
 int FindInput(char* argv0)
 {
   int CurrentlyUsing;
-  if(*argv0 == 0)
-  {
+  if(*argv0 == 0){
     CurrentlyUsing = VIDEO_FILE;
+
   } else if (*argv0 == 1){
     CurrentlyUsing = VIDEO_CAMERA;
+
   } else if (*argv0 == 2){
     CurrentlyUsing = ROBOREALM;
+
   } else {
     cout << "No Valid Video Input was specified. Proceding with a still image" << endl;
     CurrentlyUsing = STILL_IMAGE;
@@ -94,6 +96,7 @@ Mat pullImage(int CurrentlyUsing, RR_API& rr, VideoCapture& cap)
 
       return dst;
       break;
+
     default:
       cout << "No source was specified. Image could not be pulled.\n Empty Mat is supplied" << endl;
       return dst;
