@@ -5,20 +5,22 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv/highgui.h"
-
 // ARuCo
 #include "src/aruco.h"
 #include "src/cvdrawingutils.h"
-
+// RobotRealm Lib
+#include "C++/MinGW/RR_API.h"
+// C libs
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <vector>
+// Our .h's
 #include "functions.h"
-#include "C++/MinGW/RR_API.h"
-
+#include "Rotate3d.h"
+// Definitions
 #define ever ;;
-
+// Namespaces
 using namespace cv;
 using namespace std;
 using namespace aruco;
@@ -32,7 +34,6 @@ static void help()
 int main(int argc, char* argv[])
 {
   if(argc < 2){help();}
-
 
   int CurrentlyUsing = FindInput(argv[0]);
   cv::VideoCapture cap;
@@ -155,6 +156,28 @@ int main(int argc, char* argv[])
     {
         cout<<"aruco failed\nException :"<<ex.what()<<endl;
     }
+
+    /* Beginning of section for rotation */
+
+
+
+    // Run the elements from rotate3d and show them
+    Mat src = imread("Sample_Pictures/S5.jpg");
+    Mat warp_dst, warp_rotate_dst;
+
+    cv::Mat* frameArray = new cv::Mat[2];
+
+    frameArray = Rotate(src);
+    warp_dst = frameArray[0];
+    warp_rotate_dst = frameArray[1];
+    namedWindow("Source image", CV_WINDOW_AUTOSIZE );
+    imshow("Source image", src );
+
+    namedWindow("Warp", CV_WINDOW_AUTOSIZE );
+    imshow("Warp", warp_dst );
+
+    namedWindow("Warp + Rotate", CV_WINDOW_AUTOSIZE );
+    imshow("Warp + Rotate", warp_rotate_dst );
 
 
     if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
