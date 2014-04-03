@@ -18,6 +18,7 @@
 // Our .h's
 #include "functions.h"
 #include "Rotate3d.h"
+#include "VStream.h"
 // Definitions
 #define ever ;;
 // Namespaces
@@ -33,39 +34,15 @@ static void help()
 
 int main(int argc, char* argv[])
 {
-  if(argc < 2){help();}
+  if(argc < 3){help();cin.get();exit(0);}
 
-  int CurrentlyUsing = FindInput(argv[0]);
-  cv::VideoCapture cap;
-  RR_API rr;
+  VStream Vs(argv);
+  Vs.FindInput();
+  Vs.StartInput();
+
 
   // initialise the appropriate video device. This is kinda messy but needed because I need it lulz and modularity
-  int vidcap_result;
-  if(CurrentlyUsing == ROBOREALM)
-  {
-    cout << "Using RoboRealm for Image aquisition" << endl;
-    char* host;
-    if(argv[1]){host = argv[1];} else {host = "127.0.0.1";} // If we're told where to connect to, do that. else connect to this computer
-    vidcap_result = init_videocapture(CurrentlyUsing,rr,host); // Initialise the magic rr system thingo
-  } else
 
-    if (CurrentlyUsing == STILL_IMAGE)
-  {
-    cout << "Using a still image for Image aquisition" << endl;
-  } else if (CurrentlyUsing == VIDEO_CAMERA || CurrentlyUsing == VIDEO_FILE){
-    cout << "Using OpenCV's Video Capture method for Image aquisition" << endl;
-    string file_location = argv[1];
-    vidcap_result = init_videocapture(CurrentlyUsing,cap,file_location);
-  } else {
-    cout << "CurrentlyUsing was an unexpected value. \nClosing program" << endl;
-    return -1;
-  }
-
-  // If no video or anything was loaded correctly, crash.
-  if (vidcap_result == -1) {cout << "video failed to load" << endl;return -1;}
-  else {
-	cout << "Video capture has been properly defined and started" << endl;
-  }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -88,7 +65,7 @@ int main(int argc, char* argv[])
   for(ever)
   {
     // Grab current image from which ever source has been specified.
-    img = pullImage(CurrentlyUsing, rr, cap);
+    img = Vs.pullImage();
 
     // Check if the image is empty. There's not point continuing if so.
     if(!img.empty())
@@ -146,8 +123,7 @@ int main(int argc, char* argv[])
       aruco::MarkerDetector MDetector;
       vector<Marker> Markers;
       //read the input image
-      cv::Mat InImage;
-      cap >> InImage;
+      cv::Mat InImage = Vs.pullImage();
    //Ok, let's detect
       MDetector.detect(InImage,Markers);
       //for each marker, draw info and its boundaries in the image
