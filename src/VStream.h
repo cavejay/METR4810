@@ -35,11 +35,11 @@ public:
   cv::VideoCapture cap;
   RR_API rr;
   int CurrentlyUsing;
-  char* args[];
+  vector<string> args[];
 
 
   // Constructor
-  VStream (char* argv[]);
+  VStream (vector<string> argv);
 
   // Functions
   int FindInput();

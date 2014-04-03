@@ -10,12 +10,9 @@
 /**
  * The Constructor for VStream takes the input arguments of main()
  */
-VStream::VStream (char* argv[])
+VStream::VStream (vector<string> argv)
 {
-  for(int i; i < strlen(*argv) ; i++)
-  {
-    args[i] = argv[i];
-  }
+  args = argv;
 }
 
 VStream::~VStream ()
@@ -29,21 +26,21 @@ VStream::~VStream ()
  */
 int VStream::FindInput()
 {
-//  if(*args[1] == '0'){
-//    cout << "args: " << args[1] << "0: " << "0" << endl;
-//    CurrentlyUsing = VIDEO_FILE;
-//
-//  } else if (*args[1] == '1'){
-//    CurrentlyUsing = VIDEO_CAMERA;
-//
-//  } else if (*args[1] == '2'){
-//    CurrentlyUsing = ROBOREALM;
-//
-//  } else {
-//    cout << "No Valid Video Input was specified. Proceding with a still image" << endl;
-//    CurrentlyUsing = STILL_IMAGE;
-//  }
-//  return CurrentlyUsing;
+  if(strcmp(args[1],"0")){
+    cout << "args: " << args[1] << "0: " << "0" << endl;
+    CurrentlyUsing = VIDEO_FILE;
+
+  } else if (strcmp(args[1],"1")){
+    CurrentlyUsing = VIDEO_CAMERA;
+
+  } else if (strcmp(args[1], "2")){
+    CurrentlyUsing = ROBOREALM;
+
+  } else {
+    cout << "No Valid Video Input was specified. Proceding with a still image" << endl;
+    CurrentlyUsing = STILL_IMAGE;
+  }
+  return CurrentlyUsing;
 }
 
 /**
@@ -56,7 +53,7 @@ int VStream::StartInput()
   if(CurrentlyUsing == ROBOREALM)
   {
     cout << "Using RoboRealm for Image aquisition" << endl;
-    char* host;
+    string host;
     if(args[2]){host = args[2];} else {host = "127.0.0.1";} // If we're told where to connect to, do that. else connect to this computer
     vidcap_result = init_videocapture(CurrentlyUsing,rr,host); // Initialise the magic rr system thingo
     return 1;

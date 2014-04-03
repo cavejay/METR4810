@@ -34,38 +34,18 @@ static void help()
   exit(0);
 }
 
-int main(int argc, char* argv[])
+int main(void) // int argc, char* argv[]
 {
-  if (argc < 2) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
-    help();
-  }
-  else { // if we've got enough parameters...
-    char*myVideoSource, myHost, myFileLocation, myCameraNumber;
-    std::cout << argv[0];
-    for (int i = 1; i < argc; i++) { /* We will iterate over argv[] to get the parameters stored inside.
-				      * Note that we're starting on 1 because we don't need to know the
-				      * path of the program, which is stored in argv[0] */
-      if (i + 1 != argc){ // Check that we haven't finished parsing already
-	if (strcmp(argv[i],"-s")) {
-	  // We know the next argument *should* be the filename:
-	    myVideoSource = argv[i + 1];
-	} else if (strcmp(argv[i],"-h")) {
-	    myHost = *argv[i + 1];
-	} else if (strcmp(argv[i], "-loc")) {
-	    myFileLocation = *argv[i + 1];
-	} else if (strcmp(argv[i], "-c")) {
-	    myCameraNumber = *argv[i + 1];
-	} else {
-	  std::cout << "Not enough or invalid arguments, please try again.\n";
-	  Sleep(2000);
-	  exit(0);
-	}
-      }
-      std::cout << argv[i] << " ";
-    }
-  }
-  if(argc == 3){help();}
+//  if (argc < 2) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
+//    help();
+//  }// if we've got enough parameters...
 
+  // Srsly thou. Just stick want you want in this before you compile. Screw cmdline for now :(
+
+  vector<string> argv;
+  argv[0] = "METR4810";
+  argv[1] = "0";
+  argv[2] = "127.0.0.1";
   VStream Vs(argv);
   Vs.FindInput();
   Vs.StartInput();
