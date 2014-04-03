@@ -5,142 +5,197 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv/highgui.h"
-
 // ARuCo
 #include "src/aruco.h"
 #include "src/cvdrawingutils.h"
-
+// RobotRealm Lib
+#include "C++/MinGW/RR_API.h"
+// C libs
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <vector>
+// Our .h's
 #include "functions.h"
-#include "C++/MinGW/RR_API.h"
-
+#include "Rotate3d.h"
+// Definitions
+#define ever ;;
+// Namespaces
 using namespace cv;
 using namespace std;
 using namespace aruco;
 
 static void help()
 { // This is here for when this becomes a command-line program :)
-
+  cout << "This program is currently not meant to run from the command line.\n"
+      "Please read the source and either recompile with the right settings." << endl;
 }
 
 int main(int argc, char* argv[])
-{ // Run this from the command line with no inputs atm.
-  // initialise a whole bunch of stuff
+{
+  if(argc < 2){help();}
 
-/* The following is similar to what will be used for the actual demo, while we're working with a video stream
- * It isn't needed for now though, as we've got mad as skillz and are just working with stills :)
-
-  VideoCapture cap;
+  int CurrentlyUsing = FindInput(argv[0]);
+  cv::VideoCapture cap;
   RR_API rr;
-  int vidcap_result = init_videocapture(VIDEO_FILE,cap,"C:/Sample.avi");
-  if (vidcap_result == -1)
+
+  // initialise the appropriate video device. This is kinda messy but needed because I need it lulz and modularity
+  int vidcap_result;
+  if(CurrentlyUsing == ROBOREALM)
   {
-    return -1;
+    cout << "Using RoboRealm for Image aquisition" << endl;
+    char* host;
+    if(argv[1]){host = argv[1];} else {host = "127.0.0.1";} // If we're told where to connect to, do that. else connect to this computer
+    vidcap_result = init_videocapture(CurrentlyUsing,rr,host); // Initialise the magic rr system thingo
   } else
-  if (vidcap_result == 0)
+
+    if (CurrentlyUsing == STILL_IMAGE)
   {
-	cout << "The Variable for VIDEO_FILE was invalid" << endl;
+    cout << "Using a still image for Image aquisition" << endl;
+  } else if (CurrentlyUsing == VIDEO_CAMERA || CurrentlyUsing == VIDEO_FILE){
+    cout << "Using OpenCV's Video Capture method for Image aquisition" << endl;
+    string file_location = argv[1];
+    vidcap_result = init_videocapture(CurrentlyUsing,cap,file_location);
   } else {
-	cout << "VideoCapture has been properly defined and started" << endl;
-  }
-
-*/
-
-  Mat img1 = imread("img.jpg");
-
-  // Initialize Variables
-  cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThresTrack;
-  if(!img1.empty())
-  {
-    cv::imshow("rawr",img1);
-    cout << "I got it yo\n";
-  } else {
-    cout << "Yo, the image is empty???\n";
+    cout << "CurrentlyUsing was an unexpected value. \nClosing program" << endl;
     return -1;
   }
 
-  frame_bgr = img1;
+  // If no video or anything was loaded correctly, crash.
+  if (vidcap_result == -1) {cout << "video failed to load" << endl;return -1;}
+  else {
+	cout << "Video capture has been properly defined and started" << endl;
+  }
 
-  // Make le windows
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+
+  // Initialise all dem variables
+
+  cv::Mat img, img1; ///== imread("img.jpg");
+  cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThresTrack;
+  int threshMag = 0;
+  int d_val, e_val;
+  int two50 = 255;
+  int fifty = 50;
+
+
+  cv::namedWindow("Thresholded Image", CV_WINDOW_AUTOSIZE);
+  cv::createTrackbar("threshold value", "Thresholded Image", &threshMag,two50, NULL);
+  cv::createTrackbar( "Dilation size", "Thresholded Image", &d_val, fifty, NULL);
+  cv::createTrackbar( "Erosion size", "Thresholded Image", &e_val,fifty, NULL);
+  // Start Loop
+  for(ever)
+  {
+    // Grab current image from which ever source has been specified.
+    img = pullImage(CurrentlyUsing, rr, cap);
+
+    // Check if the image is empty. There's not point continuing if so.
+    if(!img.empty())
+    {
+      cv::imshow("rawr",img);
+      cout << "I got it yo\n";
+    } else {
+      cout << "Yo, the image is empty???\n";
+      return -1;
+    }
+
+    frame_bgr = img.clone();
+
 //  cv::namedWindow("Basic Stream",CV_WINDOW_AUTOSIZE); //create a window called "MyVideo"
+    try
+    {
+      // Gray
+      cv::cvtColor( frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
+      cv::imshow( "Example Gray", frame_gry );
+      cout << "rawr1\n";
+      // Canny
+      cv::Canny( frame_gry, frame_cny, 10, 100, 3, true );
+      cv::imshow("Example Canny", frame_cny);
 
-  /*  This is where we put all the looping stuff.
-   *  I'm thinking only a single thread atm.
-   *  The for(;;) also will go just above here :) */
+      // Track as Black
 
-    // Gray
-    cv::cvtColor( frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
-    cv::imshow( "Example Gray", frame_gry );
+      cv::cvtColor(frame_bgr, frame_hsv, cv::COLOR_BGR2HSV);
+      vector<Mat> hsvchannels(3);
+      cout << frame_hsv.channels() << endl;
+      cv::split(frame_hsv, hsvchannels);
+//      cv::imshow("H", hsvchannels[0]);
+//      cv::imshow("V", hsvchannels[2]);
+      cv::threshold(hsvchannels[2], ThresTrack,150,255,cv::THRESH_BINARY);
+      Dilation(ThresTrack,ThresTrack,ED_RECTANGLE,d_val);
+      Erosion(ThresTrack,ThresTrack,ED_RECTANGLE,e_val);
+      Dilation(ThresTrack,ThresTrack,ED_RECTANGLE,d_val);
+      cv::imshow("Threshold Test", ThresTrack);
 
-    // Canny
-    cv::Canny( frame_gry, frame_cny, 10, 100, 3, true );
-    cv::imshow("Example Canny", frame_cny);
+      //Circle
+      cv::cvtColor(frame_bgr, frame_gry, CV_BGR2GRAY);
+      // smooth it, otherwise a lot of false circles may be detected
+      cv::GaussianBlur( frame_gry, frame_gry, Size(9, 9), 2, 2 );
+      vector<Vec3f> circles;
+      cv::HoughCircles(frame_gry, circles, CV_HOUGH_GRADIENT, 2, 10, 200, 100, 0, 200);
+      Draw_Circles(frame_bgr,circles);
+      cv::imshow( "circles", frame_bgr);
+    } catch (std::exception &ex)
+    {
+      cout<<"Improc failed\nException :"<<ex.what()<<endl;
+    }
 
-    // Track as black
-    cv::namedWindow("Thresholded Image", CV_WINDOW_AUTOSIZE);
-    int threshMag = 0;
-    int d_val;
-    int e_val;
-    int two50 = 255;
-    int fifty = 50;
-    cv::cvtColor(frame_bgr, frame_hsv, cv::COLOR_BGR2HSV);
-    vector<Mat> hsvchannels(frame_hsv.channels());
-    cout << frame_hsv.channels() << endl;
-    cv::split(frame_hsv, hsvchannels);
-    cv::createTrackbar("threshold value", "Thresholded Image", &threshMag,two50, NULL);
-    cv::createTrackbar( "Dilation size", "Thresholded Image", &d_val, fifty, NULL);
-    cv::createTrackbar( "Erosion size", "Thresholded Image", &e_val,fifty, NULL);
-
-    cv::imshow("H", hsvchannels[0]);
-    cv::imshow("V", hsvchannels[2]);
-    cv::threshold(hsvchannels[2], ThresTrack,150,255,cv::THRESH_BINARY);
-    Dilation(ThresTrack,ThresTrack,ED_RECTANGLE,0.5);
-    Erosion(ThresTrack,ThresTrack,ED_RECTANGLE,0.3);
-    Dilation(ThresTrack,ThresTrack,ED_RECTANGLE,0.8);
-    cv::imshow("Threshold Test", ThresTrack);
-
-    //Circle
-    cv::cvtColor(frame_bgr, frame_gry, CV_BGR2GRAY);
-    // smooth it, otherwise a lot of false circles may be detected
-    cv::GaussianBlur( frame_gry, frame_gry, Size(9, 9), 2, 2 );
-    vector<Vec3f> circles;
-    cv::HoughCircles(frame_gry, circles, CV_HOUGH_GRADIENT, 2, 10, 200, 100, 0,200);
-    Draw_Circles(frame_bgr,circles);
-    cv::imshow( "circles", frame_bgr);
 
     try
     {
-        aruco::MarkerDetector MDetector;
-        vector<Marker> Markers;
-        //read the input image
-        cv::Mat InImage;
-        InImage=cv::imread("img1.png");
-     //Ok, let's detect
-        MDetector.detect(InImage,Markers);
-        //for each marker, draw info and its boundaries in the image
-        for (unsigned int i=0;i<Markers.size();i++) {
-            cout<<Markers[i]<<endl;
-            Markers[i].draw(InImage,Scalar(0,0,255),2);
-        }
-        cv::imshow("in",InImage);
-        cv::waitKey(0);//wait for key to be pressed
+      aruco::MarkerDetector MDetector;
+      vector<Marker> Markers;
+      //read the input image
+      cv::Mat InImage;
+      cap >> InImage;
+   //Ok, let's detect
+      MDetector.detect(InImage,Markers);
+      //for each marker, draw info and its boundaries in the image
+      for (unsigned int i=0;i<Markers.size();i++) {
+	  cout<<Markers[i]<<endl;
+	  Markers[i].draw(InImage,Scalar(0,0,255),2);
+      }
+      cv::imshow("in",InImage);
+//        cv::waitKey(0);//wait for key to be pressed
     } catch (std::exception &ex)
     {
         cout<<"aruco failed\nException :"<<ex.what()<<endl;
     }
 
+    /* Beginning of section for rotation */
 
-    /* Don't need this yet :)
+
+
+    // Run the elements from rotate3d and show them
+    try
+    {
+      Mat src = imread("Sample_Pictures/S5.jpg");
+      Mat warp_dst, warp_rotate_dst;
+
+      cv::Mat* frameArray = new cv::Mat[2];
+
+      frameArray = Rotate(src);
+      warp_dst = frameArray[0];
+      warp_rotate_dst = frameArray[1];
+      namedWindow("Source image", CV_WINDOW_AUTOSIZE );
+      imshow("Source image", src );
+
+      namedWindow("Warp", CV_WINDOW_AUTOSIZE );
+      imshow("Warp", warp_dst );
+
+      namedWindow("Warp + Rotate", CV_WINDOW_AUTOSIZE );
+      imshow("Warp + Rotate", warp_rotate_dst );
+    } catch (std::exception &ex) {
+      cout<<"rotation failed\nException :"<<ex.what()<<endl;
+    }
+
     if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
     {
       cout << "esc key is pressed by user" << endl;
       break;
     }
-    */
-  waitKey();
+  }
+//  waitKey();
 //  return 0;
 
 }

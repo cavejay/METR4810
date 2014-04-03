@@ -6,14 +6,31 @@
  */
 #include "functions.h"
 
+int FindInput(char* argv0)
+{
+  int CurrentlyUsing;
+  if(argv0[0] == '0'){
+    CurrentlyUsing = VIDEO_FILE;
 
+  } else if (argv0[0] == '1'){
+    CurrentlyUsing = VIDEO_CAMERA;
+
+  } else if (argv0[0] == '2'){
+    CurrentlyUsing = ROBOREALM;
+
+  } else {
+    cout << "No Valid Video Input was specified. Proceding with a still image" << endl;
+    CurrentlyUsing = STILL_IMAGE;
+  }
+  return CurrentlyUsing;
+}
 
 int init_videocapture(int video_source, VideoCapture& cap, const string& file_loc)
 {
   switch (video_source) // Do different things for different video sources :)
   {
-  case 0: // The source is a video file.
-    cap.open("C:/Sample.avi"); // Load Video file
+  case VIDEO_FILE: // The source is a video file.
+    cap.open(file_loc); // Load Video file
     if ( !cap.isOpened() )  // if not success, exit program
     {
       cout << "Cannot open the video file" << endl;
@@ -25,8 +42,8 @@ int init_videocapture(int video_source, VideoCapture& cap, const string& file_lo
     }
     break;
 
-  case 1:
-   cap.open(0); // Load Video camera #0
+  case VIDEO_CAMERA:
+    cap.open(0); // Load Video camera #0
     if (!cap.isOpened())  // if not success, exit program
     {
       cout << "Cannot open camera '0' closing program" << endl;
@@ -47,18 +64,51 @@ int init_videocapture(int video_source, VideoCapture& cap, const string& file_lo
   return 0;
 }
 
-int init_videocapture(int video_source, RR_API& rr, const string& file_loc)
+int init_videocapture(int video_source, RR_API& rr, char* ServerAddress)
 {
-  if(video_source == 2)
+  if(video_source == ROBOREALM)
   {
-//    rr.connect("127.0.0.1",80);
-
+//    strcpy(Host,ServerAddress.c_str());
+    rr.connect(ServerAddress,6060);
   } else {
     cout << "The 2nd variable must be a videoCapture object to run from a file or video camera.\nClosing Program" << endl;
     return -1;
   }
   return 0;
 }
+
+Mat pullImage(int CurrentlyUsing, RR_API& rr, VideoCapture& cap)
+{ //
+  Mat dst;
+  switch(CurrentlyUsing)
+  {
+    case VIDEO_FILE:
+      cap >> dst;
+      return dst;
+      break;
+
+    case VIDEO_CAMERA:
+      cap >> dst;
+      return dst;
+      break;
+
+    case ROBOREALM:
+
+      return dst;
+      break;
+
+    case STILL_IMAGE:
+      dst = imread("img.jpg");
+      return dst;
+      break;
+    default:
+      cout << "No source was specified. Image could not be pulled.\n Empty Mat is supplied" << endl;
+      return dst;
+      break;
+  }
+  return dst;
+}
+
 
 void Draw_Circles(Mat& img, const vector<Vec3f>& circles)
 {
@@ -68,7 +118,7 @@ void Draw_Circles(Mat& img, const vector<Vec3f>& circles)
     {
       Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
       int radius = cvRound(circles[i][2]);
-      cout << radius <<endl;
+//      cout << radius <<endl;
       // draw the circle center
       circle( img, center, 3, Scalar(0,255,0), -1, 8, 0 );
       // draw the circle outline
@@ -103,4 +153,18 @@ void Erosion(const Mat& src, Mat& dst, int erosion_shape, double erosion_size)
   /// Apply the erosion operation
   erode( src, dst, element);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
