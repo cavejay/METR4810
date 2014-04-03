@@ -12,7 +12,10 @@
  */
 VStream::VStream (char* argv[])
 {
-  args = &argv;
+  for(int i; i < strlen(*argv) ; i++)
+  {
+    args[i] = argv[i];
+  }
 }
 
 VStream::~VStream ()
@@ -26,20 +29,21 @@ VStream::~VStream ()
  */
 int VStream::FindInput()
 {
-  if(args[1] == '0'){
-    CurrentlyUsing = VIDEO_FILE;
-
-  } else if (args[1] == '1'){
-    CurrentlyUsing = VIDEO_CAMERA;
-
-  } else if (args[1] == '2'){
-    CurrentlyUsing = ROBOREALM;
-
-  } else {
-    cout << "No Valid Video Input was specified. Proceding with a still image" << endl;
-    CurrentlyUsing = STILL_IMAGE;
-  }
-  return CurrentlyUsing;
+//  if(*args[1] == '0'){
+//    cout << "args: " << args[1] << "0: " << "0" << endl;
+//    CurrentlyUsing = VIDEO_FILE;
+//
+//  } else if (*args[1] == '1'){
+//    CurrentlyUsing = VIDEO_CAMERA;
+//
+//  } else if (*args[1] == '2'){
+//    CurrentlyUsing = ROBOREALM;
+//
+//  } else {
+//    cout << "No Valid Video Input was specified. Proceding with a still image" << endl;
+//    CurrentlyUsing = STILL_IMAGE;
+//  }
+//  return CurrentlyUsing;
 }
 
 /**
@@ -127,6 +131,7 @@ int VStream::init_videocapture(int video_source, VideoCapture& cap, const string
 {
   switch (video_source) // Do different things for different video sources :)
   {
+
   case VIDEO_FILE: // The source is a video file.
     cap.open(file_loc); // Load Video file
     if ( !cap.isOpened() )  // if not success, exit program

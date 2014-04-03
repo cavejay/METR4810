@@ -14,6 +14,11 @@
 #include "opencv/highgui.h"
 // RobotRealm Lib
 #include "C++/MinGW/RR_API.h"
+// C libs
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <vector>
 
 #include "functions.h"
 // Namespaces

@@ -28,13 +28,43 @@ using namespace aruco;
 
 static void help()
 { // This is here for when this becomes a command-line program :)
-  cout << "This program is currently not meant to run from the command line.\n"
-      "Please read the source and either recompile with the right settings." << endl;
+  std::cout << "Usage is -s <video_source>\n	Additional commands are: \n	-h <host>\n	"
+                "-loc <file_location>\n	-c <Camera_Number>"; // Inform the user of how to use the program
+  std::cin.get();
+  exit(0);
 }
 
 int main(int argc, char* argv[])
 {
-  if(argc < 3){help();cin.get();exit(0);}
+  if (argc < 2) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
+    help();
+  }
+  else { // if we've got enough parameters...
+    char*myVideoSource, myHost, myFileLocation, myCameraNumber;
+    std::cout << argv[0];
+    for (int i = 1; i < argc; i++) { /* We will iterate over argv[] to get the parameters stored inside.
+				      * Note that we're starting on 1 because we don't need to know the
+				      * path of the program, which is stored in argv[0] */
+      if (i + 1 != argc){ // Check that we haven't finished parsing already
+	if (strcmp(argv[i],"-s")) {
+	  // We know the next argument *should* be the filename:
+	    myVideoSource = argv[i + 1];
+	} else if (strcmp(argv[i],"-h")) {
+	    myHost = *argv[i + 1];
+	} else if (strcmp(argv[i], "-loc")) {
+	    myFileLocation = *argv[i + 1];
+	} else if (strcmp(argv[i], "-c")) {
+	    myCameraNumber = *argv[i + 1];
+	} else {
+	  std::cout << "Not enough or invalid arguments, please try again.\n";
+	  Sleep(2000);
+	  exit(0);
+	}
+      }
+      std::cout << argv[i] << " ";
+    }
+  }
+  if(argc == 3){help();}
 
   VStream Vs(argv);
   Vs.FindInput();
