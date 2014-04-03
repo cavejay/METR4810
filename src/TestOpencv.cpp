@@ -74,8 +74,16 @@ int main(int argc, char* argv[])
 
   cv::Mat img, img1; ///== imread("img.jpg");
   cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThresTrack;
+  int threshMag = 0;
+  int d_val, e_val;
+  int two50 = 255;
+  int fifty = 50;
 
 
+  cv::namedWindow("Thresholded Image", CV_WINDOW_AUTOSIZE);
+  cv::createTrackbar("threshold value", "Thresholded Image", &threshMag,two50, NULL);
+  cv::createTrackbar( "Dilation size", "Thresholded Image", &d_val, fifty, NULL);
+  cv::createTrackbar( "Erosion size", "Thresholded Image", &e_val,fifty, NULL);
   // Start Loop
   for(ever)
   {
@@ -95,62 +103,59 @@ int main(int argc, char* argv[])
     frame_bgr = img.clone();
 
 //  cv::namedWindow("Basic Stream",CV_WINDOW_AUTOSIZE); //create a window called "MyVideo"
+    try
+    {
+      // Gray
+      cv::cvtColor( frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
+      cv::imshow( "Example Gray", frame_gry );
+      cout << "rawr1\n";
+      // Canny
+      cv::Canny( frame_gry, frame_cny, 10, 100, 3, true );
+      cv::imshow("Example Canny", frame_cny);
 
-    // Gray
-    cv::cvtColor( frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
-    cv::imshow( "Example Gray", frame_gry );
+      // Track as Black
 
-    // Canny
-    cv::Canny( frame_gry, frame_cny, 10, 100, 3, true );
-    cv::imshow("Example Canny", frame_cny);
+      cv::cvtColor(frame_bgr, frame_hsv, cv::COLOR_BGR2HSV);
+      vector<Mat> hsvchannels(3);
+      cout << frame_hsv.channels() << endl;
+      cv::split(frame_hsv, hsvchannels);
+//      cv::imshow("H", hsvchannels[0]);
+//      cv::imshow("V", hsvchannels[2]);
+      cv::threshold(hsvchannels[2], ThresTrack,150,255,cv::THRESH_BINARY);
+      Dilation(ThresTrack,ThresTrack,ED_RECTANGLE,d_val);
+      Erosion(ThresTrack,ThresTrack,ED_RECTANGLE,e_val);
+      Dilation(ThresTrack,ThresTrack,ED_RECTANGLE,d_val);
+      cv::imshow("Threshold Test", ThresTrack);
 
-    // Track as black
-    cv::namedWindow("Thresholded Image", CV_WINDOW_AUTOSIZE);
-    int threshMag = 0;
-    int d_val;
-    int e_val;
-    int two50 = 255;
-    int fifty = 50;
-    cv::cvtColor(frame_bgr, frame_hsv, cv::COLOR_BGR2HSV);
-    vector<Mat> hsvchannels(frame_hsv.channels());
-    cout << frame_hsv.channels() << endl;
-    cv::split(frame_hsv, hsvchannels);
-    cv::createTrackbar("threshold value", "Thresholded Image", &threshMag,two50, NULL);
-    cv::createTrackbar( "Dilation size", "Thresholded Image", &d_val, fifty, NULL);
-    cv::createTrackbar( "Erosion size", "Thresholded Image", &e_val,fifty, NULL);
+      //Circle
+      cv::cvtColor(frame_bgr, frame_gry, CV_BGR2GRAY);
+      // smooth it, otherwise a lot of false circles may be detected
+      cv::GaussianBlur( frame_gry, frame_gry, Size(9, 9), 2, 2 );
+      vector<Vec3f> circles;
+      cv::HoughCircles(frame_gry, circles, CV_HOUGH_GRADIENT, 2, 10, 200, 100, 0, 200);
+      Draw_Circles(frame_bgr,circles);
+      cv::imshow( "circles", frame_bgr);
+    } catch (std::exception &ex)
+    {
+      cout<<"Improc failed\nException :"<<ex.what()<<endl;
+    }
 
-    cv::imshow("H", hsvchannels[0]);
-    cv::imshow("V", hsvchannels[2]);
-    cv::threshold(hsvchannels[2], ThresTrack,150,255,cv::THRESH_BINARY);
-    Dilation(ThresTrack,ThresTrack,ED_RECTANGLE,0.5);
-    Erosion(ThresTrack,ThresTrack,ED_RECTANGLE,0.3);
-    Dilation(ThresTrack,ThresTrack,ED_RECTANGLE,0.8);
-    cv::imshow("Threshold Test", ThresTrack);
-
-    //Circle
-    cv::cvtColor(frame_bgr, frame_gry, CV_BGR2GRAY);
-    // smooth it, otherwise a lot of false circles may be detected
-    cv::GaussianBlur( frame_gry, frame_gry, Size(9, 9), 2, 2 );
-    vector<Vec3f> circles;
-    cv::HoughCircles(frame_gry, circles, CV_HOUGH_GRADIENT, 2, 10, 200, 100, 0,200);
-    Draw_Circles(frame_bgr,circles);
-    cv::imshow( "circles", frame_bgr);
 
     try
     {
-        aruco::MarkerDetector MDetector;
-        vector<Marker> Markers;
-        //read the input image
-        cv::Mat InImage;
-        cap >> InImage;
-     //Ok, let's detect
-        MDetector.detect(InImage,Markers);
-        //for each marker, draw info and its boundaries in the image
-        for (unsigned int i=0;i<Markers.size();i++) {
-            cout<<Markers[i]<<endl;
-            Markers[i].draw(InImage,Scalar(0,0,255),2);
-        }
-        cv::imshow("in",InImage);
+      aruco::MarkerDetector MDetector;
+      vector<Marker> Markers;
+      //read the input image
+      cv::Mat InImage;
+      cap >> InImage;
+   //Ok, let's detect
+      MDetector.detect(InImage,Markers);
+      //for each marker, draw info and its boundaries in the image
+      for (unsigned int i=0;i<Markers.size();i++) {
+	  cout<<Markers[i]<<endl;
+	  Markers[i].draw(InImage,Scalar(0,0,255),2);
+      }
+      cv::imshow("in",InImage);
 //        cv::waitKey(0);//wait for key to be pressed
     } catch (std::exception &ex)
     {
@@ -162,23 +167,27 @@ int main(int argc, char* argv[])
 
 
     // Run the elements from rotate3d and show them
-    Mat src = imread("Sample_Pictures/S5.jpg");
-    Mat warp_dst, warp_rotate_dst;
+    try
+    {
+      Mat src = imread("Sample_Pictures/S5.jpg");
+      Mat warp_dst, warp_rotate_dst;
 
-    cv::Mat* frameArray = new cv::Mat[2];
+      cv::Mat* frameArray = new cv::Mat[2];
 
-    frameArray = Rotate(src);
-    warp_dst = frameArray[0];
-    warp_rotate_dst = frameArray[1];
-    namedWindow("Source image", CV_WINDOW_AUTOSIZE );
-    imshow("Source image", src );
+      frameArray = Rotate(src);
+      warp_dst = frameArray[0];
+      warp_rotate_dst = frameArray[1];
+      namedWindow("Source image", CV_WINDOW_AUTOSIZE );
+      imshow("Source image", src );
 
-    namedWindow("Warp", CV_WINDOW_AUTOSIZE );
-    imshow("Warp", warp_dst );
+      namedWindow("Warp", CV_WINDOW_AUTOSIZE );
+      imshow("Warp", warp_dst );
 
-    namedWindow("Warp + Rotate", CV_WINDOW_AUTOSIZE );
-    imshow("Warp + Rotate", warp_rotate_dst );
-
+      namedWindow("Warp + Rotate", CV_WINDOW_AUTOSIZE );
+      imshow("Warp + Rotate", warp_rotate_dst );
+    } catch (std::exception &ex) {
+      cout<<"rotation failed\nException :"<<ex.what()<<endl;
+    }
 
     if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
     {
