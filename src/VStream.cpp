@@ -8,11 +8,16 @@
 #include "VStream.h"
 
 /**
- * The Constructor for VStream takes the input arguments of main()
+ * The Constructor for VStream takes the video_source, the roborealm host and a file location.
+ * Both the host ip and the file loc aren't required.
  */
-VStream::VStream (vector<string> argv)
+VStream::VStream (int iCurrentlyUsing, char* iHost, string ifile_loc)
 {
-  args = argv;
+  CurrentlyUsing = iCurrentlyUsing;
+  Host = iHost;
+  file_loc = ifile_loc;
+
+//  args = argv;
 }
 
 VStream::~VStream ()
@@ -21,27 +26,29 @@ VStream::~VStream ()
 }
 
 /**
+ * 			DEAD
+ *
  * From the argv it is determined which form of input is requested.
  * This sets the internal variable CurrentlyUsing appropriately.
  */
-int VStream::FindInput()
-{
-  if(strcmp(args[1],"0")){
-    cout << "args: " << args[1] << "0: " << "0" << endl;
-    CurrentlyUsing = VIDEO_FILE;
-
-  } else if (strcmp(args[1],"1")){
-    CurrentlyUsing = VIDEO_CAMERA;
-
-  } else if (strcmp(args[1], "2")){
-    CurrentlyUsing = ROBOREALM;
-
-  } else {
-    cout << "No Valid Video Input was specified. Proceding with a still image" << endl;
-    CurrentlyUsing = STILL_IMAGE;
-  }
-  return CurrentlyUsing;
-}
+//int VStream::FindInput()
+//{
+//  if(strcmp(args[1],"0")){
+//    cout << "args: " << args[1] << "0: " << "0" << endl;
+//    CurrentlyUsing = VIDEO_FILE;
+//
+//  } else if (strcmp(args[1],"1")){
+//    CurrentlyUsing = VIDEO_CAMERA;
+//
+//  } else if (strcmp(args[1], "2")){
+//    CurrentlyUsing = ROBOREALM;
+//
+//  } else {
+//    cout << "No Valid Video Input was specified. Proceding with a still image" << endl;
+//    CurrentlyUsing = STILL_IMAGE;
+//  }
+//  return CurrentlyUsing;
+//}
 
 /**
  * Starts the stream specified by CurrentlyUsing.
@@ -53,9 +60,7 @@ int VStream::StartInput()
   if(CurrentlyUsing == ROBOREALM)
   {
     cout << "Using RoboRealm for Image aquisition" << endl;
-    string host;
-    if(args[2]){host = args[2];} else {host = "127.0.0.1";} // If we're told where to connect to, do that. else connect to this computer
-    vidcap_result = init_videocapture(CurrentlyUsing,rr,host); // Initialise the magic rr system thingo
+    vidcap_result = init_videocapture(CurrentlyUsing,rr,Host); // Initialise the magic rr system thingo
     return 1;
 
   } else
@@ -67,8 +72,7 @@ int VStream::StartInput()
   } else
   if (CurrentlyUsing == VIDEO_CAMERA || CurrentlyUsing == VIDEO_FILE){
     cout << "Using OpenCV's Video Capture method for Image aquisition" << endl;
-    string file_location = args[2];
-    vidcap_result = init_videocapture(CurrentlyUsing,cap,file_location);
+    vidcap_result = init_videocapture(CurrentlyUsing,cap,file_loc);
   }
 
   else {

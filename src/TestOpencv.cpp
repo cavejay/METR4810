@@ -26,13 +26,15 @@ using namespace cv;
 using namespace std;
 using namespace aruco;
 
-static void help()
-{ // This is here for when this becomes a command-line program :)
-  std::cout << "Usage is -s <video_source>\n	Additional commands are: \n	-h <host>\n	"
-                "-loc <file_location>\n	-c <Camera_Number>"; // Inform the user of how to use the program
-  std::cin.get();
-  exit(0);
-}
+// Screw cmdline stuff for now. That gave me a headache >:(
+
+//static void help()
+//{ // This is here for when this becomes a command-line program :)
+//  std::cout << "Usage is -s <video_source>\n	Additional commands are: \n	-h <host>\n	"
+//                "-loc <file_location>\n	-c <Camera_Number>"; // Inform the user of how to use the program
+//  std::cin.get();
+//  exit(0);
+//}
 
 int main(void) // int argc, char* argv[]
 {
@@ -42,12 +44,8 @@ int main(void) // int argc, char* argv[]
 
   // Srsly thou. Just stick want you want in this before you compile. Screw cmdline for now :(
 
-  vector<string> argv;
-  argv[0] = "METR4810";
-  argv[1] = "0";
-  argv[2] = "127.0.0.1";
-  VStream Vs(argv);
-  Vs.FindInput();
+  VStream Vs(VIDEO_CAMERA);
+//  Vs.FindInput();
   Vs.StartInput();
 
 

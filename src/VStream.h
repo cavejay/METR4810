@@ -35,11 +35,12 @@ public:
   cv::VideoCapture cap;
   RR_API rr;
   int CurrentlyUsing;
-  vector<string> args[];
+  char* Host;
+  string file_loc;
 
 
   // Constructor
-  VStream (vector<string> argv);
+  VStream (int CurrentlyUsing, char* Host = "127.0.0.1", string file_loc = "C:/Sample.avi");
 
   // Functions
   int FindInput();
