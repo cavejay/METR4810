@@ -44,10 +44,9 @@ int main(void) // int argc, char* argv[]
 
   // Srsly thou. Just stick want you want in this before you compile. Screw cmdline for now :(
 
-  VStream Vs(STILL_IMAGE, "127.0.0.1", "Sample_Pictures/track-example3.png");
+  VStream Vs(STILL_IMAGE, "127.0.0.1", "Sample_Pictures/track-example2.png");
 //  Vs.FindInput();
   Vs.StartInput();
-
 
   // initialise the appropriate video device. This is kinda messy but needed because I need it lulz and modularity
 
@@ -58,17 +57,17 @@ int main(void) // int argc, char* argv[]
   // Initialise all dem variables
 
   cv::Mat img, img1; ///== imread("img.jpg");
-  cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThresTrack;
+  cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThreshTrack;
   int threshMag = 0;
   int d_val, e_val;
   int two50 = 255;
   int fifty = 50;
+  RNG rng(12345);
 
-
-  cv::namedWindow("Thresholded Image", CV_WINDOW_AUTOSIZE);
-  cv::createTrackbar("threshold value", "Thresholded Image", &threshMag,two50, NULL);
-  cv::createTrackbar( "Dilation size", "Thresholded Image", &d_val, fifty, NULL);
-  cv::createTrackbar( "Erosion size", "Thresholded Image", &e_val,fifty, NULL);
+//  cv::namedWindow("Thresholded Image", CV_WINDOW_AUTOSIZE);
+//  cv::createTrackbar("threshold value", "Thresholded Image", &threshMag,two50, NULL);
+//  cv::createTrackbar( "Dilation size", "Thresholded Image", &d_val, fifty, NULL);
+//  cv::createTrackbar( "Erosion size", "Thresholded Image", &e_val,fifty, NULL);
   // Start Loop
   for(ever)
   {
@@ -87,12 +86,23 @@ int main(void) // int argc, char* argv[]
 
     frame_bgr = img.clone();
 
-    cv::cvtColor(frame_bgr, frame_hsv, cv::COLOR_BGR2HSV);
-    vector<Mat> hsvchannels(3);
-    cout << frame_hsv.channels() << endl;
-    cv::split(frame_hsv, hsvchannels);
-//      cv::imshow("H", hsvchannels[0]);
-      cv::imshow("V", hsvchannels[2]);
+    cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
+    cv::threshold( frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY );
+
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+
+    cv::findContours( ThreshTrack, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+    cv::Mat drawing = cv::Mat::zeros( ThreshTrack.size(), CV_8UC3 );
+    for( int i = 0; i< contours.size(); i++ )
+    {
+      Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+      drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+    }
+
+     /// Show in a window
+     namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
+     imshow( "Contours", drawing );
 //    cv::threshold(hsvchannels[2], ThresTrack,150,255,cv::THRESH_BINARY);
 //    Dilation(ThresTrack,ThresTrack,ED_RECTANGLE,d_val);
 //    Erosion(ThresTrack,ThresTrack,ED_RECTANGLE,e_val);
