@@ -113,7 +113,7 @@ Mat VStream::pullImage()
       break;
 
     case STILL_IMAGE:
-      dst = imread("img.jpg");
+      dst = imread(file_loc);
       return dst;
       break;
     default:
@@ -178,6 +178,7 @@ int VStream::init_videocapture(int video_source, RR_API& rr, char* ServerAddress
   {
 //    strcpy(Host,ServerAddress.c_str());
     rr.connect(ServerAddress,6060);
+
   } else {
     cout << "The 2nd variable must be a videoCapture object to run from a file or video camera.\nClosing Program" << endl;
     return -1;
