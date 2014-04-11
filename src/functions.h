@@ -39,4 +39,5 @@ Mat pullImage(int CurrentlyUsing, RR_API& rr, VideoCapture& cap);
 void Draw_Circles(Mat& img, const vector<Vec3f>& circles);
 void Dilation(const Mat& src, Mat& dst, int dilation_shape, double dilation_size);
 void Erosion(const Mat& src, Mat& dst, int erosion_shape, double erosion_size);
+bool less_vectors(const std::vector<Point>& vec1, const std::vector<Point>& vec2);
 #endif /* FUNCTIONS_H_ */

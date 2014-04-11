@@ -19,6 +19,10 @@
 #include "functions.h"
 #include "Rotate3d.h"
 #include "VStream.h"
+// Aruco .h's
+#include "src/marker.h"
+#include "src/aruco.h"
+#include "src/cvdrawingutils.h"
 // Definitions
 #define ever ;;
 // Namespaces
@@ -89,6 +93,7 @@ int main(void) // int argc, char* argv[]
     cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
     cv::threshold( frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY );
 
+    // Contours are a vector of vectors of points
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
 
@@ -111,6 +116,24 @@ int main(void) // int argc, char* argv[]
 
 
 
+     /* PATHING
+      * Jonathan Holland
+      * 11/04/14
+      */
+
+     // Use the <vector<vector<Point>>> contours frame to extract the two biggest <vector<Point>>
+
+     // Sort by size
+     sort(contours.begin(),contours.end(),less_vectors);
+
+     // Assign the two tracks to the two largest contours
+     vector<Point> largest1 = contours[contours.size()-1];
+     vector<Point> largest2 = contours[contours.size()-2];
+
+     // Get the center of the vehicle given the AR tag has been recognised
+     cv::Point2f carCenter = Markers[0].getCenter();
+
+
 
     if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
     {
@@ -120,5 +143,8 @@ int main(void) // int argc, char* argv[]
   }
 //  waitKey();
 //  return 0;
+}
 
+bool less_vectors(const std::vector<Point>& vec1, const std::vector<Point>& vec2) {
+        return vec1.size() < vec2.size();
 }
