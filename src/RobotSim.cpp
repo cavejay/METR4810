@@ -17,6 +17,10 @@ RobotSim::RobotSim(Point2d Position, float angle, String name, Size R_size)
 
 }
 
+  /*
+   * Draws the "robot" as a triangle faceing in the
+   * direction it's initialised as.
+   */
 void RobotSim::draw(Mat& src)
 {
   cv::RotatedRect Rekt = RotatedRect(Position, R_size, angle);
@@ -26,11 +30,6 @@ void RobotSim::draw(Mat& src)
   cv::line(src, vertices[0], Front, Scalar(255,0,0));
   cv::line(src, vertices[1], Front, Scalar(255,0,0));
   cv::line(src, vertices[0], vertices[1], Scalar(255,0,0));
-
-  //  for (int i = 0; i < 4; i++)
-//  {
-//    cv::line(src, vertices[i], vertices[(i+1)%4], Scalar(255,0,0));
-//  }
 }
 
 

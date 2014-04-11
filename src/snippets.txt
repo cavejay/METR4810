@@ -79,3 +79,7 @@ try
     {
         cout<<"aruco failed\nException :"<<ex.what()<<endl;
     }
+
+// Videowriter Stuff
+
+  VideoWriter Vw("rawr.avi",-1,30,Size(838,670));

@@ -19,14 +19,11 @@
 #include "functions.h"
 #include "Rotate3d.h"
 #include "VStream.h"
-<<<<<<< Updated upstream
 // Aruco .h's
 #include "src/marker.h"
 #include "src/aruco.h"
 #include "src/cvdrawingutils.h"
-=======
 #include "RobotSim.h"
->>>>>>> Stashed changes
 // Definitions
 #define ever ;;
 // Namespaces
@@ -61,7 +58,7 @@ int main(void) // int argc, char* argv[]
   // Make Robot SImulator
   RobotSim Rsim = RobotSim(Point2d(400,250),0,"Robot1");
 
-  VideoWriter Vw("rawr.avi",-1,30,Size(838,670));
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -82,11 +79,6 @@ int main(void) // int argc, char* argv[]
   String filename = "img";
   for(ever)
   {
-    count++;
-    /*
-     * 		Pull Image and init
-     *
-     */
     // Grab current image from which ever source has been specified.
     img = Vs.pullImage();
 
@@ -99,13 +91,11 @@ int main(void) // int argc, char* argv[]
       cout << "Yo, the image is empty???\n";
       return -1;
     }
-
     frame_bgr = img.clone();
 
-    /*
-     * 		Grab contours draw them
-     *
-     *
+    /* THRESHOLD IMAGE + RUN ROBOTSIM AS A TEST
+     * Michael Ball
+     * 11/4/14
      */
 
     cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
@@ -125,17 +115,35 @@ int main(void) // int argc, char* argv[]
 
      /// Show in a window
      namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
-     Rsim.move(3, 1.0);
-     Rsim.draw(drawing);
+     Rsim.move(3, 1.0); // Move the simulation
+     Rsim.draw(drawing); // draw the simulation
      imshow( "Contours", drawing );
 
-//     Vw << drawing;
 
-//     std::stringstream ss;
-//     ss << count;
-//     filename = ss.str() + ".png";
-//     imwrite(filename,drawing, compression_params);
+     /*	DETECT AR_TAG
+      * Michael Ball
+      * 11/4/14
+      */
 
+     aruco::MarkerDetector MDetector;
+     vector<Marker> Markers;
+     try // This is only here 'cause its how the aruco library's dev's wrote their sample
+     {
+       //read the input image
+//       cv::Mat InImage = Vs.pullImage(); //
+       cv::Mat InImage = imread("Sample_Pictures/Marker1.png");
+       //Ok, let's detect
+       MDetector.detect(InImage,Markers);
+       //for each marker, draw info and its boundaries in the image
+       for (unsigned int i=0;i<Markers.size();i++) {
+	 cout<<Markers[i]<<endl;
+	 Markers[i].draw(InImage,Scalar(0,0,255),2);
+       }
+       cv::imshow("in",InImage);
+ //        cv::waitKey(0);//wait for key to be pressed
+     } catch (std::exception &ex) {
+	 cout<<"aruco failed\nException :"<<ex.what()<<endl;
+     }
 
      /* PATHING
       * Jonathan Holland
