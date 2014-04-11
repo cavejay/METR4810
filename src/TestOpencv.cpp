@@ -19,10 +19,14 @@
 #include "functions.h"
 #include "Rotate3d.h"
 #include "VStream.h"
+<<<<<<< Updated upstream
 // Aruco .h's
 #include "src/marker.h"
 #include "src/aruco.h"
 #include "src/cvdrawingutils.h"
+=======
+#include "RobotSim.h"
+>>>>>>> Stashed changes
 // Definitions
 #define ever ;;
 // Namespaces
@@ -50,31 +54,39 @@ int main(void) // int argc, char* argv[]
 
   VStream Vs(STILL_IMAGE, "127.0.0.1", "Sample_Pictures/track-example2.png");
 //  Vs.FindInput();
+//  initialise the appropriate video device. This is kinda messy but needed because I need it 4lulz and modularity
   Vs.StartInput();
 
-  // initialise the appropriate video device. This is kinda messy but needed because I need it lulz and modularity
+
+  // Make Robot SImulator
+  RobotSim Rsim = RobotSim(Point2d(400,250),0,"Robot1");
+
+  VideoWriter Vw("rawr.avi",-1,30,Size(838,670));
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-  // Initialise all dem variables
 
+  // Initialise all dem variable
   cv::Mat img, img1; ///== imread("img.jpg");
   cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThreshTrack;
   int threshMag = 0;
-  int d_val, e_val;
-  int two50 = 255;
-  int fifty = 50;
-  RNG rng(12345);
 
-//  cv::namedWindow("Thresholded Image", CV_WINDOW_AUTOSIZE);
-//  cv::createTrackbar("threshold value", "Thresholded Image", &threshMag,two50, NULL);
-//  cv::createTrackbar( "Dilation size", "Thresholded Image", &d_val, fifty, NULL);
-//  cv::createTrackbar( "Erosion size", "Thresholded Image", &e_val,fifty, NULL);
+  vector<int> compression_params;
+      compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+      compression_params.push_back(9);
+
   // Start Loop
+  int count = 0;
+  String filename = "img";
   for(ever)
   {
+    count++;
+    /*
+     * 		Pull Image and init
+     *
+     */
     // Grab current image from which ever source has been specified.
     img = Vs.pullImage();
 
@@ -90,6 +102,12 @@ int main(void) // int argc, char* argv[]
 
     frame_bgr = img.clone();
 
+    /*
+     * 		Grab contours draw them
+     *
+     *
+     */
+
     cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
     cv::threshold( frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY );
 
@@ -101,19 +119,22 @@ int main(void) // int argc, char* argv[]
     cv::Mat drawing = cv::Mat::zeros( ThreshTrack.size(), CV_8UC3 );
     for( int i = 0; i< contours.size(); i++ )
     {
-      Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+      Scalar color = Scalar(0,255,100);
       drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
     }
 
      /// Show in a window
      namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
+     Rsim.move(3, 1.0);
+     Rsim.draw(drawing);
      imshow( "Contours", drawing );
-//    cv::threshold(hsvchannels[2], ThresTrack,150,255,cv::THRESH_BINARY);
-//    Dilation(ThresTrack,ThresTrack,ED_RECTANGLE,d_val);
-//    Erosion(ThresTrack,ThresTrack,ED_RECTANGLE,e_val);
-//    Dilation(ThresTrack,ThresTrack,ED_RECTANGLE,d_val);
-//    cv::imshow("Threshold Test", ThresTrack);
 
+//     Vw << drawing;
+
+//     std::stringstream ss;
+//     ss << count;
+//     filename = ss.str() + ".png";
+//     imwrite(filename,drawing, compression_params);
 
 
      /* PATHING
