@@ -67,14 +67,17 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.mingw.exe.debug.709912367" name="MinGW C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.mingw.exe.debug">
 								<option id="gnu.cpp.link.option.paths.604476441" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\OpenCV_METR_BUILD\bin&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/aruco_bin}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Roborealm_API}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Roborealm_API/C++/MinGW}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/aruco_bin}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\OpenCV_BUILT\bin&quot;"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.1533111756" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="libopencv_core248"/>
+									<listOptionValue builtIn="false" value="ws2_32"/>
+									<listOptionValue builtIn="false" value="RR_COM_API"/>
+									<listOptionValue builtIn="false" value="RR_API_lib"/>
 									<listOptionValue builtIn="false" value="libaruco124"/>
-									<listOptionValue builtIn="false" value="RR_API_cpp"/>
 									<listOptionValue builtIn="false" value="libopencv_highgui248"/>
 									<listOptionValue builtIn="false" value="libopencv_imgproc248"/>
 									<listOptionValue builtIn="false" value="libopencv_features2d248"/>

@@ -41,7 +41,8 @@ using namespace aruco;
 //  exit(0);
 //}
 
-int main(void) // int argc, char* argv[]
+int
+main (void) // int argc, char* argv[]
 {
 //  if (argc < 2) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
 //    help();
@@ -49,21 +50,18 @@ int main(void) // int argc, char* argv[]
 
   // Srsly thou. Just stick want you want in this before you compile. Screw cmdline for now :(
 
-  VStream Vs(STILL_IMAGE, "127.0.0.1", "Sample_Pictures/track-example2.png");
+  VStream Vs (ROBOREALM, "127.0.0.1", "Sample_Pictures/track-example2.png");
 //  Vs.FindInput();
 //  initialise the appropriate video device. This is kinda messy but needed because I need it 4lulz and modularity
-  Vs.StartInput();
-
+  Vs.StartInput ();
 
   // Make Robot SImulator
-  RobotSim Rsim = RobotSim(Point2d(400,250),0,"Robot1");
-
-
-
+  Point2d StartingPos(400, 250);
+  float StartingAngle(0);
+  RobotSim Rsim = RobotSim (StartingPos, StartingAngle, "Robot1");
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
-
 
   // Initialise all dem variable
   cv::Mat img, img1; ///== imread("img.jpg");
@@ -71,100 +69,99 @@ int main(void) // int argc, char* argv[]
   int threshMag = 0;
 
   vector<int> compression_params;
-      compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
-      compression_params.push_back(9);
+  compression_params.push_back (CV_IMWRITE_PNG_COMPRESSION);
+  compression_params.push_back (9);
 
   // Start Loop
   int count = 0;
   String filename = "img";
-  for(ever)
+  for (ever)
   {
     // Grab current image from which ever source has been specified.
-    img = Vs.pullImage();
+    img = Vs.pullImage ();
 
     // Check if the image is empty. There's not point continuing if so.
-    if(!img.empty())
+    if (!img.empty ())
     {
-      cv::imshow("Grabbed Image",img);
+      cv::imshow ("Grabbed Image", img);
       cout << "I got it yo\n";
-    } else {
+    }
+    else
+    {
       cout << "Yo, the image is empty???\n";
       return -1;
     }
-    frame_bgr = img.clone();
+    frame_bgr = img.clone ();
 
     /* THRESHOLD IMAGE + RUN ROBOTSIM AS A TEST
      * Michael Ball
      * 11/4/14
      */
 
-    cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
-    cv::threshold( frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY );
+    cv::cvtColor (frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
+    cv::threshold (frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY);
 
     // Contours are a vector of vectors of points
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
 
-    cv::findContours( ThreshTrack, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
-    cv::Mat drawing = cv::Mat::zeros( ThreshTrack.size(), CV_8UC3 );
-    for( int i = 0; i< contours.size(); i++ )
+    cv::findContours (ThreshTrack, contours, hierarchy, CV_RETR_TREE,
+		      CV_CHAIN_APPROX_SIMPLE, Point (0, 0));
+    cv::Mat drawing = cv::Mat::zeros (ThreshTrack.size (), CV_8UC3);
+    for (int i = 0; i < contours.size (); i++)
     {
-      Scalar color = Scalar(0,255,100);
-      drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+      Scalar color = Scalar (0, 255, 100);
+      drawContours (drawing, contours, i, color, 2, 8, hierarchy, 0, Point ());
     }
 
-     /// Show in a window
-     namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
-     Rsim.move(3, 1.0); // Move the simulation
-     Rsim.draw(drawing); // draw the simulation
-     imshow( "Contours", drawing );
+    /// Show in a window
+    namedWindow ("Contours", CV_WINDOW_AUTOSIZE);
+    Rsim.move (3, 1.0); // Move the simulation
+    Rsim.draw (drawing); // draw the simulation
+    imshow ("Contours", drawing);
 
+    /*	DETECT AR_TAG
+     * Michael Ball
+     * 11/4/14
+     */
 
-     /*	DETECT AR_TAG
-      * Michael Ball
-      * 11/4/14
-      */
+//     aruco::MarkerDetector MDetector;
+//     vector<Marker> Markers;
+//     try // This is only here 'cause its how the aruco library's dev's wrote their sample
+//     {
+//       //read the input image
+////       cv::Mat InImage = Vs.pullImage(); //
+//       cv::Mat InImage = imread("Sample_Pictures/Marker1.png");
+//       //Ok, let's detect
+//       MDetector.detect(InImage,Markers);
+//       //for each marker, draw info and its boundaries in the image
+//       for (unsigned int i=0;i<Markers.size();i++) {
+//	 cout<<Markers[i]<<endl;
+//	 Markers[i].draw(InImage,Scalar(0,0,255),2);
+//       }
+//       cv::imshow("in",InImage);
+// //        cv::waitKey(0);//wait for key to be pressed
+//     } catch (std::exception &ex) {
+//	 cout<<"aruco failed\nException :"<<ex.what()<<endl;
+//     }
+    /* PATHING
+     * Jonathan Holland
+     * 11/04/14
+     */
 
-     aruco::MarkerDetector MDetector;
-     vector<Marker> Markers;
-     try // This is only here 'cause its how the aruco library's dev's wrote their sample
-     {
-       //read the input image
-//       cv::Mat InImage = Vs.pullImage(); //
-       cv::Mat InImage = imread("Sample_Pictures/Marker1.png");
-       //Ok, let's detect
-       MDetector.detect(InImage,Markers);
-       //for each marker, draw info and its boundaries in the image
-       for (unsigned int i=0;i<Markers.size();i++) {
-	 cout<<Markers[i]<<endl;
-	 Markers[i].draw(InImage,Scalar(0,0,255),2);
-       }
-       cv::imshow("in",InImage);
- //        cv::waitKey(0);//wait for key to be pressed
-     } catch (std::exception &ex) {
-	 cout<<"aruco failed\nException :"<<ex.what()<<endl;
-     }
+//     // Use the <vector<vector<Point>>> contours frame to extract the two biggest <vector<Point>>
+//
+//     // Sort by size
+//     sort(contours.begin(),contours.end(),less_vectors);
+//
+//     // Assign the two tracks to the two largest contours
+//     vector<Point> largest1 = contours[contours.size()-1];
+//     vector<Point> largest2 = contours[contours.size()-2];
+//
+//     // Get the center of the vehicle given the AR tag has been recognised
+//     cv::Point2f carCenter = Markers[0].getCenter();
 
-     /* PATHING
-      * Jonathan Holland
-      * 11/04/14
-      */
-
-     // Use the <vector<vector<Point>>> contours frame to extract the two biggest <vector<Point>>
-
-     // Sort by size
-     sort(contours.begin(),contours.end(),less_vectors);
-
-     // Assign the two tracks to the two largest contours
-     vector<Point> largest1 = contours[contours.size()-1];
-     vector<Point> largest2 = contours[contours.size()-2];
-
-     // Get the center of the vehicle given the AR tag has been recognised
-     cv::Point2f carCenter = Markers[0].getCenter();
-
-
-
-    if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
+    if (waitKey (30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
     {
       cout << "esc key is pressed by user" << endl;
       break;
@@ -174,6 +171,8 @@ int main(void) // int argc, char* argv[]
 //  return 0;
 }
 
-bool less_vectors(const std::vector<Point>& vec1, const std::vector<Point>& vec2) {
-        return vec1.size() < vec2.size();
+bool
+less_vectors (const std::vector<Point>& vec1, const std::vector<Point>& vec2)
+{
+  return vec1.size () < vec2.size ();
 }

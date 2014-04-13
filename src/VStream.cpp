@@ -60,7 +60,8 @@ int VStream::StartInput()
   if(CurrentlyUsing == ROBOREALM)
   {
     cout << "Using RoboRealm for Image aquisition" << endl;
-    vidcap_result = init_videocapture(CurrentlyUsing,rr,Host); // Initialise the magic rr system thingo
+    vidcap_result = init_videocapture(CurrentlyUsing,rr,Host); // Initialise the magic rr system thingo.
+    cout << "video init passed\n";
     return 1;
 
   } else
@@ -177,7 +178,25 @@ int VStream::init_videocapture(int video_source, RR_API& rr, char* ServerAddress
   if(video_source == ROBOREALM)
   {
 //    strcpy(Host,ServerAddress.c_str());
+      cout << "connecting\n";
     rr.connect(ServerAddress,6060);
+    cout << ".......connected\n";
+    int width;
+    int* p_width = &width;
+    int height;
+    int* p_height = &height;
+    rr.getDimension(p_width, p_height);
+    cout << "width: " << width << "\nheight " << height << endl;
+    char* filename = "ppmIMG";
+    cout << "made filename\n";
+    unsigned char buffer;
+    unsigned char* p_buffer = &buffer;
+    cout << "made buffer thingo\n";
+    rr.savePPM(filename,p_buffer,width,height);
+    cout << "saved ppm apparently\n";
+    rr.disconnect();
+    cout << "disconnected\n";
+    cout << buffer;
 
   } else {
     cout << "The 2nd variable must be a videoCapture object to run from a file or video camera.\nClosing Program" << endl;
