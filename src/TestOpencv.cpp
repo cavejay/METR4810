@@ -34,13 +34,13 @@ using namespace aruco;
 int main (void) // int argc, char* argv[]
 {
 
-  VStream Vs(STILL_IMAGE, "127.0.0.1", "Sample_Pictures/track-example2.png");
+  VStream Vs(STILL_IMAGE, "127.0.0.1", "Sample_Pictures/track-example3.png");
   //  Vs.FindInput();
   //  initialise the appropriate video device. This is kinda messy but needed because I need it 4lulz and modularity
   Vs.StartInput();
 
   // Make Robot Simulator
-  RobotSim Rsim = RobotSim(Point2d(400,250),0,"Robot1");
+  RobotSim Rsim = RobotSim(Point2d(600,270),0,"Robot1",Size(30,15));
 
   ////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,8 +99,8 @@ int main (void) // int argc, char* argv[]
 
     /// Show in a window
     namedWindow("Contours", CV_WINDOW_AUTOSIZE);
-    Rsim.move(3, 1.0);// Move the simulation
-    Rsim.draw(drawing);// draw the simulation
+//    Rsim.move(3, 1.0);// Move the simulation
+//    Rsim.draw(drawing);// draw the simulation
     imshow("Contours", drawing);
 
     /*	DETECT AR_TAG
@@ -145,7 +145,8 @@ int main (void) // int argc, char* argv[]
     vector<Point> largest2 = contours[contours.size() - 2];
 
     // Get the center of the vehicle given the AR tag has been recognised
-    cv::Point2f carCenter = Markers[0].getCenter();
+//    cv::Point2f carCenter = Markers[0].getCenter();
+    cv::Point2f carCenter = Rsim.Position;
 
     double value = 0;
     double totalValue = 0;
@@ -194,11 +195,18 @@ int main (void) // int argc, char* argv[]
     if(average2 > average1)
     {
       // Tell the car to go right
+      Rsim.move(1, 1);// Move the simulation
     }
     else
     {
       // Tell the car to go left
+      Rsim.move(1, -1);// Move the simulation
     }
+
+
+    Rsim.draw(drawing);// draw the simulation
+    imshow("Contours", drawing);
+
 
     if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
     {
