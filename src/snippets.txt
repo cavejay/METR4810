@@ -83,3 +83,8 @@ try
 // Videowriter Stuff
 
   VideoWriter Vw("rawr.avi",-1,30,Size(838,670));
+  
+  
+      /* Other variants to use if to control movement */
+   //    if((average1 >= .98*average2 && average1 <= average2 ) || (average1 >= average2 && average1 <= .98*average2))
+    //    if((totalValue1 >= .98*totalValue2 && totalValue1 <= totalValue2 ) || (totalValue1 >= totalValue2 && totalValue1 <= .98*totalValue2))

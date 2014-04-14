@@ -18,7 +18,9 @@ RobotSim::RobotSim(Point2d Position, float angle, String name, Size R_size, Stri
   {
     repr = imread(Repr);
     if(!repr.empty()){
-
+//	cv::Rect roi( cv::Point( originX, originY ), cv::Size( width, height ));
+//	cv::Mat destinationROI = bigImage( roi );
+//	smallImage.copyTo( destinationROI );
     }
   }
 //  cv::resize(src, src, img.size());
@@ -42,9 +44,7 @@ void RobotSim::draw(Mat& src, int search_circle)
   circle(src, Position, search_circle, Scalar(0,0,255), 2, 8, 0 );
 //  circle(src, Position, search_circle*0.25, Scalar(0,0,150), 2, 8, 0 );
 
-
 }
-
 
 /*
  * Moves the Robot a certain distance 'dist' in the direction of angle

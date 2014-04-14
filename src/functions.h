@@ -32,10 +32,6 @@ enum {
 };
 
 // Functions
-int FindInput(char* argv0);
-int init_videocapture(int video_source, VideoCapture& cap, const string& file_loc = "C:/Sample.avi");
-int init_videocapture(int video_source, RR_API& rr, char* Network_Address);
-Mat pullImage(int CurrentlyUsing, RR_API& rr, VideoCapture& cap);
 void Draw_Circles(Mat& img, const vector<Vec3f>& circles);
 void Dilation(const Mat& src, Mat& dst, int dilation_shape, double dilation_size);
 void Erosion(const Mat& src, Mat& dst, int erosion_shape, double erosion_size);

@@ -50,6 +50,11 @@ void Erosion(const Mat& src, Mat& dst, int erosion_shape, double erosion_size)
   erode( src, dst, element);
 }
 
+bool less_vectors(const std::vector<Point>& vec1,const std::vector<Point>& vec2)
+ {
+   return vec1.size() < vec2.size();
+ }
+
 
 
 

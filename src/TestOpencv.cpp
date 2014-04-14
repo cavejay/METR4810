@@ -42,6 +42,9 @@ int main (void) // int argc, char* argv[]
   // Make Robot Simulator
   RobotSim Rsim = RobotSim(Point2d(600,300),0,"Robot1",Size(30,15));
 
+  // Init PID stuff 'cause I don't know how useful that will be yet.
+  PID pid();
+
   ////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -176,7 +179,6 @@ int main (void) // int argc, char* argv[]
 	totalValue1 += value;
 	count += 1;
       }
-
     }
     average1 = totalValue1 / count;
     Pnum1 = count;
@@ -199,42 +201,44 @@ int main (void) // int argc, char* argv[]
     }
     average2 = totalValue2 / count;
     Pnum2 = count;
+
+    /* Info dump */
+    cout <<
+	"Total Distance Outside (1): " << totalValue1 << endl <<
+	"Total Distance Inside (2): " << totalValue2 << endl <<
+	"Average Outside (1): " << average1 << endl <<
+	"Average Inside (2): " << average2 << endl <<
+	"Number of Points Outside (1): " << Pnum1 << endl <<
+	"number of Points Inside (2): " << Pnum2 << endl;
+
+
     // If one average is larger than the other, move towards that edge
     // If differences are tiny just go straight
-
-    /* Other variants to use if to control movement */
-    //    if((average1 >= .98*average2 && average1 <= average2 ) || (average1 >= average2 && average1 <= .98*average2))
-    //    if((totalValue1 >= .98*totalValue2 && totalValue1 <= totalValue2 ) || (totalValue1 >= totalValue2 && totalValue1 <= .98*totalValue2))
-
-
-    if((Pnum1 >= .8*Pnum2 && Pnum1 <= Pnum2 ) || (Pnum1 >= Pnum2 && Pnum1 <= .8*Pnum2))
+    if((Pnum1 >= .75*Pnum2 && Pnum1 <= Pnum2 ) || (Pnum1 >= Pnum2 && Pnum1 <= .75*Pnum2))
     {
       // Tell the car to go straight
-      Rsim.move(2, 0);// Move the simulation
+      Rsim.move(2 , 0);// Move the simulation
       cout << "Go Straight\n";
     }
     // Assuming largest2 is the inside track (being smaller than largest 1)
     else if (Pnum1 > Pnum2)
     {
-          // Tell the car to go right
-          Rsim.move(2, 10);// Move the simulation
-	  cout << "Turning right\n";
+      // Tell the car to go right
+      Rsim.move(2, 4);// Move the simulation
+      cout << "Turning right\n";
     }
     else if (Pnum2 > Pnum1)
     {
-    	// Tell the car to go left
-    	Rsim.move(2, -10); // Move the simulation
-    	cout << "Turning Left\n";
+      // Tell the car to go left
+      Rsim.move(2, -4); // Move the simulation
+      cout << "Turning Left\n";
     } else {
-	cout << "tell me something" << endl;
-	cout << Pnum1 << endl;
-	cout << Pnum2 << endl;
+      cout << "#####\nELSE HAPPENED\n#####" << endl;
     }
 
 
-    Rsim.draw(drawing, circRadius);// draw the simulation
+    Rsim.draw(drawing, circRadius);// draw the s`imulation
     imshow("Contours", drawing);
-
 
     if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
     {
@@ -246,8 +250,3 @@ int main (void) // int argc, char* argv[]
 //  waitKey();
 //  return 0;
 }
-
- bool less_vectors(const std::vector<Point>& vec1,const std::vector<Point>& vec2)
-  {
-    return vec1.size() < vec2.size();
-  }
