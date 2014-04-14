@@ -19,11 +19,11 @@
 #include "functions.h"
 #include "Rotate3d.h"
 #include "VStream.h"
+#include "RobotSim.h"
 // Aruco .h's
 #include "src/marker.h"
 #include "src/aruco.h"
 #include "src/cvdrawingutils.h"
-#include "RobotSim.h"
 // Definitions
 #define ever ;;
 // Namespaces
@@ -42,8 +42,8 @@ int main (void) // int argc, char* argv[]
   // Make Robot Simulator
   RobotSim Rsim = RobotSim(Point2d(600,300),0,"Robot1",Size(30,15));
 
-  // Init PID stuff 'cause I don't know how useful that will be yet.
-  PID pid();
+//  VideoWriter Vw("Test1.avi",-1,30,Size(838,670));
+
 
   ////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,15 +51,17 @@ int main (void) // int argc, char* argv[]
   // Initialise all dem variable
   cv::Mat img, img1;///== imread("img.jpg");
   cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThreshTrack;
-  int threshMag = 0;
+  int threshMag = 160;
+
+  vector<float> error_list;
 
   vector<int> compression_params;
   compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
   compression_params.push_back(9);
+  namedWindow("Contours", 1);
+  cv::createTrackbar( "Threshold Value", "Contours", &threshMag, 255, NULL );
 
   // Start Loop
-  int count = 0;
-  String filename = "img";
   for (ever)
   {
     // Grab current image from which ever source has been specified.
@@ -83,6 +85,7 @@ int main (void) // int argc, char* argv[]
      * 11/4/14
      */
 
+
     cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
     cv::threshold(frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY);
 
@@ -92,7 +95,9 @@ int main (void) // int argc, char* argv[]
 
     cv::findContours(ThreshTrack, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0)); // Changed CV_CHAIN_APPROX from siple to none
     cv::Mat drawing = cv::Mat::zeros(ThreshTrack.size(), CV_8UC3);
+    // Sort le vectors
     sort(contours.begin(), contours.end(), less_vectors);
+    // Make more colours for the largest vecotrs
     vector<Scalar> colors;
     colors.push_back(Scalar(100,100,100));
     colors.push_back(Scalar(200,200,200));
@@ -104,8 +109,6 @@ int main (void) // int argc, char* argv[]
 
     /// Show in a window
     namedWindow("Contours", CV_WINDOW_AUTOSIZE);
-//    Rsim.move(3, 1.0);// Move the simulation
-//    Rsim.draw(drawing);// draw the simulation
     imshow("Contours", drawing);
 
     /*	DETECT AR_TAG
@@ -162,6 +165,7 @@ int main (void) // int argc, char* argv[]
     int count = 1;
     int Pnum1 = 0;
     int Pnum2 = 0;
+    float avg_error = 0;
 
     // Assign a value to make the circle around the car
     double circRadius = 50;
@@ -202,19 +206,36 @@ int main (void) // int argc, char* argv[]
     average2 = totalValue2 / count;
     Pnum2 = count;
 
+    // Calculate error from |average1 - average2|
+    avg_error = fabs(average1 - average2);
+    // Proportional
+    float p = avg_error*0.6;
+    error_list.push_back(avg_error);
+    float integrate = 0;
+    if(error_list.size() > 4)
+    {
+      for(int i = 0;i < error_list.size()-1;i++)
+      {
+	integrate += (error_list[i] + error_list[i+1])/2;
+      }
+      cout << "integrate: " << integrate << endl;
+    }
+    float p_i = integrate*0.001 + p;
+
     /* Info dump */
     cout <<
 	"Total Distance Outside (1): " << totalValue1 << endl <<
 	"Total Distance Inside (2): " << totalValue2 << endl <<
 	"Average Outside (1): " << average1 << endl <<
 	"Average Inside (2): " << average2 << endl <<
+	"Average Error: " << avg_error << endl <<
 	"Number of Points Outside (1): " << Pnum1 << endl <<
 	"number of Points Inside (2): " << Pnum2 << endl;
 
 
     // If one average is larger than the other, move towards that edge
     // If differences are tiny just go straight
-    if((Pnum1 >= .75*Pnum2 && Pnum1 <= Pnum2 ) || (Pnum1 >= Pnum2 && Pnum1 <= .75*Pnum2))
+    if((Pnum1 >= .99*Pnum2 && Pnum1 <= Pnum2 ) || (Pnum1 >= Pnum2 && Pnum1 <= .99*Pnum2))
     {
       // Tell the car to go straight
       Rsim.move(2 , 0);// Move the simulation
@@ -240,7 +261,7 @@ int main (void) // int argc, char* argv[]
     Rsim.draw(drawing, circRadius);// draw the s`imulation
     imshow("Contours", drawing);
 
-    if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
+    if (waitKey(1) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
     {
       cout << "esc key is pressed by user" << endl;
       break;
