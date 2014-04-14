@@ -177,26 +177,41 @@ int VStream::init_videocapture(int video_source, RR_API& rr, char* ServerAddress
 {
   if(video_source == ROBOREALM)
   {
-//    strcpy(Host,ServerAddress.c_str());
-      cout << "connecting\n";
-    rr.connect(ServerAddress,6060);
-    cout << ".......connected\n";
     int width;
     int* p_width = &width;
     int height;
     int* p_height = &height;
     rr.getDimension(p_width, p_height);
-    cout << "width: " << width << "\nheight " << height << endl;
-    char* filename = "ppmIMG";
-    cout << "made filename\n";
-    unsigned char buffer;
-    unsigned char* p_buffer = &buffer;
-    cout << "made buffer thingo\n";
-    rr.savePPM(filename,p_buffer,width,height);
-    cout << "saved ppm apparently\n";
+    unsigned char* pixels = (unsigned char *)malloc(width*height*1);
+    unsigned char* pixels2 = (unsigned char *)malloc(width*height*3);
+//    unsigned char* p_pixels = &pixels;
+    cout << "made needed vars and pointers\n";
+
+    cout << "connecting\n";
+    rr.connect(ServerAddress,6060);
+    cout << ".......connected\n\nrunning getImage()\n";
+
+    rr.getImage("",pixels,p_width, p_height,width*height,"GRAY");
+    cout << "got Image\n";
+
+    Mat rawr = cv::imdecode(*pixels, CV_LOAD_IMAGE_GRAYSCALE);
+    if (!rawr.empty()){imshow("haah!",rawr);} else {cout << "picture was empty\n";}
+    cout << "decoded and shown\n";
+
+//    rr.getBitmap("processed", pixels2, p_width, p_height, width*height*3);
+//    cout << "bitmap got\n";
+//    Mat rawr2 = cv::imdecode(*pixels2, CV_LOAD_IMAGE_COLOR);
+//    if (!rawr2.empty()){imshow("haah!2",rawr2);} else {cout << "picture2 was empty\n";}
+//    cout << "decoded pixels2 and shown\n";
+
     rr.disconnect();
     cout << "disconnected\n";
-    cout << buffer;
+    cout << "width: " << width << "\nheight " << height << endl;
+    cout << "pixels: " << pixels << endl << "p_pixels: " << &pixels << endl;;
+    free(pixels);
+    free(pixels2);
+
+
 
   } else {
     cout << "The 2nd variable must be a videoCapture object to run from a file or video camera.\nClosing Program" << endl;

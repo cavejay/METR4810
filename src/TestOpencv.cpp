@@ -34,7 +34,7 @@ using namespace aruco;
 int main (void) // int argc, char* argv[]
 {
 
-  VStream Vs(STILL_IMAGE, "127.0.0.1", "Sample_Pictures/track-example3.png");
+  VStream Vs(ROBOREALM, "127.0.0.1", "Sample_Pictures/track-example3.png");
   //  Vs.FindInput();
   //  initialise the appropriate video device. This is kinda messy but needed because I need it 4lulz and modularity
   Vs.StartInput();

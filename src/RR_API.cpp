@@ -467,7 +467,7 @@ bool RR_API::getImage(char *name, unsigned char *pixels, int *width, int *height
 {
 	unsigned int len;
 	if (!connected) return false;
-	if (name==NULL) name[0]=0;
+	if (name==NULL) name="";
 	char *format;
 	char ename[64];
 	// escape the name for use in an XML stream
