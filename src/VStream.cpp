@@ -181,21 +181,23 @@ int VStream::init_videocapture(int video_source, RR_API& rr, char* ServerAddress
     int* p_width = &width;
     int height;
     int* p_height = &height;
+    cout << "connecting\n";
+    rr.connect("127.0.0.1",6060);
+    cout << ".......connected\n";
     rr.getDimension(p_width, p_height);
     unsigned char* pixels = (unsigned char *)malloc(width*height*1);
     unsigned char* pixels2 = (unsigned char *)malloc(width*height*3);
 //    unsigned char* p_pixels = &pixels;
     cout << "made needed vars and pointers\n";
 
-    cout << "connecting\n";
-    rr.connect(ServerAddress,6060);
-    cout << ".......connected\n\nrunning getImage()\n";
+
+    cout << "running getImage()\n";
 
     rr.getImage("",pixels,p_width, p_height,width*height,"GRAY");
     cout << "got Image\n";
 
-    Mat rawr = cv::imdecode(*pixels, CV_LOAD_IMAGE_GRAYSCALE);
-    if (!rawr.empty()){imshow("haah!",rawr);} else {cout << "picture was empty\n";}
+//    Mat rawr = cv::imdecode(*pixels, CV_LOAD_IMAGE_GRAYSCALE);
+//    if (!rawr.empty()){imshow("haah!",rawr);} else {cout << "picture was empty\n";}
     cout << "decoded and shown\n";
 
 //    rr.getBitmap("processed", pixels2, p_width, p_height, width*height*3);

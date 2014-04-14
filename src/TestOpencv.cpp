@@ -34,13 +34,13 @@ using namespace aruco;
 int main (void) // int argc, char* argv[]
 {
 
-  VStream Vs(ROBOREALM, "127.0.0.1", "Sample_Pictures/track-example3.png");
+  VStream Vs(STILL_IMAGE, "127.0.0.1", "Sample_Pictures/track-example3.png");
   //  Vs.FindInput();
   //  initialise the appropriate video device. This is kinda messy but needed because I need it 4lulz and modularity
   Vs.StartInput();
 
   // Make Robot Simulator
-  RobotSim Rsim = RobotSim(Point2d(600,270),0,"Robot1",Size(30,15));
+  RobotSim Rsim = RobotSim(Point2d(600,300),0,"Robot1",Size(30,15));
 
   ////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////
@@ -87,14 +87,16 @@ int main (void) // int argc, char* argv[]
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
 
-    cv::findContours(ThreshTrack, contours, hierarchy, CV_RETR_TREE,
-	CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+    cv::findContours(ThreshTrack, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0)); // Changed CV_CHAIN_APPROX from siple to none
     cv::Mat drawing = cv::Mat::zeros(ThreshTrack.size(), CV_8UC3);
+    sort(contours.begin(), contours.end(), less_vectors);
+    vector<Scalar> colors;
+    colors.push_back(Scalar(100,100,100));
+    colors.push_back(Scalar(200,200,200));
     for (int i = 0; i < contours.size(); i++)
     {
       Scalar color = Scalar(0, 255, 100);
-      drawContours(drawing, contours, i, color, 2, 8, hierarchy, 0,
-	  Point());
+      drawContours(drawing, contours, i, color, 2, 8, hierarchy, 0, Point());
     }
 
     /// Show in a window
@@ -107,7 +109,7 @@ int main (void) // int argc, char* argv[]
      * Michael Ball
      * 11/4/14
      */
-
+    /*
     aruco::MarkerDetector MDetector;
     vector<Marker> Markers;
     try// This is only here 'cause its how the aruco library's dev's wrote their sample
@@ -123,13 +125,14 @@ int main (void) // int argc, char* argv[]
 	cout << Markers[i] << endl;
 	Markers[i].draw(InImage, Scalar(0, 0, 255), 2);
       }
-      cv::imshow("in", InImage);
+//      cv::imshow("in", InImage);
       //        cv::waitKey(0);//wait for key to be pressed
     }
     catch (std::exception &ex)
     {
       cout << "aruco failed\nException :" << ex.what() << endl;
     }
+    */
 
     /* PATHING
      * Jonathan Holland
@@ -138,7 +141,7 @@ int main (void) // int argc, char* argv[]
 
     // Use the <vector<vector<Point>>> contours frame to extract the two biggest <vector<Point>>
     // Sort by size
-    sort(contours.begin(), contours.end(), less_vectors);
+//    sort(contours.begin(), contours.end(), less_vectors);
 
     // Assign the two tracks to the two largest contours
     vector<Point> largest1 = contours[contours.size() - 1];
@@ -147,13 +150,20 @@ int main (void) // int argc, char* argv[]
     // Get the center of the vehicle given the AR tag has been recognised
 //    cv::Point2f carCenter = Markers[0].getCenter();
     cv::Point2f carCenter = Rsim.Position;
+    double average1 = 0;
+    double average2 = 0;
 
     double value = 0;
-    double totalValue = 0;
-    int count = 0;
-    // Assign a value to make the circle around the car
-    double circRadius = 40;
+    double totalValue1 = 0;
+    double totalValue2 = 0;
+    int count = 1;
+    int Pnum1 = 0;
+    int Pnum2 = 0;
 
+    // Assign a value to make the circle around the car
+    double circRadius = 50;
+
+    // Probably the outside of the track
     for (int i = 0; i < largest1.size(); i++)
     {
       // Use pythagoras on the 2 dimensional plane to find the distances
@@ -163,18 +173,18 @@ int main (void) // int argc, char* argv[]
       // If the value is within the circle radius of a distance
       if (value < circRadius)
       {
-	totalValue += value;
+	totalValue1 += value;
 	count += 1;
       }
 
     }
-    double average1 = value / count;
+    average1 = totalValue1 / count;
+    Pnum1 = count;
 
     value = 0;
-    totalValue = 0;
-    count = 0;
+    count = 1;
 
-    // Do the same for largest2, the other contour
+    // Do the same for largest2, the other contour probably the inside of the track
     for (int i = 0; i < largest2.size(); i++)
     {
       value = sqrt(
@@ -183,28 +193,46 @@ int main (void) // int argc, char* argv[]
 
       if (value < circRadius)
       {
-	totalValue += value;
+	totalValue2 += value;
 	count += 1;
       }
     }
-    double average2 = value / count;
-
+    average2 = totalValue2 / count;
+    Pnum2 = count;
     // If one average is larger than the other, move towards that edge
+    // If differences are tiny just go straight
 
+    /* Other variants to use if to control movement */
+    //    if((average1 >= .98*average2 && average1 <= average2 ) || (average1 >= average2 && average1 <= .98*average2))
+    //    if((totalValue1 >= .98*totalValue2 && totalValue1 <= totalValue2 ) || (totalValue1 >= totalValue2 && totalValue1 <= .98*totalValue2))
+
+
+    if((Pnum1 >= .8*Pnum2 && Pnum1 <= Pnum2 ) || (Pnum1 >= Pnum2 && Pnum1 <= .8*Pnum2))
+    {
+      // Tell the car to go straight
+      Rsim.move(2, 0);// Move the simulation
+      cout << "Go Straight\n";
+    }
     // Assuming largest2 is the inside track (being smaller than largest 1)
-    if(average2 > average1)
+    else if (Pnum1 > Pnum2)
     {
-      // Tell the car to go right
-      Rsim.move(1, 1);// Move the simulation
+          // Tell the car to go right
+          Rsim.move(2, 10);// Move the simulation
+	  cout << "Turning right\n";
     }
-    else
+    else if (Pnum2 > Pnum1)
     {
-      // Tell the car to go left
-      Rsim.move(1, -1);// Move the simulation
+    	// Tell the car to go left
+    	Rsim.move(2, -10); // Move the simulation
+    	cout << "Turning Left\n";
+    } else {
+	cout << "tell me something" << endl;
+	cout << Pnum1 << endl;
+	cout << Pnum2 << endl;
     }
 
 
-    Rsim.draw(drawing);// draw the simulation
+    Rsim.draw(drawing, circRadius);// draw the simulation
     imshow("Contours", drawing);
 
 

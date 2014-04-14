@@ -7,13 +7,22 @@
 
 #include "RobotSim.h"
 
-RobotSim::RobotSim(Point2d Position, float angle, String name, Size R_size)
+RobotSim::RobotSim(Point2d Position, float angle, String name, Size R_size, String Repr)
 {
   this->angle = angle;
   this->Position = Position;
   this->R_size = R_size;
   if(!(name == "")){this->name = name;}
     else {this->name = "Robot_Name";}
+  if(Repr != "")
+  {
+    repr = imread(Repr);
+    if(!repr.empty()){
+
+    }
+  }
+//  cv::resize(src, src, img.size());
+
 
 }
 
@@ -21,7 +30,7 @@ RobotSim::RobotSim(Point2d Position, float angle, String name, Size R_size)
    * Draws the "robot" as a triangle faceing in the
    * direction it's initialised as.
    */
-void RobotSim::draw(Mat& src)
+void RobotSim::draw(Mat& src, int search_circle)
 {
   cv::RotatedRect Rekt = RotatedRect(Position, R_size, angle);
   Point2f vertices[4];
@@ -30,6 +39,10 @@ void RobotSim::draw(Mat& src)
   cv::line(src, vertices[0], Front, Scalar(255,0,0));
   cv::line(src, vertices[1], Front, Scalar(255,0,0));
   cv::line(src, vertices[0], vertices[1], Scalar(255,0,0));
+  circle(src, Position, search_circle, Scalar(0,0,255), 2, 8, 0 );
+//  circle(src, Position, search_circle*0.25, Scalar(0,0,150), 2, 8, 0 );
+
+
 }
 
 
