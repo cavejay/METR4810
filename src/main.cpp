@@ -35,22 +35,20 @@ using namespace aruco;
 int main (void) // int argc, char* argv[]
 {
 
+   /*
+	*  BEGINNING of Setup
+	*/
   VStream Vs(STILL_IMAGE, "127.0.0.1", "Sample_Pictures/track-example3.png");
-  //  Vs.FindInput();
-  //  initialise the appropriate video device. This is kinda messy but needed because I need it 4lulz and modularity
+
+  //  Initialise the video device
   Vs.StartInput();
 
-  // Make Robot Simulator
+  // Initialise Robo Simulation
   RobotSim Rsim = RobotSim(Point2d(600,300),0,"Robot1",Size(30,15));
 
-//  VideoWriter Vw("Test1.avi",-1,30,Size(838,670));
 
-
-  ////////////////////////////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////////////////////////////
-
-  // Initialise all dem variable
-  cv::Mat img, img1;///== imread("img.jpg");
+  // Initialise variables
+  cv::Mat img, img1;
   cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThreshTrack;
   int threshMag = 160;
 
@@ -62,28 +60,41 @@ int main (void) // int argc, char* argv[]
   namedWindow("Contours", 1);
   cv::createTrackbar( "Threshold Value", "Contours", &threshMag, 255, NULL );
 
+   /*
+    *  END of Setup
+    */
+
+
+   /*
+    *  BEGINNING of functionality
+    */
+
+
   // Start Loop
-  for (ever)
+  while(1)
   {
-    // Grab current image from which ever source has been specified.
+    // Grab current image from specified source
     img = Vs.pullImage();
 
-    // Check if the image is empty. There's not point continuing if so.
+    // Check if image is empty.
     if (!img.empty())
     {
       cv::imshow("Grabbed Image", img);
-      cout << "I got it yo\n";
+      cout << "The image has been procured successful\n";
     }
+
     else
     {
-      cout << "Yo, the image is empty???\n";
       return -1;
     }
+
     frame_bgr = img.clone();
 
-    /* THRESHOLD IMAGE + RUN ROBOTSIM AS A TEST
+    /*
+     * THRESHOLD IMAGE + RUN ROBOSIM AS A TEST
      * Michael Ball
-     * 11/4/14
+     * Updated by Jonathan Holland
+     *
      */
 
 
@@ -96,9 +107,11 @@ int main (void) // int argc, char* argv[]
 
     cv::findContours(ThreshTrack, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0)); // Changed CV_CHAIN_APPROX from siple to none
     cv::Mat drawing = cv::Mat::zeros(ThreshTrack.size(), CV_8UC3);
-    // Sort le vectors
+
+    // Sort vectors
     sort(contours.begin(), contours.end(), less_vectors);
-    // Make more colours for the largest vecotrs
+
+    // Make more colours for the largest vectors
     vector<Scalar> colors;
     colors.push_back(Scalar(100,100,100));
     colors.push_back(Scalar(200,200,200));
@@ -112,60 +125,62 @@ int main (void) // int argc, char* argv[]
     namedWindow("Contours", CV_WINDOW_AUTOSIZE);
     imshow("Contours", drawing);
 
-    /*	DETECT AR_TAG
+    /*
+     * DETECT AR_TAG
      * Michael Ball
-     * 11/4/14
+     *
      */
     /*
     aruco::MarkerDetector MDetector;
     vector<Marker> Markers;
-    try// This is only here 'cause its how the aruco library's dev's wrote their sample
+    try
     {
       //read the input image
-//       cv::Mat InImage = Vs.pullImage(); //
+      cv::Mat InImage = Vs.pullImage(); //
       cv::Mat InImage = imread("Sample_Pictures/Marker1.png");
-      //Ok, let's detect
+      // Begin detection
       MDetector.detect(InImage, Markers);
-      //for each marker, draw info and its boundaries in the image
+      // For each marker, draw info and its boundaries in the image
       for (unsigned int i = 0; i < Markers.size(); i++)
       {
 	cout << Markers[i] << endl;
 	Markers[i].draw(InImage, Scalar(0, 0, 255), 2);
       }
-//      cv::imshow("in", InImage);
-      //        cv::waitKey(0);//wait for key to be pressed
-    }
+      cv::imshow("in", InImage);
+     }
     catch (std::exception &ex)
     {
       cout << "aruco failed\nException :" << ex.what() << endl;
     }
     */
 
-    /* PATHING
+    /*
+     * PATHING
      * Jonathan Holland
-     * 11/04/14
+     * Updated by Michael Ball & Xavier Casley
      */
-
-    // Use the <vector<vector<Point>>> contours frame to extract the two biggest <vector<Point>>
-    // Sort by size
-//    sort(contours.begin(), contours.end(), less_vectors);
 
     // Assign the two tracks to the two largest contours
     vector<Point> largest1 = contours[contours.size() - 1];
     vector<Point> largest2 = contours[contours.size() - 2];
 
     // Get the center of the vehicle given the AR tag has been recognised
-//    cv::Point2f carCenter = Markers[0].getCenter();
+
+    // Grabbing center from the Aruco tag marker
+    // cv::Point2f carCenter = Markers[0].getCenter();
+
+    // Grabbing center for the simulation
     cv::Point2f carCenter = Rsim.Position;
+
+    // Initialise local variables
     double average1 = 0;
     double average2 = 0;
-
     double value = 0;
     double totalValue1 = 0;
     double totalValue2 = 0;
     int count = 1;
-    int Pnum1 = 0;
-    int Pnum2 = 0;
+    int pNum1 = 0;
+    int pNum2 = 0;
     float avg_error = 0;
 
     // Assign a value to make the circle around the car
@@ -178,7 +193,7 @@ int main (void) // int argc, char* argv[]
       value = sqrt(
 	  pow((largest1[i].x - carCenter.x), 2)
 	  + pow((largest1[i].y - carCenter.y), 2));
-      // If the value is within the circle radius of a distance
+      // If the value is within the circle radius
       if (value < circRadius)
       {
 	totalValue1 += value;
@@ -186,7 +201,7 @@ int main (void) // int argc, char* argv[]
       }
     }
     average1 = totalValue1 / count;
-    Pnum1 = count;
+    pNum1 = count;
 
     value = 0;
     count = 1;
@@ -205,7 +220,7 @@ int main (void) // int argc, char* argv[]
       }
     }
     average2 = totalValue2 / count;
-    Pnum2 = count;
+    pNum2 = count;
 
     // Calculate error from |average1 - average2|
     avg_error = fabs(average1 - average2);
@@ -230,34 +245,40 @@ int main (void) // int argc, char* argv[]
 	"Average Outside (1): " << average1 << endl <<
 	"Average Inside (2): " << average2 << endl <<
 	"Average Error: " << avg_error << endl <<
-	"Number of Points Outside (1): " << Pnum1 << endl <<
-	"number of Points Inside (2): " << Pnum2 << endl;
+	"Number of Points Outside (1): " << pNum1 << endl <<
+	"number of Points Inside (2): " << pNum2 << endl;
 
 
     // If one average is larger than the other, move towards that edge
+
     // If differences are tiny just go straight
-    if((Pnum1 >= .99*Pnum2 && Pnum1 <= Pnum2 ) || (Pnum1 >= Pnum2 && Pnum1 <= .99*Pnum2))
+    if((pNum1 >= .99*pNum2 && pNum1 <= pNum2 ) || (pNum1 >= pNum2 && pNum1 <= .99*pNum2))
     {
       // Tell the car to go straight
+
       Rsim.move(2 , 0);// Move the simulation
       cout << "Go Straight\n";
     }
     // Assuming largest2 is the inside track (being smaller than largest 1)
-    else if (Pnum1 > Pnum2)
+    else if (pNum1 > pNum2)
     {
       // Tell the car to go right
+
       Rsim.move(2, 4);// Move the simulation
       cout << "Turning right\n";
     }
-    else if (Pnum2 > Pnum1)
+    else if (pNum2 > pNum1)
     {
       // Tell the car to go left
+
       Rsim.move(2, -4); // Move the simulation
       cout << "Turning Left\n";
-    } else {
+    }
+    else {
       cout << "#####\nELSE HAPPENED\n#####" << endl;
     }
 
+<<<<<<< HEAD:src/TestOpencv.cpp
 
     Rsim.draw(drawing, circRadius);// draw the s`imulation
 
@@ -270,15 +291,25 @@ int main (void) // int argc, char* argv[]
     putText(drawing, ss2.str(),Point(10,60), FONT_HERSHEY_SIMPLEX,0.5,Scalar(255,255,255));
 
     //Draw image
+=======
+    // draw the simulation
+    Rsim.draw(drawing, circRadius);
+>>>>>>> cfca32d49c9acb0bfdc680a9b14d1912ef10618e:src/main.cpp
     imshow("Contours", drawing);
 
-    if (waitKey(1) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
+    // Wait for 'esc' key press for 30ms.
+    // If 'esc' key is pressed, break loop
+    if (waitKey(30) == 27)
     {
-      cout << "esc key is pressed by user" << endl;
+      cout << "User Exit" << endl;
       break;
     }
   }
 
-//  waitKey();
-//  return 0;
+  /*
+   *  END of functionality
+   */
+
+
+return 0;
 }
