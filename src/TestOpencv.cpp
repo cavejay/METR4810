@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
+#include <sstream>
 // Our .h's
 #include "functions.h"
 #include "Rotate3d.h"
@@ -259,6 +260,16 @@ int main (void) // int argc, char* argv[]
 
 
     Rsim.draw(drawing, circRadius);// draw the s`imulation
+
+    // Give information to image:
+    stringstream ss1;
+    ss1 <<  "Number of Points Outside (1): " << Pnum1;
+    stringstream ss2;
+    ss2 <<  "number of Points Inside (2): " << Pnum2;
+    putText(drawing, ss1.str(),Point(10,30), FONT_HERSHEY_SIMPLEX,0.5,Scalar(255,255,255));
+    putText(drawing, ss2.str(),Point(10,60), FONT_HERSHEY_SIMPLEX,0.5,Scalar(255,255,255));
+
+    //Draw image
     imshow("Contours", drawing);
 
     if (waitKey(1) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
