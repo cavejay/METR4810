@@ -276,25 +276,20 @@ int main (void) // int argc, char* argv[]
     }
     else {
       cout << "#####\nELSE HAPPENED\n#####" << endl;
-    }
 
-<<<<<<< HEAD:src/TestOpencv.cpp
-
-    Rsim.draw(drawing, circRadius);// draw the s`imulation
+    Rsim.draw(drawing, circRadius);// draw the simulation
 
     // Give information to image:
     stringstream ss1;
-    ss1 <<  "Number of Points Outside (1): " << Pnum1;
+    ss1 <<  "Number of Points Outside (1): " << pNum1;
     stringstream ss2;
-    ss2 <<  "number of Points Inside (2): " << Pnum2;
+    ss2 <<  "number of Points Inside (2): " << pNum2;
     putText(drawing, ss1.str(),Point(10,30), FONT_HERSHEY_SIMPLEX,0.5,Scalar(255,255,255));
     putText(drawing, ss2.str(),Point(10,60), FONT_HERSHEY_SIMPLEX,0.5,Scalar(255,255,255));
 
     //Draw image
-=======
     // draw the simulation
     Rsim.draw(drawing, circRadius);
->>>>>>> cfca32d49c9acb0bfdc680a9b14d1912ef10618e:src/main.cpp
     imshow("Contours", drawing);
 
     // Wait for 'esc' key press for 30ms.
@@ -312,4 +307,5 @@ int main (void) // int argc, char* argv[]
 
 
 return 0;
+}
 }

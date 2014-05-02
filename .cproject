@@ -70,7 +70,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Roborealm_API}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Roborealm_API/C++/MinGW}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/aruco_bin}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;C:\OpenCV_BUILT\bin&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\OpenCV_BUILD\bin&quot;"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.1533111756" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="libopencv_core248"/>
