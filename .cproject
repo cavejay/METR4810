@@ -53,6 +53,7 @@
 									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\video\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\ml\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\contrib\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\Program Files (x86)\Windows Kits\8.1\Include&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.include.files.781709221" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1916451613" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -71,10 +72,10 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Roborealm_API/C++/MinGW}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/aruco_bin}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\OpenCV_BUILD\bin&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\Program Files (x86)\Windows Kits\8.1\bin&quot;"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.1533111756" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="libopencv_core248"/>
-									<listOptionValue builtIn="false" value="ws2_32"/>
 									<listOptionValue builtIn="false" value="RR_COM_API"/>
 									<listOptionValue builtIn="false" value="RR_API_lib"/>
 									<listOptionValue builtIn="false" value="libaruco124"/>
@@ -84,6 +85,10 @@
 									<listOptionValue builtIn="false" value="libopencv_calib3d248"/>
 									<listOptionValue builtIn="false" value="libopencv_nonfree248"/>
 									<listOptionValue builtIn="false" value="libopencv_flann248"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="&quot;C:\Program Files (x86)\Windows Kits\8.1\Lib\winv6.3\um\x64\BluetoothApis.lib&quot;"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="&quot;C:\Program Files (x86)\Windows Kits\8.1\Lib\winv6.3\um\x64\WSock32.Lib&quot;"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="&quot;C:\Program Files (x86)\Windows Kits\8.1\Lib\winv6.3\um\x64\WS2_32.Lib&quot;"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="WS2_32"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1973194854" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -131,6 +136,9 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.mingw.exe.release.1038302794" name="MinGW C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.mingw.exe.release"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.mingw.exe.release.1412887658" name="MinGW C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.mingw.exe.release">
+								<option id="gnu.cpp.link.option.libs.423093565" superClass="gnu.cpp.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="&quot;C:\Program Files (x86)\Windows Kits\8.1\Lib\winv6.3\um\x64\BluetoothApis.lib&quot;"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.2047330886" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -174,4 +182,5 @@
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

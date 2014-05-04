@@ -1,0 +1,6 @@
+eclipse.preferences.version=1
+environment/project/cdt.managedbuild.config.gnu.mingw.exe.debug.1131832868/PATH/delimiter=;
+environment/project/cdt.managedbuild.config.gnu.mingw.exe.debug.1131832868/PATH/operation=replace
+environment/project/cdt.managedbuild.config.gnu.mingw.exe.debug.1131832868/PATH/value=${MINGW_HOME}\\bin;${MSYS_HOME}\\bin;C\:\\Program Files (x86)\\Intel\\iCLS Client\\;C\:\\Program Files\\Intel\\iCLS Client\\;C\:\\Windows\\system32;C\:\\Windows;C\:\\Windows\\System32\\Wbem;C\:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C\:\\Program Files (x86)\\Windows Live\\Shared;C\:\\Program Files (x86)\\Intel\\OpenCL SDK\\2.0\\bin\\x86;C\:\\Program Files (x86)\\Intel\\OpenCL SDK\\2.0\\bin\\x64;C\:\\Program Files\\Intel\\Intel(R) Management Engine Components\\DAL;C\:\\Program Files\\Intel\\Intel(R) Management Engine Components\\IPT;C\:\\Program Files (x86)\\Intel\\Intel(R) Management Engine Components\\DAL;C\:\\Program Files (x86)\\Intel\\Intel(R) Management Engine Components\\IPT;C\:\\MinGW\\bin;C\:\\OpenCV_BUILD\\bin;C\:\\Program Files (x86)\\Windows Kits\\8.1\\bin;
+environment/project/cdt.managedbuild.config.gnu.mingw.exe.debug.1131832868/append=true
+environment/project/cdt.managedbuild.config.gnu.mingw.exe.debug.1131832868/appendContributed=true
