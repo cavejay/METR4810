@@ -272,12 +272,26 @@ int main (void) // int argc, char* argv[]
 
     /*
      * Simulation Controller (may not work for actual car)
-     * Created by Jonothan Holland
+     * Created by Jonathan Holland
      * Edited by Michael Ball and Xavier Casley
      */
     // Minimum threshold to go straight
     float straightThreshold = 0.99;
     float forwardSpeed = 1;
+
+    // Add in some smoothing by accounting for a large increase in points (sharp turns/chicanes)
+    // To do this, initialise variables:
+    float pNumDiscrep = abs(pNum1-pNum2); // The difference in number of points from outside to inside of track
+    float pNumDiscrepTol = 0; // The tolerance value for pNumDiscrep - requires testing
+    float sampleTime = 0; // Do we need a sample time or just check if pNumDiscrep > pNumDiscrepTol every loop?
+    float disableTime = 0; // The time for which to disable the turning  - requires testing
+
+
+    // If pNumDiscrep > pNumDiscrepTol  (set it so that it does over chicanes/sharp turns)
+    	// Option A - delay the program and move off of previous commands
+    	// Option B - Send it straight (as seen just below, essentially with the same check) BUT
+    	//   	   	  for a set period of time instead of just this instance of the loop
+
 
 
     // If one average is larger than the other, move towards that edge
