@@ -38,13 +38,13 @@ int main (void) // int argc, char* argv[]
    /*
 	*  BEGINNING of Setup
 	*/
-  VStream Vs(STILL_IMAGE, "127.0.0.1", "Sample_Pictures/track-example3.png");
+  VStream Vs(STILL_IMAGE, "127.0.0.1", "Sample_Pictures/track-example5.png");
 
   //  Initialise the video device
   Vs.StartInput();
 
   // Initialise Robo Simulation
-  RobotSim Rsim = RobotSim(Point2d(600,300),0,"Robot1",Size(30,15));
+  RobotSim Rsim = RobotSim(Point2d(600,300),0,"Robot1", 2.0,Size(30,15));
 
 
   // Initialise variables
@@ -184,10 +184,11 @@ int main (void) // int argc, char* argv[]
     float avg_error = 0;
 
     // Assign a value to make the circle around the car
-    double circRadius = 50;
+    double circRadius = 60;
+    Rsim.set_searchRadius(circRadius);
 
     // Probably the outside of the track
-    for (int i = 0; i < largest1.size(); i++)
+    for (size_t i = 0; i < largest1.size(); i++)
     {
       // Use pythagoras on the 2 dimensional plane to find the distances
       value = sqrt(
@@ -207,7 +208,7 @@ int main (void) // int argc, char* argv[]
     count = 1;
 
     // Do the same for largest2, the other contour probably the inside of the track
-    for (int i = 0; i < largest2.size(); i++)
+    for (size_t i = 0; i < largest2.size(); i++)
     {
       value = sqrt(
 	  pow((largest2[i].x - carCenter.x), 2)
@@ -223,20 +224,7 @@ int main (void) // int argc, char* argv[]
     pNum2 = count;
 
     // Calculate error from |average1 - average2|
-    avg_error = fabs(average1 - average2);
-    // Proportional
-    float p = avg_error*0.6;
-    error_list.push_back(avg_error);
-    float integrate = 0;
-    if(error_list.size() > 4)
-    {
-      for(int i = 0;i < error_list.size()-1;i++)
-      {
-	integrate += (error_list[i] + error_list[i+1])/2;
-      }
-      cout << "integrate: " << integrate << endl;
-    }
-    float p_i = integrate*0.001 + p;
+    avg_error = (pNum1 - pNum2);
 
     /* Info dump */
     cout <<
@@ -246,55 +234,111 @@ int main (void) // int argc, char* argv[]
 	"Average Inside (2): " << average2 << endl <<
 	"Average Error: " << avg_error << endl <<
 	"Number of Points Outside (1): " << pNum1 << endl <<
-	"number of Points Inside (2): " << pNum2 << endl;
+	"Number of Points Inside (2): " << pNum2 << endl;
+
+    /*
+     *  Beginning of PID Controller
+     *  Code by Michael
+     */
+    // Constants
+    float pConstant = 0.1;
+    float iConstant = 0.0005;
+    float dConstant = 0.1;
+
+    // Number of error values to use in the integration
+    int integrationNum = 10;
+
+    // Proportional
+    float p = avg_error*pConstant;
+
+    // Integral
+    error_list.push_back(avg_error);
+    float integrate = 0;
+    if(error_list.size() > integrationNum)
+    {
+      for(size_t i = error_list.size()-(integrationNum+1); i < error_list.size()-1; i++)
+      {
+	integrate += (error_list[i] + error_list[i+1])/2;
+      }
+      cout << "integrate: " << integrate << endl;
+    }
+    float intgrtr = integrate*iConstant;
+    float p_i = intgrtr + p;
+
+    // Derivative (not a major problem)
+    float errorDifference = error_list[error_list.size()-1] - error_list[error_list.size()-2];
+    float d = errorDifference*dConstant;
+    float p_i_d = p_i + d;
+
+    /*
+     * Simulation Controller (may not work for actual car)
+     * Created by Jonathan Holland
+     * Edited by Michael Ball and Xavier Casley
+     */
+    // Minimum threshold to go straight
+    float straightThreshold = 0.99;
+    float forwardSpeed = 1;
+
+    // Add in some smoothing by accounting for a large increase in points (sharp turns/chicanes)
+    // To do this, initialise variables:
+    float pNumDiscrep = abs(pNum1-pNum2); // The difference in number of points from outside to inside of track
+    float pNumDiscrepTol = 0; // The tolerance value for pNumDiscrep - requires testing
+    float sampleTime = 0; // Do we need a sample time or just check if pNumDiscrep > pNumDiscrepTol every loop?
+    float disableTime = 0; // The time for which to disable the turning  - requires testing
+
+
+    // If pNumDiscrep > pNumDiscrepTol  (set it so that it does over chicanes/sharp turns)
+    	// Option A - delay the program and move off of previous commands
+    	// Option B - Send it straight (as seen just below, essentially with the same check) BUT
+    	//   	   	  for a set period of time instead of just this instance of the loop
+
 
 
     // If one average is larger than the other, move towards that edge
-
     // If differences are tiny just go straight
-    if((pNum1 >= .99*pNum2 && pNum1 <= pNum2 ) || (pNum1 >= pNum2 && pNum1 <= .99*pNum2))
+    if((pNum1 >= straightThreshold*pNum2 && pNum1 <= pNum2 ) || (pNum1 >= pNum2 && pNum1 <= straightThreshold*pNum2))
     {
       // Tell the car to go straight
 
-      Rsim.move(2 , 0);// Move the simulation
+      Rsim.move(forwardSpeed , 0);// Move the simulation
+//      Rsim.drive(2 , 0);// Move the simulation
       cout << "Go Straight\n";
+    }
+    else if (pNum2 > pNum1)
+    {
+      // Tell the car to go left
+
+      Rsim.move(forwardSpeed, 4*p_i_d); // Move the simulation
+//      Rsim.drive(2, -4); // Move the simulation
+      cout << "Turning Left\n";
     }
     // Assuming largest2 is the inside track (being smaller than largest 1)
     else if (pNum1 > pNum2)
     {
       // Tell the car to go right
 
-      Rsim.move(2, 4);// Move the simulation
+      Rsim.move(forwardSpeed, 4*p_i_d);// Move the simulation
+//      Rsim.drive(2, 4);// Move the simulation
       cout << "Turning right\n";
-    }
-    else if (pNum2 > pNum1)
-    {
-      // Tell the car to go left
-
-      Rsim.move(2, -4); // Move the simulation
-      cout << "Turning Left\n";
     }
     else {
       cout << "#####\nELSE HAPPENED\n#####" << endl;
     }
 
-<<<<<<< HEAD:src/TestOpencv.cpp
-
-    Rsim.draw(drawing, circRadius);// draw the s`imulation
+    Rsim.draw(drawing, true);// draw the simulation
 
     // Give information to image:
     stringstream ss1;
-    ss1 <<  "Number of Points Outside (1): " << Pnum1;
+    ss1 <<  "Number of Points Outside (1): " << pNum1;
     stringstream ss2;
-    ss2 <<  "number of Points Inside (2): " << Pnum2;
+    ss2 <<  "number of Points Inside (2): " << pNum2;
     putText(drawing, ss1.str(),Point(10,30), FONT_HERSHEY_SIMPLEX,0.5,Scalar(255,255,255));
     putText(drawing, ss2.str(),Point(10,60), FONT_HERSHEY_SIMPLEX,0.5,Scalar(255,255,255));
 
     //Draw image
-=======
     // draw the simulation
     Rsim.draw(drawing, circRadius);
->>>>>>> cfca32d49c9acb0bfdc680a9b14d1912ef10618e:src/main.cpp
+    Rsim.showDirection(drawing, pNum1, pNum2);
     imshow("Contours", drawing);
 
     // Wait for 'esc' key press for 30ms.
