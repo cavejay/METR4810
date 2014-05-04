@@ -93,7 +93,7 @@ int VStream::StartInput()
  * Gets an image from the stream specified by CurrentlyUsing
  * and outputs it as a Mat.
  */
-Mat VStream::pullImage()
+Mat VStream::pullImage(int port)
 { //
   Mat dst;
   switch(CurrentlyUsing)
@@ -109,14 +109,14 @@ Mat VStream::pullImage()
       break;
 
     case ROBOREALM:
-
-      return dst;
+      return roboGrab(Host, port);
       break;
 
     case STILL_IMAGE:
       dst = imread(file_loc);
       return dst;
       break;
+
     default:
       cout << "No source was specified. Image could not be pulled.\n Empty Mat is supplied" << endl;
       return dst;
@@ -177,43 +177,15 @@ int VStream::init_videocapture(int video_source, RR_API& rr, char* ServerAddress
 {
   if(video_source == ROBOREALM)
   {
-    int width;
-    int* p_width = &width;
-    int height;
-    int* p_height = &height;
+    int* p_width = &roboWidth;
+    int* p_height = &roboHeight;
     cout << "connecting\n";
-    rr.connect("127.0.0.1",6060);
+    rr.connect(Host,6060);
     cout << ".......connected\n";
     rr.getDimension(p_width, p_height);
-    unsigned char* pixels = (unsigned char *)malloc(width*height*1);
-    unsigned char* pixels2 = (unsigned char *)malloc(width*height*3);
-//    unsigned char* p_pixels = &pixels;
-    cout << "made needed vars and pointers\n";
-
-
-    cout << "running getImage()\n";
-
-    rr.getImage("",pixels,p_width, p_height,width*height,"GRAY");
-    cout << "got Image\n";
-
-//    Mat rawr = cv::imdecode(*pixels, CV_LOAD_IMAGE_GRAYSCALE);
-//    if (!rawr.empty()){imshow("haah!",rawr);} else {cout << "picture was empty\n";}
-    cout << "decoded and shown\n";
-
-//    rr.getBitmap("processed", pixels2, p_width, p_height, width*height*3);
-//    cout << "bitmap got\n";
-//    Mat rawr2 = cv::imdecode(*pixels2, CV_LOAD_IMAGE_COLOR);
-//    if (!rawr2.empty()){imshow("haah!2",rawr2);} else {cout << "picture2 was empty\n";}
-//    cout << "decoded pixels2 and shown\n";
-
     rr.disconnect();
     cout << "disconnected\n";
-    cout << "width: " << width << "\nheight " << height << endl;
-    cout << "pixels: " << pixels << endl << "p_pixels: " << &pixels << endl;;
-    free(pixels);
-    free(pixels2);
-
-
+    cout << "width: " << roboWidth << "\nheight " << roboHeight << endl;
 
   } else {
     cout << "The 2nd variable must be a videoCapture object to run from a file or video camera.\nClosing Program" << endl;
@@ -221,3 +193,35 @@ int VStream::init_videocapture(int video_source, RR_API& rr, char* ServerAddress
   }
   return 0;
 }
+
+Mat VStream::roboGrab(char* host, int port){
+  // Reserve pixel space
+  unsigned char* pixels = (unsigned char *)malloc(roboWidth*roboHeight*1);
+
+  // Connect and grab stuff.
+  cout << "running getImage()\n";
+  rr.connect(host, port);
+  rr.getImage("",pixels,&roboWidth, &roboHeight,roboWidth*roboHeight,"GRAY");
+  rr.disconnect();
+  cout << "got pixel data\n";
+
+  // Make a Mat from the pixel data
+  Size imgSize = Size(roboHeight,roboWidth);
+  cv::Mat frame = cv::Mat(imgSize, CV_8UC1, pixels);
+
+  if (!frame.empty())
+  {
+    cout << "Frame has data, and is being shown" << endl;
+    cv::imshow("Grabbed Image", frame);
+  } else {
+    cout << "Frame is empty" << endl;
+  }
+
+  // Prove you got pixels
+//  cout << "pixels: " << pixels << endl << "p_pixels: " << &pixels << endl;
+
+  // Free pixel space
+  free(pixels);
+  return frame;
+}
+
