@@ -28,7 +28,11 @@ private:
   vector<Point2d> History;
   Size R_size;
   String name;
-  Mat repr;
+  float MAXturningSpeed;
+  int searchRadius;
+  double turningStack;
+  bool cantakenewAngle;
+
 
 public:
   // Vars
@@ -36,11 +40,14 @@ public:
   float angle;
 
   // constructor
-  RobotSim (Point2d Position, float angle, String name = "", Size R_size = Size(60,35), String Repr = "Sample_Pictures/mach5.png");
+  RobotSim (Point2d Position, float angle, String name = "", float turningSpeed = 2.0, Size R_size = Size(60,35));
 
   // Functions
-  void draw(Mat& src, int search_circle = 0);
-  void move(int dist, float angle);
+  void set_searchRadius(int searchRadius);
+  void draw(Mat& src, bool draw_searchRadius = false);
+  void showDirection(Mat& src, float value1, float value2);
+  void move(float dist, float angle);
+  void drive(float velocity, float angle, float turningSpeed = 0.5);
 };
 
 #endif /* ROBOTSIM_H_ */
