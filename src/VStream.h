@@ -28,8 +28,14 @@ using namespace std;
 class VStream
 {
 private:
+  // Varibles
+  int roboHeight;
+  int roboWidth;
+  int ports[4] = {6060,6061,6062,6063};
+
   int init_videocapture(int video_source, VideoCapture& cap, const string& file_loc);
   int init_videocapture(int video_source, RR_API& rr, char* ServerAddress);
+  Mat roboGrab(char* host, int port);
 
 public:
   cv::VideoCapture cap;
@@ -45,7 +51,7 @@ public:
   // Functions
   int FindInput();
   int StartInput();
-  cv::Mat pullImage();
+  cv::Mat pullImage(int port = 0);
 
 
   virtual
