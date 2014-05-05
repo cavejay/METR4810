@@ -63,9 +63,9 @@ void RobotSim::showDirection(Mat& src, float value1, float value2)
   //only draw certain rectangles
   if(a < 0){
     a = abs(a);
-    rectangle(src,rightPoint1, rightPoint2,Scalar(22*a,247*a,229*a), CV_FILLED);
+    rectangle(src,rightPoint1, rightPoint2,Scalar(0,255*a,0), CV_FILLED);
   } else {
-    rectangle(src,leftPoint1, leftPoint2,Scalar(10*a,124*a,255*a), CV_FILLED);
+    rectangle(src,leftPoint1, leftPoint2,Scalar(0,0,255*a), CV_FILLED);
   }
 }
 

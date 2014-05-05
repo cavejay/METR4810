@@ -21,6 +21,7 @@
 #include "Rotate3d.h"
 #include "VStream.h"
 #include "RobotSim.h"
+#include "PID.h"
 // Aruco .h's
 #include "src/marker.h"
 #include "src/aruco.h"
@@ -46,19 +47,16 @@ int main (void) // int argc, char* argv[]
   // Initialise Robo Simulation
   RobotSim Rsim = RobotSim(Point2d(600,300),0,"Robot1", 2.0,Size(45,20));
 
+  // Initialise PID for pathing
+  PID pid(0,0,0,10);
 
   // Initialise variables
   cv::Mat img, img1;
   cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThreshTrack;
   int threshMag = 160;
 
-  vector<float> error_list;
-
-  vector<int> compression_params;
-  compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
-  compression_params.push_back(9);
-  namedWindow("Contours", 1);
-  cv::createTrackbar( "Threshold Value", "Contours", &threshMag, 255, NULL );
+  namedWindow("Contours", CV_WINDOW_FREERATIO);
+//  cv::createTrackbar( "Threshold Value", "Contours", &threshMag, 255, NULL );
 
    /*
     *  END of Setup
@@ -68,7 +66,6 @@ int main (void) // int argc, char* argv[]
    /*
     *  BEGINNING of functionality
     */
-
 
   // Start Loop
   while(1)
@@ -96,7 +93,6 @@ int main (void) // int argc, char* argv[]
      * Updated by Jonathan Holland
      *
      */
-
 
     cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
     cv::threshold(frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY);
@@ -181,7 +177,6 @@ int main (void) // int argc, char* argv[]
     int count = 1;
     int pNum1 = 0;
     int pNum2 = 0;
-    float avg_error = 0;
 
     // Assign a value to make the circle around the car
     double circRadius = 40;
@@ -230,8 +225,8 @@ int main (void) // int argc, char* argv[]
     	pNum1 = 110;
     }
 
-    // Calculate error from |average1 - average2|
-    avg_error = (pNum1 - pNum2);
+    // record error
+    pid.error(pNum1 - pNum2);
 
     /* Info dump */
     cout <<
@@ -239,7 +234,7 @@ int main (void) // int argc, char* argv[]
 	"Total Distance Inside (2): " << totalValue2 << endl <<
 	"Average Outside (1): " << average1 << endl <<
 	"Average Inside (2): " << average2 << endl <<
-	"Average Error: " << avg_error << endl <<
+	"Error: " << error << endl <<
 	"Number of Points Outside (1): " << pNum1 << endl <<
 	"Number of Points Inside (2): " << pNum2 << endl;
 
@@ -248,34 +243,12 @@ int main (void) // int argc, char* argv[]
      *  Code by Michael
      */
     // Constants
-    float pConstant = 0.1;
-    float iConstant = 0.0005;
-    float dConstant = 0.1;
+    pid.Kp(0.1);
+    pid.Ki(0.0005);
+    pid.Kd(0.1);
 
     // Number of error values to use in the integration
-    int integrationNum = 10;
-
-    // Proportional
-    float p = avg_error*pConstant;
-
-    // Integral
-    error_list.push_back(avg_error);
-    float integrate = 0;
-    if(error_list.size() > integrationNum)
-    {
-      for(size_t i = error_list.size()-(integrationNum+1); i < error_list.size()-1; i++)
-      {
-	integrate += (error_list[i] + error_list[i+1])/2;
-      }
-      cout << "integrate: " << integrate << endl;
-    }
-    float intgrtr = integrate*iConstant;
-    float p_i = intgrtr + p;
-
-    // Derivative (not a major problem)
-    float errorDifference = error_list[error_list.size()-1] - error_list[error_list.size()-2];
-    float d = errorDifference*dConstant;
-    float p_i_d = p_i + d;
+    pid.set_integrationLen(10);
 
     /*
      * Simulation Controller (may not work for actual car)
@@ -285,7 +258,6 @@ int main (void) // int argc, char* argv[]
     // Minimum threshold to go straight
     float straightThreshold = 0.99;
     float forwardSpeed = 4;
-
 
     // If one average is larger than the other, move towards that edge
     // If differences are tiny just go straight
@@ -299,7 +271,7 @@ int main (void) // int argc, char* argv[]
     {
       // Tell the car to go left
 
-      Rsim.move(forwardSpeed, 4*p_i_d); // Move the simulation
+      Rsim.move(forwardSpeed, 4*pid.p_i_d()); // Move the simulation
 //      Rsim.drive(2, -4); // Move the simulation
       cout << "Turning Left\n";
     }
@@ -308,7 +280,7 @@ int main (void) // int argc, char* argv[]
     {
       // Tell the car to go right
 
-      Rsim.move(forwardSpeed, 4*p_i_d);// Move the simulation
+      Rsim.move(forwardSpeed, 4*pid.p_i_d());// Move the simulation
 //      Rsim.drive(2, 4);// Move the simulation
       cout << "Turning right\n";
     }
