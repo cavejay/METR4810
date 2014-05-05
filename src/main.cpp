@@ -44,7 +44,7 @@ int main (void) // int argc, char* argv[]
   Vs.StartInput();
 
   // Initialise Robo Simulation
-  RobotSim Rsim = RobotSim(Point2d(600,300),0,"Robot1", 2.0,Size(30,15));
+  RobotSim Rsim = RobotSim(Point2d(600,300),0,"Robot1", 2.0,Size(45,20));
 
 
   // Initialise variables
@@ -184,7 +184,7 @@ int main (void) // int argc, char* argv[]
     float avg_error = 0;
 
     // Assign a value to make the circle around the car
-    double circRadius = 60;
+    double circRadius = 40;
     Rsim.set_searchRadius(circRadius);
 
     // Probably the outside of the track
@@ -222,6 +222,13 @@ int main (void) // int argc, char* argv[]
     }
     average2 = totalValue2 / count;
     pNum2 = count;
+
+    if(pNum2 > 110) {
+    	pNum2 = 110;
+    }
+    if(pNum1 > 110) {
+    	pNum1 = 110;
+    }
 
     // Calculate error from |average1 - average2|
     avg_error = (pNum1 - pNum2);
@@ -277,21 +284,7 @@ int main (void) // int argc, char* argv[]
      */
     // Minimum threshold to go straight
     float straightThreshold = 0.99;
-    float forwardSpeed = 1;
-
-    // Add in some smoothing by accounting for a large increase in points (sharp turns/chicanes)
-    // To do this, initialise variables:
-    float pNumDiscrep = abs(pNum1-pNum2); // The difference in number of points from outside to inside of track
-    float pNumDiscrepTol = 0; // The tolerance value for pNumDiscrep - requires testing
-    float sampleTime = 0; // Do we need a sample time or just check if pNumDiscrep > pNumDiscrepTol every loop?
-    float disableTime = 0; // The time for which to disable the turning  - requires testing
-
-
-    // If pNumDiscrep > pNumDiscrepTol  (set it so that it does over chicanes/sharp turns)
-    	// Option A - delay the program and move off of previous commands
-    	// Option B - Send it straight (as seen just below, essentially with the same check) BUT
-    	//   	   	  for a set period of time instead of just this instance of the loop
-
+    float forwardSpeed = 4;
 
 
     // If one average is larger than the other, move towards that edge
@@ -299,9 +292,7 @@ int main (void) // int argc, char* argv[]
     if((pNum1 >= straightThreshold*pNum2 && pNum1 <= pNum2 ) || (pNum1 >= pNum2 && pNum1 <= straightThreshold*pNum2))
     {
       // Tell the car to go straight
-
       Rsim.move(forwardSpeed , 0);// Move the simulation
-//      Rsim.drive(2 , 0);// Move the simulation
       cout << "Go Straight\n";
     }
     else if (pNum2 > pNum1)
