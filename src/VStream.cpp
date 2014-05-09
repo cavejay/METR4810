@@ -196,18 +196,24 @@ int VStream::init_videocapture(int video_source, RR_API& rr, char* ServerAddress
 
 Mat VStream::roboGrab(char* host, int port){
   // Reserve pixel space
-  unsigned char* pixels = (unsigned char *)malloc(roboWidth*roboHeight*1);
+  unsigned char* pixels = (unsigned char *)malloc(roboWidth*roboHeight);
+
+  // Set up variables for grabbing stuff
+  unsigned int MAXSIZE = roboWidth*roboHeight;
 
   // Connect and grab stuff.
   cout << "running getImage()\n";
   rr.connect(host, port);
-  rr.getImage("",pixels,&roboWidth, &roboHeight,roboWidth*roboHeight,"GRAY");
+  if (!rr.getImage("",pixels,&roboWidth, &roboHeight, MAXSIZE ,"GRAY")){
+	cout << "API call failed. Perhaps due to a timeout?" << endl;
+  }
   rr.disconnect();
   cout << "got pixel data\n";
 
+  cout << "Showing pixel data: \n" << pixels << endl;
   // Make a Mat from the pixel data
-  Size imgSize = Size(roboHeight,roboWidth);
-  cv::Mat frame = cv::Mat(imgSize, CV_8UC1, pixels);
+  Size imgSize = Size(roboWidth,roboHeight);
+  cv::Mat frame = cv::Mat(imgSize, CV_8UC3, pixels);
 
   if (!frame.empty())
   {

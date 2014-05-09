@@ -93,8 +93,11 @@ int main (void) // int argc, char* argv[]
      * Updated by Jonathan Holland
      *
      */
-
-    cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
+    if(Vs.CurrentlyUsing != ROBOREALM){
+    	cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
+    } else {
+    	frame_gry = frame_bgr;
+    }
     cv::threshold(frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY);
 
     // Contours are a vector of vectors of points

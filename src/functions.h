@@ -21,11 +21,6 @@ using namespace cv;
 using namespace std;
 
 enum {
-  VIDEO_FILE = 0,
-  VIDEO_CAMERA = 1,
-  ROBOREALM = 2,
-  STILL_IMAGE = 3,
-
   ED_RECTANGLE = 0,
   ED_CROSS = 1,
   ED_ELLIPSE = 2
