@@ -245,10 +245,5 @@ typedef struct _BTH_QUERY_SERVICE BTHNS_RESTRICTIONBLOB,*PBTHNS_RESTRICTIONBLOB;
 #include <poppack.h>
 
 #endif
-
-
-
-
-
-
+#endif
 #endif /* JONOHAX_H_ */
