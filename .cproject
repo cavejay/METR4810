@@ -56,8 +56,11 @@
 									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\video\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\ml\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\contrib\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\mingw64\x86_64-w64-mingw32\include&quot;"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.include.files.781709221" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files" useByScannerDiscovery="false"/>
+								<option id="gnu.cpp.compiler.option.include.files.781709221" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files" useByScannerDiscovery="false" valueType="includeFiles">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/sys_constants.h}&quot;"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1916451613" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.mingw.exe.debug.1080418994" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.mingw.exe.debug">
