@@ -22,6 +22,7 @@
 #include "VStream.h"
 #include "RobotSim.h"
 #include "PID.h"
+#include "sys_constants.h"
 // Aruco .h's
 #include "src/marker.h"
 #include "src/aruco.h"
