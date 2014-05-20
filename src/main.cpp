@@ -183,7 +183,43 @@ int main (void) // int argc, char* argv[]
     int pNum2 = 0;
 
     // Assign a value to make the circle around the car
-    double circRadius = 40;
+    int preferedPoints = 110;
+    int totalPoints = 0;
+    double circRadius = 0;
+    while(totalPoints < preferedPoints){
+    	totalPoints = 0;
+    	int Points1 = 0;
+    	int Points2 = 0;
+
+    	for (size_t i = 0; i < largest1.size(); i++)
+		{
+			// Use pythagoras on the 2 dimensional plane to find the distances
+			value = sqrt(
+			pow((largest1[i].x - carCenter.x), 2)
+			+ pow((largest1[i].y - carCenter.y), 2));
+			// If the value is within the circle radius
+			if (value < circRadius)
+			{
+			  Points1 += 1;
+			}
+		}
+    	for (size_t i = 0; i < largest2.size(); i++)
+		{
+			// Use pythagoras on the 2 dimensional plane to find the distances
+			value = sqrt(
+			pow((largest2[i].x - carCenter.x), 2)
+			+ pow((largest2[i].y - carCenter.y), 2));
+			// If the value is within the circle radius
+			if (value < circRadius)
+			{
+			  Points2 += 1;
+			}
+		}
+
+    	totalPoints = Points1 + Points2;
+    	circRadius++;
+
+    }
     Rsim.set_searchRadius(circRadius);
 
     // Probably the outside of the track
@@ -196,8 +232,8 @@ int main (void) // int argc, char* argv[]
       // If the value is within the circle radius
       if (value < circRadius)
       {
-	totalValue1 += value;
-	count += 1;
+    	  totalValue1 += value;
+    	  count += 1;
       }
     }
     average1 = totalValue1 / count;
@@ -261,7 +297,7 @@ int main (void) // int argc, char* argv[]
      */
     // Minimum threshold to go straight
     float straightThreshold = 0.99;
-    float forwardSpeed = 4;
+    float forwardSpeed = 2;
 
     // If one average is larger than the other, move towards that edge
     // If differences are tiny just go straight
