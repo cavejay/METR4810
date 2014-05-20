@@ -57,6 +57,7 @@
 									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\ml\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\contrib\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\mingw64\x86_64-w64-mingw32\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;M:\Code\mingw64\x86_64-w64-mingw32\include&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.include.files.781709221" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files" useByScannerDiscovery="false" valueType="includeFiles">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/sys_constants.h}&quot;"/>
