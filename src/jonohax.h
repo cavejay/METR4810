@@ -244,9 +244,9 @@ typedef struct _BTH_QUERY_SERVICE BTHNS_RESTRICTIONBLOB,*PBTHNS_RESTRICTIONBLOB;
 
 #include <poppack.h>
 
-#endif
+#endif // __WS2BTH__H
 
-
+#endif // WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP)
 
 
 
