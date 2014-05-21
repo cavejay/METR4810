@@ -7,11 +7,11 @@
 #include <bluetoothapis.h>
 #include "jonohax.h"
 
-
 int bluetoothConn (void) // int argc, char* argv[]
 {
 	WSADATA wsd;
 	WSAStartup (MAKEWORD(1,0), &wsd);
+
 	SOCKADDR_BTH sockAddr;
 	SOCKET blueSocket;
 	int err;
@@ -19,9 +19,12 @@ int bluetoothConn (void) // int argc, char* argv[]
 	blueSocket = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
 	memset (&sockAddr, 0, sizeof(sockAddr));
 	sockAddr.addressFamily = AF_BTH;
-	sockAddr.serviceClassId = 0x1101; // Default windows protocol
+<<<<<<< HEAD
+=======
+//	sockAddr.serviceClassId = 0x1101; // Default windows protocol
+>>>>>>> a678abde4ecbb5a487852b718e7723fbce8a56b4
 	sockAddr.port = BT_PORT_ANY; // May need to change this if the channel interferes with another team
-	//sockAddr.blueAddr = // Need to pair devices to then check for this
+	//sockAddr.btAddr = // Need to pair devices to then check for this
 	err = connect(blueSocket, (SOCKADDR*)&sockAddr, sizeof(sockAddr));
 
 
