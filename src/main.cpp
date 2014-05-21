@@ -99,7 +99,7 @@ int main (int argc, char* argv[])
   while(1)
   {
     // Grab current image from specified source
-    img = Vs.pullImage();
+    img = Vs.pullImage(6060);
 
     // Check if image is empty.
     if (!img.empty())
@@ -121,11 +121,11 @@ int main (int argc, char* argv[])
      * Updated by Jonathan Holland
      *
      */
-    if(Vs._inputFormat != ROBOREALM){
+//    if(Vs._inputFormat != ROBOREALM){
     	cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
-    } else {
-    	frame_gry = frame_bgr;
-    }
+//    } else {
+//    	frame_gry = frame_bgr;
+//    }
     cv::threshold(frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY);
 
     // Contours are a vector of vectors of points

@@ -46,6 +46,7 @@ VStream::~VStream ()
 {
   // TODO Auto-generated destructor stub
 }
+
 /**
  * Creates a Video stream from the path given in the cmd line
  */
@@ -70,7 +71,7 @@ int VStream::roborealm()
 {
   int* p_width = &roboWidth;
   int* p_height = &roboHeight;
-  rr.connect(Host,6060);
+  rr.connect("localhost",6060);
   cout << ".......connected\n";
   bool success = rr.getDimension(p_width, p_height);
   rr.disconnect();
@@ -84,7 +85,8 @@ int VStream::roborealm()
  */
 int VStream::still()
 {
-
+  // There is absolutely nothing to do here...
+  return true;
 }
 
 /**
@@ -161,7 +163,7 @@ Mat VStream::roboGrab(char* host, int port){
   // Connect and grab stuff.
   cout << "running getImage()\n";
 
-  bool connected = rr.connect(host, port);
+  bool connected = rr.connect("localhost", port);
   if(!connected){
 	  cout << "ERROR: Could not connect to Roborealm." << endl;
 	  return img_out;
