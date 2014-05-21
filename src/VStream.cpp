@@ -150,38 +150,46 @@ inputFormat hashit(String const& inString){
 
 Mat VStream::roboGrab(char* host, int port){
   // Reserve pixel space
-  unsigned char* pixels = (unsigned char *)malloc(roboWidth*roboHeight);
+  uchar *data = new uchar[roboWidth * roboHeight * 3];
 
-  // Set up variables for grabbing stuff
-  unsigned int MAXSIZE = roboWidth*roboHeight;
+  // Picture to return
+  Mat img_out;
 
   // Connect and grab stuff.
   cout << "running getImage()\n";
-  rr.connect(host, port);
-  if (!rr.getImage("",pixels,&roboWidth, &roboHeight, MAXSIZE ,"GRAY")){
+
+  bool connected = rr.connect(host, port);
+  if(!connected){
+	  cout << "ERROR: Could not connect to Roborealm." << endl;
+	  return img_out;
+  }
+
+  // Wait for latest image
+  rr.waitImage();
+
+  // receive the image
+  bool imgReceived = rr.getImage(data, &roboWidth, &roboHeight, roboWidth * roboHeight * 3);
+  if (!imgReceived){
 	cout << "API call failed. Perhaps due to a timeout?" << endl;
   }
+
   rr.disconnect();
-  cout << "got pixel data\n";
+  cout << "Disconnected\n";
+  cout << "Showing pixel data: \n" << data << endl;
 
-  cout << "Showing pixel data: \n" << pixels << endl;
   // Make a Mat from the pixel data
-  Size imgSize = Size(roboWidth,roboHeight);
-  cv::Mat frame = cv::Mat(imgSize, CV_8UC3, pixels);
+  cv::Mat img(roboHeight, roboWidth, CV_8UC3, data);
+  cv::cvtColor(img, img_out, CV_RGB2BGR);
+  delete [] data;
 
-  if (!frame.empty())
+  // If the frame isn't empty show it.
+  if (!img_out.empty())
   {
     cout << "Frame has data, and is being shown" << endl;
-    cv::imshow("Grabbed Image", frame);
+    cv::imshow("Grabbed Image", img_out);
   } else {
     cout << "Frame is empty" << endl;
   }
-
-  // Prove you got pixels
-//  cout << "pixels: " << pixels << endl << "p_pixels: " << &pixels << endl;
-
-  // Free pixel space
-  free(pixels);
-  return frame;
+  return img_out;
 }
 
