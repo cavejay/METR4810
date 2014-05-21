@@ -26,7 +26,17 @@ enum {
   ED_ELLIPSE = 2
 };
 
+// Structs
+struct inputVars {
+  String inputSource;
+  String Host;
+  String file_location;
+
+};
+
 // Functions
+inputVars getInputData(int argc, char* argv[]);
+
 void Draw_Circles(Mat& img, const vector<Vec3f>& circles);
 void Dilation(const Mat& src, Mat& dst, int dilation_shape, double dilation_size);
 void Erosion(const Mat& src, Mat& dst, int erosion_shape, double erosion_size);

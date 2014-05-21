@@ -6,6 +6,45 @@
  */
 #include "functions.h"
 
+
+inputVars getInputData(int argc, char* argv[])
+{
+  inputVars toReturn;
+  for (int i = 1; i < argc; ++i) {
+    std::string arg = argv[i];
+    if ((arg == "-h") || (arg == "--help")) {
+	show_usage(argv[0]);
+	return 0;
+    } else if ((arg == "-l") || (arg == "--filelocation")) {
+    	if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+    	    destination = argv[i++]; // Increment 'i' so we don't get the argument as the next argv[i].
+    	} else { // Uh-oh, there was no argument to the destination option.
+    	      std::cerr << "--destination option requires one argument." << std::endl;
+    	    return 1;
+    	}
+    } else if ((arg == "-l") || (arg == "--filelocation")) {
+    	if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+    	    destination = argv[i++]; // Increment 'i' so we don't get the argument as the next argv[i].
+    	} else { // Uh-oh, there was no argument to the destination option.
+    	      std::cerr << "--destination option requires one argument." << std::endl;
+    	    return 1;
+    	}
+    } else if ((arg == "-l") || (arg == "--filelocation")) {
+	if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+	    destination = argv[i++]; // Increment 'i' so we don't get the argument as the next argv[i].
+	} else { // Uh-oh, there was no argument to the destination option.
+	      std::cerr << "--destination option requires one argument." << std::endl;
+	    return 1;
+	}
+    } else {
+      cout << "Invalid input, this program must be run with commands" << endl;
+      show_usage(argv[0]);
+    }
+  }
+  return toReturn;
+}
+
+
 void Draw_Circles(Mat& img, const vector<Vec3f>& circles)
 {
   cout << "Draw " << circles.size() << " of dem circles" << endl;

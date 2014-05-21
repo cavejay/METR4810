@@ -34,16 +34,34 @@ using namespace cv;
 using namespace std;
 using namespace aruco;
 
-int main (void) // int argc, char* argv[]
+void show_usage(std::string name){
+  std::cerr << "Usage: " << name << " <option(s)> SOURCES"
+	    << "Options:\n"
+	    << "\t-h,--help\t\tShow this help message\n"
+	    << "\t-s,--inputsource INPUT SOURCE\t can be 'roborealm', 'still', 'video' or 'camera'\n"
+	    << "\t-d,--destination DESTINATION\tSpecify the path for the image or video file\n"
+	    << "\t-H,--host HOST\tSpecify the IP Address of the Roborealm Server\n"
+	    << std::endl;
+	    std::cin();
+}
+
+int main (int argc, char* argv[])
 {
+  if (argc < 5) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
+      show_usage(argv[0]); // Inform the user of how to use the program
+      std::cin.get();
+      exit(0);
+  }
 
-   /*
-	*  BEGINNING of Setup
-	*/
-  VStream Vs(STILL_IMAGE, "127.0.0.1", "Sample_Pictures/track-example5.png");
+  // Translate the input commands into somthing useful
+  inputVars in = getInputData(argc, argv);
 
-  //  Initialise the video device
-  Vs.StartInput();
+
+
+  /*
+   * BEGINNING of Setup
+   */
+  VStream Vs(in);
 
   // Initialise Robo Simulation
   RobotSim Rsim = RobotSim(Point2d(600,300),0,"Robot1", 2.0,Size(45,20));
@@ -94,7 +112,7 @@ int main (void) // int argc, char* argv[]
      * Updated by Jonathan Holland
      *
      */
-    if(Vs.CurrentlyUsing != ROBOREALM){
+    if(Vs.inputFormat != ROBOREALM){
     	cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
     } else {
     	frame_gry = frame_bgr;

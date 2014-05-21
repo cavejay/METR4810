@@ -25,7 +25,7 @@
 using namespace cv;
 using namespace std;
 
-enum {
+enum inputFormat{
   VIDEO_FILE = 0,
   VIDEO_CAMERA = 1,
   ROBOREALM = 2,
@@ -41,23 +41,27 @@ private:
   int ports[4] = {6060,6061,6062,6063};
 
   int init_videocapture(int video_source, VideoCapture& cap, const string& file_loc);
-  int init_videocapture(int video_source, RR_API& rr, char* ServerAddress);
   Mat roboGrab(char* host, int port);
+  inputFormat hashit(String const& inString);
+
+  // Types of inits
+  int roborealm();
+  int still();
+  int video();
+  int camera();
+
 
 public:
   cv::VideoCapture cap;
   RR_API rr;
-  int CurrentlyUsing;
+  int _inputFormat;
   char* Host;
   string file_loc;
 
-
   // Constructor
-  VStream (int CurrentlyUsing, char* Host = "127.0.0.1", string file_loc = "C:/Sample.avi");
+  VStream (inputVars data);
 
   // Functions
-  int FindInput();
-  int StartInput();
   cv::Mat pullImage(int port = 0);
 
 
