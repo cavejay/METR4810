@@ -35,7 +35,7 @@ using namespace std;
 using namespace aruco;
 
 void show_usage(std::string name){
-  std::cerr << "Usage: " << name << " <option(s)> SOURCES"
+  std::cerr << "Usage: " << name << " <option(s)> SOURCES\n"
 	    << "Options:\n"
 	    << "\t-h,--help\t\tShow this help message\n"
 	    << "\t-s,--inputsource <input here>\t can be 'roborealm', 'still', 'video' or 'camera'\n"
@@ -51,7 +51,7 @@ void show_usage(std::string name){
 
 int main (int argc, char* argv[])
 {
-  if (argc > 200) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
+  if (argc < 2) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
       show_usage(argv[0]); // Inform the user of how to use the program
       exit(0);
   }
@@ -64,7 +64,7 @@ int main (int argc, char* argv[])
 
   // This overrides the cmdline for nowz
   in.inputSource = "still";
-  in.file_location = "Sample_Pictures/demo-track.png";
+  in.file_location = "Sample_Pictures/inPlace2-Procced.jpg";
 
 
   /*
@@ -95,6 +95,7 @@ int main (int argc, char* argv[])
     *  BEGINNING of functionality
     */
 
+  int circleReset = 4;
   // Start Loop
   while(1)
   {
@@ -211,7 +212,13 @@ int main (int argc, char* argv[])
 
     // Assign a value to make the circle around the car
     int preferedPoints = 110;
-    int circRadius = getSearchRadius(preferedPoints, carCenter, largest1, largest2);
+    int circRadius;
+    circleReset--;
+    if(circleReset < 0)
+    {
+    	circRadius = getSearchRadius(preferedPoints, carCenter, largest1, largest2);
+    	circleReset = 4;
+    }
     Rsim.set_searchRadius(circRadius);
 
     // Probably the outside of the track
