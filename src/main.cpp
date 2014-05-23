@@ -210,8 +210,9 @@ int main (int argc, char* argv[])
     int pNum2 = 0;
 
     // Assign a value to make the circle around the car
-    int preferedPoints = 110;
-    int circRadius = getSearchRadius(preferedPoints, carCenter, largest1, largest2);
+    int preferedPoints = 20; // 20 is good, it gets about the same answer as 10
+    int minSidePoints = 5; // keep this value under half of preferedPoints
+    int circRadius = getSearchRadius(preferedPoints, minSidePoints,carCenter, largest1, largest2);
     Rsim.set_searchRadius(circRadius);
 
     // Probably the outside of the track
