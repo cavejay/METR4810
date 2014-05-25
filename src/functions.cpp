@@ -55,23 +55,15 @@ bool less_vectors(const std::vector<Point>& vec1,const std::vector<Point>& vec2)
    return vec1.size() < vec2.size();
  }
 
-
-/**
- * Returns the minimum radius around carCenter that provides at least
- * preferedPoints points in both (total) inside and outside
- * with a minimum of sideMinimum points on either.
- */
-int getSearchRadius(int preferedPoints, int sideMinimum, Point2f carCenter, vector<Point> outside, vector<Point> inside)
+int getSearchRadius(int preferedPoints, Point2f carCenter, vector<Point> outside, vector<Point> inside)
 {
   int value = 0;
   int totalPoints = 0;
   int circRadius = 0;
-  int Points1 = 0;
-  int Points2 = 0;
-  while(totalPoints < preferedPoints || Points1 < sideMinimum || Points2 < sideMinimum){
+  while(totalPoints < preferedPoints){
     totalPoints = 0;
-    Points1 = 0;
-    Points2 = 0;
+    int Points1 = 0;
+    int Points2 = 0;
 
     for (size_t i = 0; i < outside.size(); i++)
     {

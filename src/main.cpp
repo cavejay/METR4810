@@ -100,6 +100,7 @@ int main (int argc, char* argv[])
     *  BEGINNING of functionality
     */
 
+  int circleReset = 4;
   // Start Loop
   while(1)
   {
@@ -217,6 +218,14 @@ int main (int argc, char* argv[])
     int preferedPoints = 20; // 20 is good, it gets about the same answer as 10
     int minSidePoints = 5; // keep this value under half of preferedPoints
     int circRadius = getSearchRadius(preferedPoints, minSidePoints, carCenter, largest1, largest2);
+    int preferedPoints = 110;
+    int circRadius;
+    circleReset--;
+    if(circleReset < 0)
+    {
+    	circRadius = getSearchRadius(preferedPoints, carCenter, largest1, largest2);
+    	circleReset = 4;
+    }
     Rsim.set_searchRadius(circRadius);
 
     // Probably the outside of the track

@@ -23,3 +23,12 @@ http://www.cmake.org/files/v2.8/cmake-2.8.12.2-win32-x86.exe
 - Installation:
 
 Let Michael Do it :P
+
+__TODO__
+Pit-stop
+Starting Light
+Cross over and tunnel handling
+Car Control
+Bluetooth (python)
+GUI (Start-stop & pit)
+
