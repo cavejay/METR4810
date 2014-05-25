@@ -15,8 +15,11 @@
 
 #include <cfloat>
 #include <limits>
+#include <string>
 
 #define DBL_EPSILON std::numeric_limits<double>::epsilon()
 #define FLT_EPSILON 1.19209290E-07F // decimal constant
 
 #endif /* SYS_CONSTANTS_H_ */
+
+void show_usage(std::string name);

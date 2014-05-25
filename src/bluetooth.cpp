@@ -32,9 +32,15 @@ int main (void) // int argc, char* argv[]
 	blueSocket = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
 	memset (&sockAddr, 0, sizeof(sockAddr));
 	sockAddr.addressFamily = AF_BTH;
+<<<<<<< HEAD
 	sockAddr.port = 4; //BT_PORT_ANY; // May need to change this if the channel interferes with another team
 	//sockAddr.serviceClassId = {00000000-0000-0000-0000-000000000000};
 	sockAddr.btAddr = 12345205070; // Value in octal?
+=======
+//	sockAddr.serviceClassId = 0x1101; // Default windows protocol
+	sockAddr.port = BT_PORT_ANY; // May need to change this if the channel interferes with another team
+	//sockAddr.btAddr = // Need to pair devices to then check for this
+>>>>>>> 31d13e5dab728432e9f9bd12f59888dacdede762
 	err = connect(blueSocket, (SOCKADDR*)&sockAddr, sizeof(sockAddr));
 
 

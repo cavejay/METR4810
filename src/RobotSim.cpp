@@ -49,6 +49,13 @@ void RobotSim::draw(Mat& src, bool draw_searchRadius)
   }
 }
 
+void RobotSim::drawTrace(Mat& src)
+{
+	for(int i = 0; i < History.size(); i++){
+		circle(src, History[i], 1, Scalar(234,0,255), -1);
+	}
+}
+
 void RobotSim::showDirection(Mat& src, float value1, float value2)
 {
   float a = (value1 - value2)/(value1);

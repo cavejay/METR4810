@@ -17,6 +17,7 @@
 #include <vector>
 #include <sstream>
 // Our .h's
+#include "startup.h"
 #include "functions.h"
 #include "Rotate3d.h"
 #include "VStream.h"
@@ -34,16 +35,47 @@ using namespace cv;
 using namespace std;
 using namespace aruco;
 
-int main (void) // int argc, char* argv[]
+void show_usage(std::string name){
+  std::cerr << "Usage: " << name << " <option(s)> SOURCES\n"
+	    << "Options:\n"
+	    << "\t-h,--help\t\tShow this help message\n"
+	    << "\t-f,--file <filename>\tLoad the following settings and more, from a .yml file\n"
+	    << "\t-g,--generatefile\tCreates a settings file with the default settings\n"
+	    << "\t-s,--inputsource <input here>\tCan be 'roborealm', 'still', 'video' or 'camera'\n"
+	    << "\t-H,--host <HOST IP>\tSpecify the IP Address of the Roborealm Server\n"
+	    << "\t-d,--destination <DESTINATION>\tSpecify the path for the image or video file\n"
+	    << "\t-c,--cameranumber <CAMERANUMBER>\tSpecify which system camera to use. 0 is default\n"
+	    << "\t-sim,--showsimulation \tShows a simulation running on the given input source. This will ignore the car\n"
+	    << "\t-demo,--demonstration \tRuns a demo using the simulation and a pre-determined picture\n"
+	    << std::endl;
+	    std::cin.get();
+}
+
+int main (int argc, char* argv[])
 {
+  if (argc > 200) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
+      show_usage(argv[0]); // Inform the user of how to use the program
+      exit(0);
+  }
 
-   /*
-	*  BEGINNING of Setup
-	*/
-  VStream Vs(STILL_IMAGE, "127.0.0.1", "Sample_Pictures/track-example5.png");
+  // Translate the input commands into somthing useful
+  inputVars in = getInputData(argc, argv);
+  if(!in.varsParsedSuccessfully){
+    exit(0);
+  } else if (in.loadFile){
+    // do the things that load le settings from le file. :3
+  }
 
-  //  Initialise the video device
-  Vs.StartInput();
+  // This overrides the cmdline for nowz
+  in.inputSource = "camera";
+  in.camera_number = 0;
+  in.file_location = "Sample_Pictures/ARTag/1.png";
+
+
+  /*
+   * BEGINNING of Setup
+   */
+  VStream Vs(in);
 
   // Initialise Robo Simulation
   RobotSim Rsim = RobotSim(Point2d(600,300),0,"Robot1", 2.0,Size(45,20));
@@ -68,44 +100,45 @@ int main (void) // int argc, char* argv[]
     *  BEGINNING of functionality
     */
 
+  int circleReset = 4;
   // Start Loop
   while(1)
   {
     // Grab current image from specified source
-    img = Vs.pullImage();
+    img = Vs.pullImage(6060);
 
     // Check if image is empty.
     if (!img.empty())
     {
+      // Lets look at it?
       cv::imshow("Grabbed Image", img);
       cout << "The image has been procured successful\n";
-    }
-
-    else
-    {
+    } else {
+      // The image was empty :(
       return -1;
     }
 
     frame_bgr = img.clone();
 
     /*
-     * THRESHOLD IMAGE + RUN ROBOSIM AS A TEST
+     * THRESHOLD IMAGE
      * Michael Ball
      * Updated by Jonathan Holland
      *
      */
-    if(Vs.CurrentlyUsing != ROBOREALM){
-    	cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
-    } else {
-    	frame_gry = frame_bgr;
-    }
+//    if(Vs._inputFormat != ROBOREALM){
+    cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
+    equalizeHist( frame_gry,frame_gry );
+//    } else {
+//    	frame_gry = frame_bgr;
+//    }
     cv::threshold(frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY);
-
+    imshow("threshed'", ThreshTrack);
     // Contours are a vector of vectors of points
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
 
-    cv::findContours(ThreshTrack, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0)); // Changed CV_CHAIN_APPROX from siple to none
+    cv::findContours(ThreshTrack, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0)); // Changed CV_CHAIN_APPROX from simple to none
     cv::Mat drawing = cv::Mat::zeros(ThreshTrack.size(), CV_8UC3);
 
     // Sort vectors
@@ -115,44 +148,16 @@ int main (void) // int argc, char* argv[]
     vector<Scalar> colors;
     colors.push_back(Scalar(100,100,100));
     colors.push_back(Scalar(200,200,200));
-    for (int i = 0; i < contours.size(); i++)
+    for (int i = 0; i < contours.size()-2; i++)
     {
       Scalar color = Scalar(0, 255, 100);
-      drawContours(drawing, contours, i, color, 2, 8, hierarchy, 0, Point());
+      drawContours(drawing, contours, i, color, 1, 8, hierarchy, 0, Point());
     }
-
+    drawContours(drawing, contours, contours.size()-2, colors[0], 1, 8, hierarchy, 0, Point());
+    drawContours(drawing, contours, contours.size()-1, colors[1], 1, 8, hierarchy, 0, Point());
     /// Show in a window
     namedWindow("Contours", CV_WINDOW_AUTOSIZE);
     imshow("Contours", drawing);
-
-    /*
-     * DETECT AR_TAG
-     * Michael Ball
-     *
-     */
-    /*
-    aruco::MarkerDetector MDetector;
-    vector<Marker> Markers;
-    try
-    {
-      //read the input image
-      cv::Mat InImage = Vs.pullImage(); //
-      cv::Mat InImage = imread("Sample_Pictures/Marker1.png");
-      // Begin detection
-      MDetector.detect(InImage, Markers);
-      // For each marker, draw info and its boundaries in the image
-      for (unsigned int i = 0; i < Markers.size(); i++)
-      {
-	cout << Markers[i] << endl;
-	Markers[i].draw(InImage, Scalar(0, 0, 255), 2);
-      }
-      cv::imshow("in", InImage);
-     }
-    catch (std::exception &ex)
-    {
-      cout << "aruco failed\nException :" << ex.what() << endl;
-    }
-    */
 
     /*
      * PATHING
@@ -183,42 +188,14 @@ int main (void) // int argc, char* argv[]
     int pNum2 = 0;
 
     // Assign a value to make the circle around the car
-    int preferedPoints = 110;
-    int totalPoints = 0;
-    double circRadius = 0;
-    while(totalPoints < preferedPoints){
-    	totalPoints = 0;
-    	int Points1 = 0;
-    	int Points2 = 0;
-
-    	for (size_t i = 0; i < largest1.size(); i++)
-		{
-			// Use pythagoras on the 2 dimensional plane to find the distances
-			value = sqrt(
-			pow((largest1[i].x - carCenter.x), 2)
-			+ pow((largest1[i].y - carCenter.y), 2));
-			// If the value is within the circle radius
-			if (value < circRadius)
-			{
-			  Points1 += 1;
-			}
-		}
-    	for (size_t i = 0; i < largest2.size(); i++)
-		{
-			// Use pythagoras on the 2 dimensional plane to find the distances
-			value = sqrt(
-			pow((largest2[i].x - carCenter.x), 2)
-			+ pow((largest2[i].y - carCenter.y), 2));
-			// If the value is within the circle radius
-			if (value < circRadius)
-			{
-			  Points2 += 1;
-			}
-		}
-
-    	totalPoints = Points1 + Points2;
-    	circRadius++;
-
+    int preferedPoints = 20; // 20 is good, it gets about the same answer as 10
+    int minSidePoints = 5; // keep this value under half of preferedPoints
+    int circRadius;
+    circleReset--;
+    if(circleReset < 0)
+    {
+    	circRadius = getSearchRadius(preferedPoints, minSidePoints, carCenter, largest1, largest2);
+    	circleReset = 4;
     }
     Rsim.set_searchRadius(circRadius);
 

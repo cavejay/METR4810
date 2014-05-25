@@ -56,6 +56,54 @@ bool less_vectors(const std::vector<Point>& vec1,const std::vector<Point>& vec2)
  }
 
 
+/**
+ * Returns the minimum radius around carCenter that provides at least
+ * preferedPoints points in both (total) inside and outside
+ * with a minimum of sideMinimum points on either.
+ */
+int getSearchRadius(int preferedPoints, int sideMinimum, Point2f carCenter, vector<Point> outside, vector<Point> inside)
+{
+  int value = 0;
+  int totalPoints = 0;
+  int circRadius = 0;
+  int Points1 = 0;
+  int Points2 = 0;
+  while(totalPoints < preferedPoints || Points1 < sideMinimum || Points2 < sideMinimum){
+    totalPoints = 0;
+    Points1 = 0;
+    Points2 = 0;
+
+    for (size_t i = 0; i < outside.size(); i++)
+    {
+      // Use pythagoras on the 2 dimensional plane to find the distances
+      value = sqrt(
+      pow((outside[i].x - carCenter.x), 2)
+      + pow((outside[i].y - carCenter.y), 2));
+      // If the value is within the circle radius
+      if (value < circRadius)
+      {
+	Points1 += 1;
+      }
+    }
+    for (size_t i = 0; i < inside.size(); i++)
+    {
+      // Use pythagoras on the 2 dimensional plane to find the distances
+      value = sqrt(
+      pow((inside[i].x - carCenter.x), 2)
+      + pow((inside[i].y - carCenter.y), 2));
+      // If the value is within the circle radius
+      if (value < circRadius)
+      {
+	Points2 += 1;
+      }
+    }
+    totalPoints = Points1 + Points2;
+    circRadius++;
+  }
+  return circRadius;
+}
+
+
 
 
 
