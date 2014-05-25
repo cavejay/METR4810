@@ -17,6 +17,7 @@
 #include <vector>
 #include <sstream>
 // Our .h's
+#include "startup.h"
 #include "functions.h"
 #include "Rotate3d.h"
 #include "VStream.h"
@@ -39,11 +40,11 @@ void show_usage(std::string name){
 	    << "Options:\n"
 	    << "\t-h,--help\t\tShow this help message\n"
 	    << "\t-f,--file <filename>\tLoad the following settings and more, from a .yml file\n"
+	    << "\t-g,--generatefile\tCreates a settings file with the default settings\n"
 	    << "\t-s,--inputsource <input here>\tCan be 'roborealm', 'still', 'video' or 'camera'\n"
 	    << "\t-H,--host <HOST IP>\tSpecify the IP Address of the Roborealm Server\n"
 	    << "\t-d,--destination <DESTINATION>\tSpecify the path for the image or video file\n"
 	    << "\t-c,--cameranumber <CAMERANUMBER>\tSpecify which system camera to use. 0 is default\n"
-	    << "\t-mt,--multithreading \tUsing this switch will run the program in multithreading mode\n"
 	    << "\t-sim,--showsimulation \tShows a simulation running on the given input source. This will ignore the car\n"
 	    << "\t-demo,--demonstration \tRuns a demo using the simulation and a pre-determined picture\n"
 	    << std::endl;
@@ -215,7 +216,7 @@ int main (int argc, char* argv[])
     // Assign a value to make the circle around the car
     int preferedPoints = 20; // 20 is good, it gets about the same answer as 10
     int minSidePoints = 5; // keep this value under half of preferedPoints
-    int circRadius = getSearchRadius(preferedPoints, minSidePoints,carCenter, largest1, largest2);
+    int circRadius = getSearchRadius(preferedPoints, minSidePoints, carCenter, largest1, largest2);
     Rsim.set_searchRadius(circRadius);
 
     // Probably the outside of the track
