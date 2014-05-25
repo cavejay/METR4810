@@ -40,6 +40,7 @@
 									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\flann\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\photo\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\video\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\Python27\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\contrib\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\ml\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\objdetect\include&quot;"/>
@@ -74,6 +75,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.mingw.exe.debug.709912367" name="MinGW C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.mingw.exe.debug">
 								<option id="gnu.cpp.link.option.paths.604476441" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Roborealm_API}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\Python27\libs&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Roborealm_API/C++/MinGW}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/aruco_bin}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\OpenCV_BUILD\bin&quot;"/>
@@ -81,6 +83,7 @@
 								</option>
 								<option id="gnu.cpp.link.option.libs.1533111756" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="RR_COM_API"/>
+									<listOptionValue builtIn="false" value="python27"/>
 									<listOptionValue builtIn="false" value="RR_API_lib"/>
 									<listOptionValue builtIn="false" value="libaruco124"/>
 									<listOptionValue builtIn="false" value="libopencv_core248"/>
