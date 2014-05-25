@@ -45,6 +45,7 @@ public:
   // Functions
   void set_searchRadius(int searchRadius);
   void draw(Mat& src, bool draw_searchRadius = false);
+  void drawTrace(Mat& src);
   void showDirection(Mat& src, float value1, float value2);
   void move(float dist, float angle);
   void drive(float velocity, float angle, float turningSpeed = 0.5);
