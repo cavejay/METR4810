@@ -51,81 +51,51 @@ void show_usage(std::string name){
 
 int main (int argc, char* argv[])
 {
-  if (argc > 200) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
-      show_usage(argv[0]); // Inform the user of how to use the program
-      exit(0);
-  }
+String rawrS[19] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"};
 
-  // Translate the input commands into somthing useful
-  inputVars in = getInputData(argc, argv);
-  if(!in.varsParsedSuccessfully){
-    exit(0);
-  }
-
-  // This overrides the cmdline for nowz
-  in.inputSource = "roborealm";
-  in.file_location = "Sample_Pictures/demo-track.png";
-
-
-  /*
-   * BEGINNING of Setup
-   */
-  VStream Vs(in);
-
-  // Initialise Robo Simulation
-  RobotSim Rsim = RobotSim(Point2d(600,300),0,"Robot1", 2.0,Size(45,20));
-
-  // Initialise PID for pathing
-  PID pid(0,0,0,10);
-
-  // Initialise variables
-  cv::Mat img, img1;
-  cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThreshTrack;
-  int threshMag = 160;
-
-  namedWindow("Contours", CV_WINDOW_FREERATIO);
-//  cv::createTrackbar( "Threshold Value", "Contours", &threshMag, 255, NULL );
-
-   /*
-    *  END of Setup
-    */
-
-
-   /*
-    *  BEGINNING of functionality
-    */
-
+Mat frame;
+//  rawr.open("dfs.avi");
   // Start Loop
-  while(1)
+  int count = 0;
+  cout << "whakjhf\n";
+
+  while(count < 20)
   {
-    // Grab current image from specified source
-    img = Vs.pullImage(6060);
-
-    // Check if image is empty.
-    if (!img.empty())
-    {
-      cv::imshow("Grabbed Image", img);
-      cout << "The image has been procured successful\n";
-    } else {
-      return -1;
-    }
-
-    frame_bgr = img.clone();
-
     /*
-     * THRESHOLD IMAGE + RUN ROBOSIM AS A TEST
+     * DETECT AR_TAG
      * Michael Ball
-     * Updated by Jonathan Holland
      *
      */
-    cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
-    cv::threshold(frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY);
+    cout << "rawrwut\n";
+    aruco::MarkerDetector MDetector;
+    vector<Marker> Markers;
+//    try
+//    {
+//      //read the input image
+////      cv::Mat InImage = Vs.pullImage(); //
+//      cv::Mat InImage = imread("Sample_Pictures/ARTag/" + rawrS[count] + ".png");
+//      // Begin detection
+//      MDetector.detect(InImage, Markers);
+//      // For each marker, draw info and its boundaries in the image
+//      for (unsigned int i = 0; i < Markers.size(); i++)
+//      {
+//	cout << Markers[i] << endl;
+//	Markers[i].draw(InImage, Scalar(0, 0, 255), 2);
+//      }
+//      cv::imshow(rawrS[count], InImage);
+//     }
+//    catch (std::exception &ex)
+//    {
+//      cout << "aruco failed\nException :" << ex.what() << endl;
+//    }
 
-    /// Show in a window
-    namedWindow("Contours", CV_WINDOW_AUTOSIZE);
-    imshow("Contours", img);
 
+    // Grab current image from specified source
+//    bool bSuccess = rawr.read(frame); // read a new frame from video
+//    if (!bSuccess){cout << "rawr\n";}
+//    else {imshow("rawrpic", frame);}
 
+    count++;
     if (waitKey(30) == 27)
     {
       cout << "User Exit" << endl;

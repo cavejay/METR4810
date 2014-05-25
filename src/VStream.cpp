@@ -115,11 +115,14 @@ int VStream::camera()
  */
 Mat VStream::pullImage(int port)
 { //
+  bool readCorrectly;
   Mat dst;
   switch(_inputFormat)
   {
     case VIDEO_FILE:
-      cap >> dst;
+      cout << "pulling from video file?" << endl;
+      readCorrectly = cap.read(dst);
+      if(!readCorrectly){cerr << "The frame could not be read" << endl;}
       return dst;
       break;
 
