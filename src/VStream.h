@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "functions.h"
+#include "startup.h"
 // Namespaces
 using namespace cv;
 using namespace std;

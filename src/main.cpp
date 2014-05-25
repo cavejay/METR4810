@@ -110,16 +110,18 @@ int main (int argc, char* argv[])
     // Check if image is empty.
     if (!img.empty())
     {
+      // Lets look at it?
       cv::imshow("Grabbed Image", img);
       cout << "The image has been procured successful\n";
     } else {
+      // The image was empty :(
       return -1;
     }
 
     frame_bgr = img.clone();
 
     /*
-     * THRESHOLD IMAGE + RUN ROBOSIM AS A TEST
+     * THRESHOLD IMAGE
      * Michael Ball
      * Updated by Jonathan Holland
      *
@@ -136,7 +138,7 @@ int main (int argc, char* argv[])
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
 
-    cv::findContours(ThreshTrack, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0)); // Changed CV_CHAIN_APPROX from siple to none
+    cv::findContours(ThreshTrack, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0)); // Changed CV_CHAIN_APPROX from simple to none
     cv::Mat drawing = cv::Mat::zeros(ThreshTrack.size(), CV_8UC3);
 
     // Sort vectors
@@ -156,35 +158,6 @@ int main (int argc, char* argv[])
     /// Show in a window
     namedWindow("Contours", CV_WINDOW_AUTOSIZE);
     imshow("Contours", drawing);
-
-    /*
-     * DETECT AR_TAG
-     * Michael Ball
-     *
-     */
-    /*
-    aruco::MarkerDetector MDetector;
-    vector<Marker> Markers;
-    try
-    {
-      //read the input image
-      cv::Mat InImage = Vs.pullImage(); //
-      cv::Mat InImage = imread("Sample_Pictures/Marker1.png");
-      // Begin detection
-      MDetector.detect(InImage, Markers);
-      // For each marker, draw info and its boundaries in the image
-      for (unsigned int i = 0; i < Markers.size(); i++)
-      {
-	cout << Markers[i] << endl;
-	Markers[i].draw(InImage, Scalar(0, 0, 255), 2);
-      }
-      cv::imshow("in", InImage);
-     }
-    catch (std::exception &ex)
-    {
-      cout << "aruco failed\nException :" << ex.what() << endl;
-    }
-    */
 
     /*
      * PATHING
@@ -217,13 +190,11 @@ int main (int argc, char* argv[])
     // Assign a value to make the circle around the car
     int preferedPoints = 20; // 20 is good, it gets about the same answer as 10
     int minSidePoints = 5; // keep this value under half of preferedPoints
-    int circRadius = getSearchRadius(preferedPoints, minSidePoints, carCenter, largest1, largest2);
-    int preferedPoints = 110;
     int circRadius;
     circleReset--;
     if(circleReset < 0)
     {
-    	circRadius = getSearchRadius(preferedPoints, carCenter, largest1, largest2);
+    	circRadius = getSearchRadius(preferedPoints, minSidePoints, carCenter, largest1, largest2);
     	circleReset = 4;
     }
     Rsim.set_searchRadius(circRadius);

@@ -8,9 +8,6 @@
 #ifndef STARTUP_H_
 #define STARTUP_H_
 
-#ifndef FUNCTIONS_H_
-#define FUNCTIONS_H_
-
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
@@ -42,5 +39,8 @@ struct inputVars {
 inputVars getInputData(int argc, char* argv[]);
 void createSettingsFile(void);
 inputVars readSettingsFile(String file);
+
+int startingLights(const Mat& src);
+
 
 #endif /* STARTUP_H_ */

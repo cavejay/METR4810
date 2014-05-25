@@ -26,8 +26,7 @@ inputVars getInputData(int argc, char* argv[])
    	}
 
     } else if ((arg == "-g") || (arg == "--generatefile")) {
-
-
+	createSettingsFile();
 	toReturn.varsParsedSuccessfully = false;
 	return toReturn;
 
@@ -78,12 +77,61 @@ inputVars getInputData(int argc, char* argv[])
   return toReturn;
 }
 
+/**
+ * Run this if you've lost the settings file, or want to reset to default.
+ */
 void createSettingsFile(void){
 
+  // Create an example file with all the default settings
+  FileStorage fs("METR4810_Settings.yml", FileStorage::WRITE);
+  fs << "Input Format" << "roborealm";
+  fs << "RoboRealm Host Address" << "localhost";
+  fs << "File Location" << "Sample_Pictures/demo-track.png";
+  fs.release();
 }
 
 inputVars readSettingsFile(String file){
+  // TODO create the read from yml function.
+  inputVars toReturn;
+  // Check if the file can actually be opened
+  if(!(file.substr(file.size()-5,file.size()-1) == ".yml")){
+    toReturn.varsParsedSuccessfully;
+    cerr << "Settings file did not end in '.yml'" << endl;
+    return toReturn;
+  }
+
+  FileStorage fs(file, FileStorage::READ);
+
+  // Read in dem vars
+  fs["Input Format"] >> toReturn.inputSource;
+  String tempHost;
+  fs["RoboRealm Host Address"] >> tempHost;
+  strcpy(toReturn.Host,tempHost.c_str());
+  fs["File Location"] >> toReturn.file_location;
+  return toReturn;
+}
+
+int startingLights(const Mat& src){
+  // TODO make a function to find the starting lights
   return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
