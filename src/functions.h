@@ -32,5 +32,5 @@ void Dilation(const Mat& src, Mat& dst, int dilation_shape, double dilation_size
 void Erosion(const Mat& src, Mat& dst, int erosion_shape, double erosion_size);
 bool less_vectors(const std::vector<Point>& vec1, const std::vector<Point>& vec2);
 
-int getSearchRadius(int preferedPoints, Point2f carCenter, vector<Point> outside, vector<Point> inside);
+int getSearchRadius(int preferedPoints, int sideMinimum, Point2f carCenter, vector<Point> outside, vector<Point> inside);
 #endif /* FUNCTIONS_H_ */
