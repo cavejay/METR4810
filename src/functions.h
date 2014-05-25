@@ -29,6 +29,8 @@ enum {
 // Structs
 struct inputVars {
   bool varsParsedSuccessfully = true;
+  bool loadFile = false;
+  String filename = "METR4810_Settings.yml";
   String inputSource = "still";
   char* Host = "127.0.0.1";
   String file_location = "Sample_Pictures/demo-track.png";

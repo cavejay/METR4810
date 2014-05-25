@@ -16,6 +16,16 @@ inputVars getInputData(int argc, char* argv[])
 	show_usage(argv[0]);
 	toReturn.varsParsedSuccessfully = false;
 
+    } else if ((arg == "-f") || (arg == "--file")) {
+   	if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+   	    toReturn.loadFile = true;
+   	    toReturn.filename = string(argv[i++]); // Increment 'i' so we don't get the argument as the next argv[i].
+   	    return toReturn;
+   	} else { // Uh-oh, there was no argument to the destination option.
+   	      std::cerr << "--destination option requires one argument." << std::endl;
+   	      toReturn.varsParsedSuccessfully = false;
+   	}
+
     } else if ((arg == "-s") || (arg == "--inputsource")) {
 	if (i + 1 < argc) { // Make sure we aren't at the end of argv!
 	    toReturn.inputSource = string(argv[i++]); // Increment 'i' so we don't get the argument as the next argv[i].

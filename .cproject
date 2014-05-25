@@ -80,19 +80,19 @@
 									<listOptionValue builtIn="false" value="&quot;C:\OpenCV_BUILD\bin&quot;"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.1533111756" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
-									<listOptionValue builtIn="false" value="libopencv_core248"/>
 									<listOptionValue builtIn="false" value="RR_COM_API"/>
 									<listOptionValue builtIn="false" value="RR_API_lib"/>
 									<listOptionValue builtIn="false" value="libaruco124"/>
+									<listOptionValue builtIn="false" value="libopencv_core248"/>
 									<listOptionValue builtIn="false" value="libopencv_highgui248"/>
 									<listOptionValue builtIn="false" value="libopencv_imgproc248"/>
 									<listOptionValue builtIn="false" value="libopencv_features2d248"/>
 									<listOptionValue builtIn="false" value="libopencv_calib3d248"/>
 									<listOptionValue builtIn="false" value="libopencv_nonfree248"/>
 									<listOptionValue builtIn="false" value="libopencv_flann248"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="bthprops"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="WSock32"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="WS2_32"/>
+									<listOptionValue builtIn="false" value="bthprops"/>
+									<listOptionValue builtIn="false" value="WSock32"/>
+									<listOptionValue builtIn="false" value="WS2_32"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1973194854" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>

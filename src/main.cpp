@@ -35,10 +35,11 @@ using namespace std;
 using namespace aruco;
 
 void show_usage(std::string name){
-  std::cerr << "Usage: " << name << " <option(s)> SOURCES"
+  std::cerr << "Usage: " << name << " <option(s)> SOURCES\n"
 	    << "Options:\n"
 	    << "\t-h,--help\t\tShow this help message\n"
-	    << "\t-s,--inputsource <input here>\t can be 'roborealm', 'still', 'video' or 'camera'\n"
+	    << "\t-f,--file <filename>\tLoad the following settings and more, from a .yml file\n"
+	    << "\t-s,--inputsource <input here>\tCan be 'roborealm', 'still', 'video' or 'camera'\n"
 	    << "\t-H,--host <HOST IP>\tSpecify the IP Address of the Roborealm Server\n"
 	    << "\t-d,--destination <DESTINATION>\tSpecify the path for the image or video file\n"
 	    << "\t-c,--cameranumber <CAMERANUMBER>\tSpecify which system camera to use. 0 is default\n"
@@ -60,11 +61,14 @@ int main (int argc, char* argv[])
   inputVars in = getInputData(argc, argv);
   if(!in.varsParsedSuccessfully){
     exit(0);
+  } else if (in.loadFile){
+    // do the things that load le settings from le file. :3
   }
 
   // This overrides the cmdline for nowz
-  in.inputSource = "still";
-  in.file_location = "Sample_Pictures/demo-track.png";
+  in.inputSource = "camera";
+  in.camera_number = 0;
+  in.file_location = "Sample_Pictures/ARTag/1.png";
 
 
   /*
@@ -106,10 +110,7 @@ int main (int argc, char* argv[])
     {
       cv::imshow("Grabbed Image", img);
       cout << "The image has been procured successful\n";
-    }
-
-    else
-    {
+    } else {
       return -1;
     }
 
@@ -122,12 +123,13 @@ int main (int argc, char* argv[])
      *
      */
 //    if(Vs._inputFormat != ROBOREALM){
-    	cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
+    cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
+    equalizeHist( frame_gry,frame_gry );
 //    } else {
 //    	frame_gry = frame_bgr;
 //    }
     cv::threshold(frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY);
-
+    imshow("threshed'", ThreshTrack);
     // Contours are a vector of vectors of points
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
@@ -142,12 +144,13 @@ int main (int argc, char* argv[])
     vector<Scalar> colors;
     colors.push_back(Scalar(100,100,100));
     colors.push_back(Scalar(200,200,200));
-    for (int i = 0; i < contours.size(); i++)
+    for (int i = 0; i < contours.size()-2; i++)
     {
       Scalar color = Scalar(0, 255, 100);
-      drawContours(drawing, contours, i, color, 2, 8, hierarchy, 0, Point());
+      drawContours(drawing, contours, i, color, 1, 8, hierarchy, 0, Point());
     }
-
+    drawContours(drawing, contours, contours.size()-2, colors[0], 1, 8, hierarchy, 0, Point());
+    drawContours(drawing, contours, contours.size()-1, colors[1], 1, 8, hierarchy, 0, Point());
     /// Show in a window
     namedWindow("Contours", CV_WINDOW_AUTOSIZE);
     imshow("Contours", drawing);
