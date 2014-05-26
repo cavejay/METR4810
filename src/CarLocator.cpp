@@ -13,32 +13,70 @@ CarLocator::CarLocator ()
 }
 
 /**
- * Takes a gray picture and returns the location of the car with a red
+ * Takes a hsv picture and returns the location of the car with a red
  */
 Point CarLocator::findCar(const Mat& src){
   // TODO Find the blob in v space, then find the blob in s space and use
-  	//pointPolygonTest to check if the mass center of the latter is within the first.
-  	// This should provide our marker (Y)
+  //pointPolygonTest to check if the mass center of the latter is within the first.
+  // This should provide our marker (Y)
 
-	/// Reduce the noise so we avoid false circle detection
-	Mat input;
-	GaussianBlur( src, input, Size(9, 9), 2, 2 );
+  cout << "split the channels" << endl;
+  vector<Mat> HSVchannels(3);
+  split(src, HSVchannels);
 
-	// Find the blob of the marker in V space!
-	vector<vector<Point> > Vc;
-	vector<Vec4i> Vhierarchy;
-	cv::findContours(src, Vc, Vhierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE, Point(0, 0));
+  Mat gray;
+  cvtColor(src, gray, CV_HSV2BGR);
+  cvtColor(gray, gray, CV_BGR2GRAY);
+  // Find the blob of the marker in V space!
+  Mat V_thresh;
+  vector<vector<Point> > Vc;
+  vector<Vec4i> Vhierarchy;
+  imshow("HSV - V", gray);
+  cv::threshold(gray, V_thresh, 160, 255, THRESH_BINARY);
+  imshow("HSV - V - thresh", V_thresh);
+  cv::findContours(V_thresh, Vc, Vhierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
-	// Find the blob in the marker in S Space!
-	vector<vector<Point> > Sc;
-	vector<Vec4i> Shierarchy;
-	cv::findContours(src, Sc, Shierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE, Point(0, 0));
+  cout << "found the contours in the Value channel" << endl;
 
+  // Find the blob in the marker in S Space!
+  Mat S_thresh;
+  vector<vector<Point> > Sc;
+  vector<Vec4i> Shierarchy;
+  imshow("HSV - S", HSVchannels[1]);
+  cv::threshold(HSVchannels[1], S_thresh, 200, 255, THRESH_BINARY);
+  imshow("HSV - S - thresh", S_thresh);
+  cv::findContours(S_thresh, Sc, Shierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+  cout << "found the contours in the Saturation channel" << endl;
 
+  // find Moments
+  vector<Moments> mu(Sc.size() );
+  for(size_t i = 0; i < Sc.size(); i++ ){
+    mu[i] = moments( Sc[i], false );
+  }
+  cout << "found moments" << endl;
 
-	imshow("input Show",input);
-	Point rawr;
-	return rawr;
+  ///  Get the mass centers:
+  vector<Point2f> S_masscenter( Sc.size() );
+  for(size_t i = 0; i < Sc.size(); i++ ){
+    S_masscenter[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 );
+  }
+  cout << "found masscenters" << endl;
+
+  Mat show = src.clone();
+  cvtColor(show, show, CV_HSV2BGR);
+  for (size_t i = 0; i < Vc.size(); i++){
+    drawContours(show, Vc, i, Scalar(0,0,255),1);
+  }
+  cout << "drawn Vc onto show" << endl;
+  for (size_t i = 0; i < Sc.size(); i++){
+    drawContours(show, Sc, i, Scalar(255,0,0),1);
+  }
+
+  // TODO Continue with this. look into hierarchy and contours inside contours and check if mass center of small one is in larger one by using getPolygon
+
+  imshow("input Show",show);
+  Point rawr;
+  return rawr;
 }
 
 void CarLocator::findCar_SURF(const Mat& src){

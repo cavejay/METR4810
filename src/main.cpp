@@ -146,16 +146,7 @@ int main (int argc, char* argv[])
     cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
     cv::cvtColor(frame_bgr, frame_hsv, cv::COLOR_BGR2HSV);
 
-    vector<Mat> HSVchannels(3);
-    split(frame_hsv, HSVchannels);
-    imshow("H", HSVchannels[0]);
-    imshow("S", HSVchannels[1]);
-    imshow("V", HSVchannels[2]);
-    cl.findCar(HSVchannels[2]);
-    equalizeHist( HSVchannels[1],frame_gry );
-//    } else {
-//    	frame_gry = frame_bgr;
-//    }
+    cl.findCar(frame_hsv);
     cv::threshold(frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY);
     imshow("threshed'", ThreshTrack);
     // Contours are a vector of vectors of points
