@@ -18,6 +18,7 @@
 #include <sstream>
 // Our .h's
 #include "startup.h"
+#include "CarLocator.h"
 #include "functions.h"
 #include "Rotate3d.h"
 #include "VStream.h"
@@ -83,6 +84,9 @@ int main (int argc, char* argv[])
 
   // Initialise PID for pathing
   PID pid(0,0,0,10);
+
+  // Car Localisation init
+  CarLocator cl = CarLocator();
 
   // Initialise variables
   cv::Mat img, img1;
