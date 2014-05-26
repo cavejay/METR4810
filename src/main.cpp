@@ -132,7 +132,15 @@ int main (int argc, char* argv[])
      */
 //    if(Vs._inputFormat != ROBOREALM){
     cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
-    equalizeHist( frame_gry,frame_gry );
+    cv::cvtColor(frame_bgr, frame_hsv, cv::COLOR_BGR2HSV);
+
+    vector<Mat> HSVchannels(3);
+    split(frame_hsv, HSVchannels);
+    imshow("H", HSVchannels[0]);
+    imshow("S", HSVchannels[1]);
+    imshow("V", HSVchannels[2]);
+    cl.findCar(HSVchannels[2]);
+    equalizeHist( HSVchannels[1],frame_gry );
 //    } else {
 //    	frame_gry = frame_bgr;
 //    }
