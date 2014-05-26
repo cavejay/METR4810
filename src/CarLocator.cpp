@@ -16,17 +16,26 @@ CarLocator::CarLocator ()
  * Takes a gray picture and returns the location of the car with a red
  */
 Point CarLocator::findCar(const Mat& src){
+  // TODO Find the blob in v space, then find the blob in s space and use
+  	//pointPolygonTest to check if the mass center of the latter is within the first.
+  	// This should provide our marker (Y)
+
 	/// Reduce the noise so we avoid false circle detection
 	Mat input;
 	GaussianBlur( src, input, Size(9, 9), 2, 2 );
-// TODO Find the blob in v space, then find the blob in s space and use
-	//pointPolygonTest to check if the mass center of the latter is within the first.
-	// This should provide our marker (Y)
-	vector<Vec3f> circles;
 
-	  /// Apply the Hough Transform to find the circles
-	HoughCircles( src, circles, CV_HOUGH_GRADIENT, 1, src.rows/8, 200, 100, 0, 0 );
-	Draw_Circles(input, circles);
+	// Find the blob of the marker in V space!
+	vector<vector<Point> > Vc;
+	vector<Vec4i> Vhierarchy;
+	cv::findContours(src, Vc, Vhierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE, Point(0, 0));
+
+	// Find the blob in the marker in S Space!
+	vector<vector<Point> > Sc;
+	vector<Vec4i> Shierarchy;
+	cv::findContours(src, Sc, Shierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE, Point(0, 0));
+
+
+
 	imshow("input Show",input);
 	Point rawr;
 	return rawr;

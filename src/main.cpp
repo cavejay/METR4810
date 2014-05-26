@@ -25,6 +25,7 @@
 #include "RobotSim.h"
 #include "PID.h"
 #include "sys_constants.h"
+#include "race_track_extraction.h"
 // Aruco .h's
 #include "src/marker.h"
 #include "src/aruco.h"
@@ -65,12 +66,13 @@ int main (int argc, char* argv[])
     exit(0);
   } else if (in.loadFile){
     // do the things that load le settings from le file. :3
+    readSettingsFile(in.filename);
   }
 
   // This overrides the cmdline for nowz
-  in.inputSource = "camera";
+  in.inputSource = "still";
   in.camera_number = 0;
-  in.file_location = "Sample_Pictures/ARTag/1.png";
+  in.file_location = "Sample_Pictures/inPlace5.jpg";
 
 
   /*
@@ -123,6 +125,16 @@ int main (int argc, char* argv[])
     }
 
     frame_bgr = img.clone();
+
+    /*
+     * BOB's Thresholding
+     *
+     */
+      Mat a;
+      cvtColor(frame_bgr, a, CV_BGR2GRAY);
+      a = race_track_extraction(a,0.5,0.5,0.5,0.5);
+      namedWindow("f_bw",WINDOW_AUTOSIZE);
+      imshow("f_bw", a);
 
     /*
      * THRESHOLD IMAGE

@@ -41,6 +41,7 @@
 									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\photo\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\video\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\Python27\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;M:\Code\Python27_32\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\contrib\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\ml\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\openCV\sources\modules\objdetect\include&quot;"/>
@@ -76,6 +77,7 @@
 								<option id="gnu.cpp.link.option.paths.604476441" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Roborealm_API}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\Python27\libs&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;M:\Code\Python27_32\libs&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Roborealm_API/C++/MinGW}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/aruco_bin}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\OpenCV_BUILD\bin&quot;"/>
