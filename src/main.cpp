@@ -66,6 +66,7 @@ int main (int argc, char* argv[])
     exit(0);
   } else if (in.loadFile){
     // do the things that load le settings from le file. :3
+    readSettingsFile(in.filename);
   }
 
   // This overrides the cmdline for nowz
