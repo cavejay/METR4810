@@ -34,7 +34,7 @@ Point CarLocator::findCar(const Mat& src){
   imshow("HSV - V", gray);
   cv::threshold(gray, V_thresh, 160, 255, THRESH_BINARY);
   imshow("HSV - V - thresh", V_thresh);
-  cv::findContours(V_thresh, Vc, Vhierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+  cv::findContours(V_thresh, Vc, Vhierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
   cout << "found the contours in the Value channel" << endl;
 
@@ -43,7 +43,7 @@ Point CarLocator::findCar(const Mat& src){
   vector<vector<Point> > Sc;
   vector<Vec4i> Shierarchy;
   imshow("HSV - S", HSVchannels[1]);
-  cv::threshold(HSVchannels[1], S_thresh, 200, 255, THRESH_BINARY);
+  cv::threshold(HSVchannels[1], S_thresh, 150, 255, THRESH_BINARY_INV);
   imshow("HSV - S - thresh", S_thresh);
   cv::findContours(S_thresh, Sc, Shierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
   cout << "found the contours in the Saturation channel" << endl;

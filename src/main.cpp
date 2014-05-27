@@ -18,6 +18,7 @@
 #include <sstream>
 // Our .h's
 #include "startup.h"
+#include "CarLocator.h"
 #include "functions.h"
 #include "Rotate3d.h"
 #include "VStream.h"
@@ -66,11 +67,12 @@ int main (int argc, char* argv[])
     exit(0);
   } else if (in.loadFile){
     // do the things that load le settings from le file. :3
+	  readSettingsFile(in.filename);
   }
 
   // This overrides the cmdline for nowz
   in.inputSource = "camera";
-  in.camera_number = 0;
+  in.camera_number = 1;
   in.file_location = "Sample_Pictures/ARTag/1.png";
 
 
@@ -84,6 +86,9 @@ int main (int argc, char* argv[])
 
   // Initialise PID for pathing
   PID pid(0,0,0,10);
+
+  // Car Localisation init
+  CarLocator cl = CarLocator();
 
   // Initialise variables
   cv::Mat img, img1;
@@ -151,9 +156,12 @@ int main (int argc, char* argv[])
 //    if(Vs._inputFormat != ROBOREALM){
     cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
     equalizeHist( frame_gry,frame_gry );
-//    } else {
-//    	frame_gry = frame_bgr;
-//    }
+
+    cv::cvtColor(frame_bgr, frame_hsv, cv::COLOR_BGR2HSV);
+
+    // Try to find the car
+    cl.findCar(frame_hsv);
+
     cv::threshold(frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY);
     imshow("threshed'", ThreshTrack);
     // Contours are a vector of vectors of points
