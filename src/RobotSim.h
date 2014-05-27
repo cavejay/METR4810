@@ -40,6 +40,7 @@ public:
   float angle;
 
   // constructor
+  // TODO make a click event for the starting point
   RobotSim (Point2d Position, float angle, String name = "", float turningSpeed = 2.0, Size R_size = Size(60,35));
 
   // Functions

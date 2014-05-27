@@ -27,6 +27,7 @@ inputVars getInputData(int argc, char* argv[])
 
     } else if ((arg == "-g") || (arg == "--generatefile")) {
 	createSettingsFile();
+	cerr << "Settings file created successfully, please run again with -f <filename>" << endl;
 	toReturn.varsParsedSuccessfully = false;
 	return toReturn;
 
