@@ -79,6 +79,8 @@ unsigned long WINAPI pyThread(void *ptr) {
 				case WAIT_OBJECT_0:
 					printf("Thread %d: wait succeeded\n", GetCurrentThreadId());
 					// Use the wrapper function sendPy to move the vehicle
+					cout<<"Sending to python: "<<globalArr[0]<<"  "<<globalArr[1];
+
 					sendPy(service,globalArr[0],globalArr[1]);
 					// Reset checkArrChange to no changes
 				    checkArrChange = false;
@@ -87,7 +89,7 @@ unsigned long WINAPI pyThread(void *ptr) {
 
 					if (!ReleaseSemaphore(
 										checkSemaphore,  // handle to semaphore
-										-1,            // increase count by one
+										1,            // increase count by one
 										NULL) )       // not interested in previous count
 					{
 						printf("ReleaseSemaphore error: %d\n", GetLastError());
@@ -115,6 +117,9 @@ void move(int mlr, int mfb) {
 	    case WAIT_OBJECT_0:
 	    	printf("Thread %d: wait succeeded\n", GetCurrentThreadId());
 	    	// Add movement commands to the globalArr
+
+	    	cout<<"The global Arr is: "<<globalArr[0]<<"  "<<globalArr[1];
+
 	    	globalArr[0] = mlr; // First argument is moveleftright (0 to 255)
 	    	globalArr[1] = mfb; // Second argument is moveforwardback (0 to 255)
 	    	// AFTER globalArr has been modified, change checkArrChange to true to represent changes have ALREADY BEEN MADE
@@ -454,8 +459,8 @@ int main (int argc, char* argv[])
   /*
    *  END of functionality
    */
-  CloseHandle(arrSemaphore);
   CloseHandle(checkSemaphore);
   CloseHandle(pyBlueThread);
+  pyDc();
 return 0;
 }
