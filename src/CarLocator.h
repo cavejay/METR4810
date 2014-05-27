@@ -44,4 +44,6 @@ public:
 
 };
 
+void findMarkerContours(const Mat& src);
+
 #endif /* LOCATOR_H_ */

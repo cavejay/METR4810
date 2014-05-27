@@ -27,25 +27,33 @@ Point CarLocator::findCar(const Mat& src){
   Mat gray;
   cvtColor(src, gray, CV_HSV2BGR);
   cvtColor(gray, gray, CV_BGR2GRAY);
+
+
   // Find the blob of the marker in V space!
+  // This is the white circle of the marker
   Mat V_thresh;
   vector<vector<Point> > Vc;
   vector<Vec4i> Vhierarchy;
   imshow("HSV - V", gray);
   cv::threshold(gray, V_thresh, 160, 255, THRESH_BINARY);
+//  Dilation(V_thresh, V_thresh, ED_ELLIPSE,4);
   imshow("HSV - V - thresh", V_thresh);
   cv::findContours(V_thresh, Vc, Vhierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
   cout << "found the contours in the Value channel" << endl;
+  cout << "there are this many: " << Vc.size() << endl;
 
   // Find the blob in the marker in S Space!
+  // This is the red dot
   Mat S_thresh;
   vector<vector<Point> > Sc;
   vector<Vec4i> Shierarchy;
   imshow("HSV - S", HSVchannels[1]);
   cv::threshold(HSVchannels[1], S_thresh, 150, 255, THRESH_BINARY_INV);
+  Dilation(S_thresh, S_thresh, ED_ELLIPSE,0.5);
   imshow("HSV - S - thresh", S_thresh);
   cv::findContours(S_thresh, Sc, Shierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+
   cout << "found the contours in the Saturation channel" << endl;
 
   // find Moments
@@ -61,6 +69,27 @@ Point CarLocator::findCar(const Mat& src){
     S_masscenter[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 );
   }
   cout << "found masscenters" << endl;
+  cout << "THere are this many: " << S_masscenter.size() << endl;
+
+  // Check if the masscenters are inside one of the contours
+  // i is the contour
+  // j in the masscenter
+  vector<Point2f> carPoint(1);
+  vector<vector<Point> > carContour(1);
+  for(int i = 0; i < Vc.size(); i++){
+    cout << "i: " << i << endl;
+    for(int j = 0; j < S_masscenter.size(); j++){
+      cout << "j: " << j << endl;
+      int loc = pointPolygonTest(Vc[i],S_masscenter[j],false);
+      cout << loc << endl;
+      if(loc > 0){
+	carPoint.push_back(S_masscenter[j]);
+	carContour.push_back(Vc[i]);
+      }
+    }
+  }
+
+  cout << "did we make it?\n";
 
   Mat show = src.clone();
   cvtColor(show, show, CV_HSV2BGR);
@@ -72,11 +101,80 @@ Point CarLocator::findCar(const Mat& src){
     drawContours(show, Sc, i, Scalar(255,0,0),1);
   }
 
+  for(size_t i = 0; i < carPoint.size(); i++){
+    circle( show, carPoint[i], 20, Scalar(0,255,0), 5, 8, 0 );
+    drawContours(show, carContour, i, Scalar(0,255,255));
+  }
+
+
   // TODO Continue with this. look into hierarchy and contours inside contours and check if mass center of small one is in larger one by using getPolygon
 
   imshow("input Show",show);
   Point rawr;
   return rawr;
+}
+
+void findMarkerContours(const Mat& src)
+{
+	vector<vector<Point> > contours;
+	vector<Vec4i> hierarchy;
+	vector<Point> approx;
+
+	bool markerFound = false;
+
+	cv::Mat frame = src.clone();
+	Mat src_gray;
+	double thresh = 160;
+
+	cv::cvtColor(frame, src_gray, CV_BGR2GRAY);
+	//Reduce noise with a 3x3 kernel
+	blur( src_gray, src_gray, Size(3,3));
+
+	//Convert to binary using canny
+	cv::Mat bw;
+	cv::Canny(src_gray, bw, thresh, 3*thresh, 3);
+
+	imshow("bw", bw);
+
+	findContours(bw.clone(), contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+
+	Mat drawing = Mat::zeros( bw.size(), CV_8UC3 );
+
+	for (int i = 0; i < contours.size(); i++)
+	{
+	  int child_count = 0;
+	  Scalar color = Scalar(120, 120,120);
+	  // contour
+	  drawContours( drawing, contours, i, color, 1, 8, vector<Vec4i>(), 0, Point() );
+
+	  //Approximate the contour with accuracy proportional to contour perimeter
+	  cv::approxPolyDP(cv::Mat(contours[i]), approx, cv::arcLength(cv::Mat(contours[i]), true) *0.02, true);
+
+	  //Skip small or non-convex objects
+	  if(fabs(cv::contourArea(contours[i])) < 100 || !cv::isContourConvex(approx))
+		  continue;
+	  if (approx.size() >= 8) //More than 6-8 vertices means its likely a circle
+	  {
+	    int index = i;
+	    int count = 0;
+	    for (int j = 0; j < 10; j++) // Check for up to 9 child contours. This is our marker.
+	    // Not robust to speed or scale...
+	    // Check for a small number of child contours and HSV values inside the smallest one?? YEEE
+	    {
+	      if(hierarchy[index][2] != -1)
+	      {
+		index++; // Contour has a child, move to next contour
+		count++;
+	      } else {
+		break;
+	      }
+	    }
+	    if (count >= 4 && count <= 6) // || HSV IS BLUE
+	    {
+	      drawContours( frame, contours, i, Scalar(0,255,0), 2, 8);
+	    }
+	  }
+	}
 }
 
 void CarLocator::findCar_SURF(const Mat& src){

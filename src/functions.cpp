@@ -23,7 +23,7 @@ void Draw_Circles(Mat& img, const vector<Vec3f>& circles)
 }
 
 
-void Dilation(const Mat& src, Mat& dst, int dilation_shape, double dilation_size)
+void Dilation(const Mat& src, Mat& dst, ED_SHAPE dilation_shape, double dilation_size)
 {
   int dilation_type;
   if( dilation_shape == 0 ){ dilation_type = MORPH_RECT; }
@@ -36,7 +36,7 @@ void Dilation(const Mat& src, Mat& dst, int dilation_shape, double dilation_size
 }
 
 
-void Erosion(const Mat& src, Mat& dst, int erosion_shape, double erosion_size)
+void Erosion(const Mat& src, Mat& dst, ED_SHAPE erosion_shape, double erosion_size)
 {
   int erosion_type;
   if( erosion_shape == 0 ){ erosion_type = MORPH_RECT; }
