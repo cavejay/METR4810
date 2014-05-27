@@ -31,7 +31,6 @@
 #include "src/cvdrawingutils.h"
 // Definitions
 #define ever ;;
-#define MAX_SEM_COUNT=1;
 // Namespaces
 using namespace cv;
 using namespace std;
@@ -43,7 +42,10 @@ int* globalArr = new int[2];
 // A global variable to check if globalArr has new values
 // false for no change, true for changes made
 bool checkArrChange = false;
-HANDLE checkSemaphore;
+// A global variable to check if bluetooth is connected
+// as it is now run in another thread
+bool connected = false;
+
 
 void show_usage(std::string name){
   std::cerr << "Usage: " << name << " <option(s)> SOURCES\n"
@@ -64,42 +66,16 @@ void show_usage(std::string name){
 unsigned long WINAPI pyThread(void *ptr) {
 	// Initially connect to the vehicle
 	PyObject* service = pyConn();
-
+	connected = true;
 	while(1){
 		// If the global array has something to send
 		if(checkArrChange) {
-			DWORD dwWait;
-			// Try to enter the semaphore gate.
-			dwWait = WaitForSingleObject(
-						checkSemaphore,   // handle to semaphore
-						0L);           // zero-second time-out interval
-
-			switch (dwWait) {
-			// The semaphore object was signaled.
-				case WAIT_OBJECT_0:
-					printf("Thread %d: wait succeeded\n", GetCurrentThreadId());
-					// Use the wrapper function sendPy to move the vehicle
-					cout<<"Sending to python: "<<globalArr[0]<<"  "<<globalArr[1];
-
-					sendPy(service,globalArr[0],globalArr[1]);
-					// Reset checkArrChange to no changes
-				    checkArrChange = false;
-
-				    // Release the semaphore when task is finished
-
-					if (!ReleaseSemaphore(
-										checkSemaphore,  // handle to semaphore
-										1,            // increase count by one
-										NULL) )       // not interested in previous count
-					{
-						printf("ReleaseSemaphore error: %d\n", GetLastError());
-					}
-					break;
-
-				// The semaphore was nonsignaled, so a time-out occurred.
-				case WAIT_TIMEOUT:
-					printf("Thread %d: wait timed out\n", GetCurrentThreadId());
-					break;
+			if((sendPy(service,globalArr[0],globalArr[1]))==0) {
+				// Reset checkArrChange to no changes
+				checkArrChange = false;
+			}
+			else {
+				cout<<"Error in sendPy";
 			}
 		}
 	}
@@ -107,45 +83,21 @@ unsigned long WINAPI pyThread(void *ptr) {
 }
 
 void move(int mlr, int mfb) {
-	DWORD dwWait;
-	// Try to enter the semaphore gate.
-	dwWait = WaitForSingleObject(
-	    							checkSemaphore,   // handle to semaphore
-	    							INFINITE);        // Wait until semaphore is signaled
-	switch (dwWait) {
-		// The semaphore object was signaled.
-	    case WAIT_OBJECT_0:
-	    	printf("Thread %d: wait succeeded\n", GetCurrentThreadId());
-	    	// Add movement commands to the globalArr
+	// Add movement commands to the globalArr
+	globalArr[0] = mlr; // First argument is moveleftright (0 to 255)
+	globalArr[1] = mfb; // Second argument is moveforwardback (0 to 255)
+	// AFTER globalArr has been modified, change checkArrChange to true to represent changes have ALREADY BEEN MADE
+	checkArrChange = true;
 
-	    	cout<<"The global Arr is: "<<globalArr[0]<<"  "<<globalArr[1];
-
-	    	globalArr[0] = mlr; // First argument is moveleftright (0 to 255)
-	    	globalArr[1] = mfb; // Second argument is moveforwardback (0 to 255)
-	    	// AFTER globalArr has been modified, change checkArrChange to true to represent changes have ALREADY BEEN MADE
-	        checkArrChange = true;
-
-	        // Release the semaphore when task is finished
-
-	        if (!ReleaseSemaphore(
-	    							checkSemaphore,  // handle to semaphore
-	    							1,            // increase count by one
-	    							NULL) )       // not interested in previous count
-	    	{
-	        	printf("ReleaseSemaphore error: %d\n", GetLastError());
-	    	}
-	    	break;
-
-	    	// The semaphore was nonsignaled, so a time-out occurred.
-	    	case WAIT_TIMEOUT:
-	    		printf("Thread %d: wait timed out\n", GetCurrentThreadId());
-	    		break;
-	}
 }
 
 
 int main (int argc, char* argv[])
 {
+  while(connected==false) {
+	  //do nothing
+  }
+
   if (argc > 200) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
       show_usage(argv[0]); // Inform the user of how to use the program
       exit(0);
@@ -194,20 +146,6 @@ int main (int argc, char* argv[])
         						0, // creational flag ( start if  0 )
         						&threadID); // thread ID
 
-  // Need to also create a semaphore the global that is changed by both threads
-  // This is similar to mutex in linux (a way of locking access to globals when running multiple threads)
-  // Create a semaphore with initial and max counts of 1 so they can only be accessed at one time
-
-  checkSemaphore = CreateSemaphore(
-              NULL,           // default security attributes
-              1,  			  // initial count
-              1,  			  // maximum count
-              NULL);          // unnamed semaphore
-
-  if (checkSemaphore == NULL) {
-	  printf("CreateSemaphore error: %d\n", GetLastError());
-      return 1;
-  }
 
 
 
@@ -459,7 +397,6 @@ int main (int argc, char* argv[])
   /*
    *  END of functionality
    */
-  CloseHandle(checkSemaphore);
   CloseHandle(pyBlueThread);
   pyDc();
 return 0;

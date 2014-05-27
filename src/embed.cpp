@@ -49,7 +49,7 @@ PyObject* pyConn(void) {
 	Py_DECREF(pFunc);
 
 	// Don't finalise this section so that the reference is kept to an instance of the class?
-	// This may allow a class versiont to be used if passing *PyObject doesn't work
+	// This may allow a class version to be used if passing *PyObject doesn't work
 	//Py_Finalize();
 
 	return pSerial;
@@ -57,8 +57,6 @@ PyObject* pyConn(void) {
 
 
 int sendPy(PyObject *serial,int mlr, int mfb) {
-		cout<< mlr;
-		cout<< mfb;
 	// Initialize the Python Interpreter
 	    //Py_Initialize();
 
@@ -101,7 +99,6 @@ int sendPy(PyObject *serial,int mlr, int mfb) {
 	        }
 
 	    }
-	    cout << pArgs;
 	    pValue = PyObject_CallObject(pFunc, pArgs);
 	    Py_DECREF(pArgs);
 	    if (pValue != NULL) {
@@ -128,7 +125,6 @@ int sendPy(PyObject *serial,int mlr, int mfb) {
 	    //Py_Finalize();
 
 	    return 0;
-
 }
 
 void pyDc(void) {
