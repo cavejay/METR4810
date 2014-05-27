@@ -25,6 +25,7 @@
 #include "PID.h"
 #include "sys_constants.h"
 #include "embed.h"
+#include "race_track_extraction.h"
 // Aruco .h's
 #include "src/marker.h"
 #include "src/aruco.h"
@@ -95,8 +96,8 @@ int main (int argc, char* argv[])
   // Need to thread the python interpreter
   // Use embed.cpp to connect bluetooth
 
-  PyObject* service = pyConn();
-  sendPy(service,0,0);
+//  PyObject* service = pyConn();
+//  sendPy(service,0,0);
 
 
    /*
@@ -128,6 +129,18 @@ int main (int argc, char* argv[])
     }
 
     frame_bgr = img.clone();
+
+
+    /*
+     * BOB's Thresholding
+     *
+     */
+//      Mat a;
+//      cvtColor(frame_bgr, a, CV_BGR2GRAY);
+//      a = race_track_extraction(a,0.5,0.5,0.5,0.5);
+//      namedWindow("f_bw",WINDOW_AUTOSIZE);
+//      imshow("f_bw", a);
+
 
     /*
      * THRESHOLD IMAGE
