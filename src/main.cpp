@@ -31,10 +31,19 @@
 #include "src/cvdrawingutils.h"
 // Definitions
 #define ever ;;
+#define MAX_SEM_COUNT=1;
 // Namespaces
 using namespace cv;
 using namespace std;
 using namespace aruco;
+// Global variable for array to send data
+// Currently of limited allocated memory size
+// - no need for stacking up more commands
+int* globalArr = new int[2];
+// A global variable to check if globalArr has new values
+// false for no change, true for changes made
+bool checkArrChange = false;
+HANDLE checkSemaphore;
 
 void show_usage(std::string name){
   std::cerr << "Usage: " << name << " <option(s)> SOURCES\n"
@@ -51,6 +60,84 @@ void show_usage(std::string name){
 	    << std::endl;
 	    std::cin.get();
 }
+
+unsigned long WINAPI pyThread(void *ptr) {
+	// Initially connect to the vehicle
+	PyObject* service = pyConn();
+
+	while(1){
+		// If the global array has something to send
+		if(checkArrChange) {
+			DWORD dwWait;
+			// Try to enter the semaphore gate.
+			dwWait = WaitForSingleObject(
+						checkSemaphore,   // handle to semaphore
+						0L);           // zero-second time-out interval
+
+			switch (dwWait) {
+			// The semaphore object was signaled.
+				case WAIT_OBJECT_0:
+					printf("Thread %d: wait succeeded\n", GetCurrentThreadId());
+					// Use the wrapper function sendPy to move the vehicle
+					sendPy(service,globalArr[0],globalArr[1]);
+					// Reset checkArrChange to no changes
+				    checkArrChange = false;
+
+				    // Release the semaphore when task is finished
+
+					if (!ReleaseSemaphore(
+										checkSemaphore,  // handle to semaphore
+										-1,            // increase count by one
+										NULL) )       // not interested in previous count
+					{
+						printf("ReleaseSemaphore error: %d\n", GetLastError());
+					}
+					break;
+
+				// The semaphore was nonsignaled, so a time-out occurred.
+				case WAIT_TIMEOUT:
+					printf("Thread %d: wait timed out\n", GetCurrentThreadId());
+					break;
+			}
+		}
+	}
+	return 0;
+}
+
+void move(int mlr, int mfb) {
+	DWORD dwWait;
+	// Try to enter the semaphore gate.
+	dwWait = WaitForSingleObject(
+	    							checkSemaphore,   // handle to semaphore
+	    							INFINITE);        // Wait until semaphore is signaled
+	switch (dwWait) {
+		// The semaphore object was signaled.
+	    case WAIT_OBJECT_0:
+	    	printf("Thread %d: wait succeeded\n", GetCurrentThreadId());
+	    	// Add movement commands to the globalArr
+	    	globalArr[0] = mlr; // First argument is moveleftright (0 to 255)
+	    	globalArr[1] = mfb; // Second argument is moveforwardback (0 to 255)
+	    	// AFTER globalArr has been modified, change checkArrChange to true to represent changes have ALREADY BEEN MADE
+	        checkArrChange = true;
+
+	        // Release the semaphore when task is finished
+
+	        if (!ReleaseSemaphore(
+	    							checkSemaphore,  // handle to semaphore
+	    							1,            // increase count by one
+	    							NULL) )       // not interested in previous count
+	    	{
+	        	printf("ReleaseSemaphore error: %d\n", GetLastError());
+	    	}
+	    	break;
+
+	    	// The semaphore was nonsignaled, so a time-out occurred.
+	    	case WAIT_TIMEOUT:
+	    		printf("Thread %d: wait timed out\n", GetCurrentThreadId());
+	    		break;
+	}
+}
+
 
 int main (int argc, char* argv[])
 {
@@ -92,11 +179,31 @@ int main (int argc, char* argv[])
   namedWindow("Contours", CV_WINDOW_FREERATIO);
 //  cv::createTrackbar( "Threshold Value", "Contours", &threshMag, 255, NULL );
 
-  // Need to thread the python interpreter
-  // Use embed.cpp to connect bluetooth
+  // Need to thread the Python interpreter for bluetooth
+  HANDLE pyBlueThread;
+  DWORD threadID;
+  pyBlueThread = CreateThread(NULL, // security attributes ( default if NULL )
+        						0, // stack SIZE default if 0
+        						pyThread, // Start Address
+        						NULL, // input data
+        						0, // creational flag ( start if  0 )
+        						&threadID); // thread ID
 
-  PyObject* service = pyConn();
-  sendPy(service,0,0);
+  // Need to also create a semaphore the global that is changed by both threads
+  // This is similar to mutex in linux (a way of locking access to globals when running multiple threads)
+  // Create a semaphore with initial and max counts of 1 so they can only be accessed at one time
+
+  checkSemaphore = CreateSemaphore(
+              NULL,           // default security attributes
+              1,  			  // initial count
+              1,  			  // maximum count
+              NULL);          // unnamed semaphore
+
+  if (checkSemaphore == NULL) {
+	  printf("CreateSemaphore error: %d\n", GetLastError());
+      return 1;
+  }
+
 
 
    /*
@@ -290,34 +397,29 @@ int main (int argc, char* argv[])
     if((pNum1 >= straightThreshold*pNum2 && pNum1 <= pNum2 ) || (pNum1 >= pNum2 && pNum1 <= straightThreshold*pNum2))
     {
       // Tell the car to go straight
+      move(128,0);
 
-      // Use the wrapper function sendPy to move the actual vehicle
-      //sendPy(service,128, 0); // first arg is moveleftright (0 to 255)
+      // Tell the simulation car to go straight
 
-    		  	  	   // Second arg is moveforwardback (0 to 255)
-
-      Rsim.move(forwardSpeed , 0);// Move the simulation
+      Rsim.move(forwardSpeed , 0);
       cout << "Go Straight\n";
     }
     else if (pNum2 > pNum1)
     {
       // Tell the car to go left
+      move(0,0);
 
-      //sendPy(service,0, 0);
-
-      Rsim.move(forwardSpeed, 4*pid.p_i_d()); // Move the simulation
-//      Rsim.drive(2, -4); // Move the simulation
+      // Tell the simulation car to go left
+      Rsim.move(forwardSpeed, 4*pid.p_i_d());
       cout << "Turning Left\n";
     }
-    // Assuming largest2 is the inside track (being smaller than largest 1)
     else if (pNum1 > pNum2)
     {
       // Tell the car to go right
+      move(255,0);
 
-      //sendPy(service,255, 0);
-
-      Rsim.move(forwardSpeed, 4*pid.p_i_d());// Move the simulation
-//      Rsim.drive(2, 4);// Move the simulation
+      // Tell the simulation car to go right
+      Rsim.move(forwardSpeed, 4*pid.p_i_d());
       cout << "Turning right\n";
     }
     else {
@@ -352,6 +454,8 @@ int main (int argc, char* argv[])
   /*
    *  END of functionality
    */
-
+  CloseHandle(arrSemaphore);
+  CloseHandle(checkSemaphore);
+  CloseHandle(pyBlueThread);
 return 0;
 }
