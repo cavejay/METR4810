@@ -7,7 +7,7 @@
 
 #include "CarLocator.h"
 
-CarLocator::CarLocator ()
+CarLocator::CarLocator (inputVars in)
 {
   // TODO figure out if anything actually needs to go here?
 }

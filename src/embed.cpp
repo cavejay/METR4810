@@ -7,7 +7,7 @@
 
 #include <Python.h>
 
-int main() {
+int embed() {
 
 	// Initialize the Python Interpreter
 	    Py_Initialize();

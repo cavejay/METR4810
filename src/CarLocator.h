@@ -38,7 +38,7 @@ private:
   Mat getWAvg(void);
 
 public:
-  CarLocator ();
+  CarLocator (inputVars in);
   void findCar_SURF(const Mat& src);
   Point findCar(const Mat& src);
 
