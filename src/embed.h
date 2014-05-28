@@ -9,7 +9,7 @@
 #define EMBED_H_
 
 #include <Python.h>
-PyObject* pyConn(void);
+PyObject* pyConn(PyObject* pModule);
 int sendPy(PyObject* service,int mlr, int mfb);
 void pyDc(void);
 
