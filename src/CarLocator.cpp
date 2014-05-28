@@ -20,7 +20,7 @@ Point CarLocator::findCar(const Mat& src){
   //pointPolygonTest to check if the mass center of the latter is within the first.
   // This should provide our marker (Y)
 
-  cout << "split the channels" << endl;
+//  cout << "split the channels" << endl;
   vector<Mat> HSVchannels(3);
   split(src, HSVchannels);
 
@@ -34,11 +34,11 @@ Point CarLocator::findCar(const Mat& src){
   Mat V_thresh;
   vector<vector<Point> > Vc;
   vector<Vec4i> Vhierarchy;
-  imshow("HSV - V", gray);
-  cv::threshold(gray, V_thresh, 160, 255, THRESH_BINARY);
-//  Dilation(V_thresh, V_thresh, ED_ELLIPSE,4);
+//  imshow("HSV - V", gray);
+  cv::threshold(gray, V_thresh, 200, 255, THRESH_BINARY);
+  Dilation(V_thresh, V_thresh, ED_ELLIPSE,1.8);
   imshow("HSV - V - thresh", V_thresh);
-  cv::findContours(V_thresh, Vc, Vhierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+  cv::findContours(V_thresh, Vc, Vhierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
   cout << "found the contours in the Value channel" << endl;
   cout << "there are this many: " << Vc.size() << endl;
@@ -48,70 +48,75 @@ Point CarLocator::findCar(const Mat& src){
   Mat S_thresh;
   vector<vector<Point> > Sc;
   vector<Vec4i> Shierarchy;
-  imshow("HSV - S", HSVchannels[1]);
+//  imshow("HSV - S", HSVchannels[1]);
   cv::threshold(HSVchannels[1], S_thresh, 150, 255, THRESH_BINARY_INV);
-  Dilation(S_thresh, S_thresh, ED_ELLIPSE,0.5);
+//  Dilation(S_thresh, S_thresh, ED_ELLIPSE,0.8);
+  bitwise_not(S_thresh,S_thresh);
   imshow("HSV - S - thresh", S_thresh);
   cv::findContours(S_thresh, Sc, Shierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
-  cout << "found the contours in the Saturation channel" << endl;
+//  cout << "found the contours in the Saturation channel" << endl;
 
   // find Moments
   vector<Moments> mu(Sc.size() );
   for(size_t i = 0; i < Sc.size(); i++ ){
     mu[i] = moments( Sc[i], false );
   }
-  cout << "found moments" << endl;
+//  cout << "found moments" << endl;
 
   ///  Get the mass centers:
   vector<Point2f> S_masscenter( Sc.size() );
   for(size_t i = 0; i < Sc.size(); i++ ){
     S_masscenter[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 );
   }
-  cout << "found masscenters" << endl;
-  cout << "THere are this many: " << S_masscenter.size() << endl;
+//  cout << "found masscenters" << endl;
+//  cout << "THere are this many: " << S_masscenter.size() << endl;
 
   // Check if the masscenters are inside one of the contours
   // i is the contour
   // j in the masscenter
-  vector<Point2f> carPoint(1);
-  vector<vector<Point> > carContour(1);
+  vector<Point2f> carPoint;
+  vector<vector<Point> > carContour;
   for(int i = 0; i < Vc.size(); i++){
-    cout << "i: " << i << endl;
+//    cout << "i: " << i << endl;
     for(int j = 0; j < S_masscenter.size(); j++){
-      cout << "j: " << j << endl;
-      int loc = pointPolygonTest(Vc[i],S_masscenter[j],false);
-      cout << loc << endl;
-      if(loc > 0){
-	carPoint.push_back(S_masscenter[j]);
-	carContour.push_back(Vc[i]);
-      }
+//      cout << "j: " << j << endl;
+      // If the contour is less than 1/4 of the image continue
+      if(contourArea(Vc[i]) < 0.25*src.size().area()){
+
+    	// Check if the masscenter is in side the contour
+	    int loc = pointPolygonTest(Vc[i],S_masscenter[j],false);
+//		cout << loc << endl;
+		if(loc > 0){
+			// if it is, check to make sure the contour it's inside is a circle
+			vector<Point> approx;
+			cv::approxPolyDP(Vc[i], approx, cv::arcLength(Vc[i], true) *0.01, true);
+			if (isContourConvex(approx)){
+			  carPoint.push_back(S_masscenter[j]);
+			  carContour.push_back(approx);
+			}
+		}
+	  }
     }
   }
 
-  cout << "did we make it?\n";
-
   Mat show = src.clone();
   cvtColor(show, show, CV_HSV2BGR);
-  for (size_t i = 0; i < Vc.size(); i++){
-    drawContours(show, Vc, i, Scalar(0,0,255),1);
-  }
-  cout << "drawn Vc onto show" << endl;
-  for (size_t i = 0; i < Sc.size(); i++){
-    drawContours(show, Sc, i, Scalar(255,0,0),1);
-  }
+//  for (size_t i = 0; i < Vc.size(); i++){
+//    drawContours(show, Vc, i, Scalar(0,0,255),1);
+//  }
+////  cout << "drawn Vc onto show" << endl;
+//  for (size_t i = 0; i < Sc.size(); i++){
+//    drawContours(show, Sc, i, Scalar(255,0,0),1);
+//  }
 
   for(size_t i = 0; i < carPoint.size(); i++){
-    circle( show, carPoint[i], 20, Scalar(0,255,0), 5, 8, 0 );
+    circle( show, carPoint[0], 20, Scalar(0,255,0), 5, 8, 0 );
     drawContours(show, carContour, i, Scalar(0,255,255));
   }
 
-
-  // TODO Continue with this. look into hierarchy and contours inside contours and check if mass center of small one is in larger one by using getPolygon
-
   imshow("input Show",show);
-  Point rawr;
-  return rawr;
+  return carPoint[0];
 }
 
 void findMarkerContours(const Mat& src)

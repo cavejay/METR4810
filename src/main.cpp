@@ -160,7 +160,7 @@ int main (int argc, char* argv[])
     cv::cvtColor(frame_bgr, frame_hsv, cv::COLOR_BGR2HSV);
 
     // Try to find the car
-    cl.findCar(frame_hsv);
+    Point car = cl.findCar(frame_hsv);
 
     cv::threshold(frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY);
     imshow("threshed'", ThreshTrack);

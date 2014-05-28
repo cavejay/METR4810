@@ -32,6 +32,7 @@ struct inputVars {
   bool multithreading = false;
   bool Simulation = false;
   bool demo_mode = false;
+  bool showWorking = false;
 };
 
 // FUNCTIONS

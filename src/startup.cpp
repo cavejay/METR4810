@@ -88,6 +88,7 @@ void createSettingsFile(void){
   fs << "Input Format" << "roborealm";
   fs << "RoboRealm Host Address" << "localhost";
   fs << "File Location" << "Sample_Pictures/demo-track.png";
+  fs << "Show debug images and print outs" << false;
   fs.release();
 }
 
@@ -109,6 +110,8 @@ inputVars readSettingsFile(String file){
   fs["RoboRealm Host Address"] >> tempHost;
   strcpy(toReturn.Host,tempHost.c_str());
   fs["File Location"] >> toReturn.file_location;
+  fs["Show debug images and print outs"] >> toReturn.showWorking;
+
   return toReturn;
 }
 
