@@ -7,19 +7,15 @@
 
 #include "CarLocator.h"
 
-CarLocator::CarLocator ()
+CarLocator::CarLocator (inputVars in)
 {
-  // TODO figure out if anything actually needs to go here?
+  // TODO transfer the values needed to pass to the car finder class
 }
 
 /**
  * Takes a hsv picture and returns the location of the car with a red
  */
 Point CarLocator::findCar(const Mat& src){
-  // TODO Find the blob in v space, then find the blob in s space and use
-  //pointPolygonTest to check if the mass center of the latter is within the first.
-  // This should provide our marker (Y)
-
 //  cout << "split the channels" << endl;
   vector<Mat> HSVchannels(3);
   split(src, HSVchannels);
@@ -37,11 +33,11 @@ Point CarLocator::findCar(const Mat& src){
 //  imshow("HSV - V", gray);
   cv::threshold(gray, V_thresh, 200, 255, THRESH_BINARY);
   Dilation(V_thresh, V_thresh, ED_ELLIPSE,1.8);
-  imshow("HSV - V - thresh", V_thresh);
+//  imshow("HSV - V - thresh", V_thresh);
   cv::findContours(V_thresh, Vc, Vhierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
-  cout << "found the contours in the Value channel" << endl;
-  cout << "there are this many: " << Vc.size() << endl;
+//  cout << "found the contours in the Value channel" << endl;
+//  cout << "there are this many: " << Vc.size() << endl;
 
   // Find the blob in the marker in S Space!
   // This is the red dot
@@ -52,7 +48,7 @@ Point CarLocator::findCar(const Mat& src){
   cv::threshold(HSVchannels[1], S_thresh, 150, 255, THRESH_BINARY_INV);
 //  Dilation(S_thresh, S_thresh, ED_ELLIPSE,0.8);
   bitwise_not(S_thresh,S_thresh);
-  imshow("HSV - S - thresh", S_thresh);
+//  imshow("HSV - S - thresh", S_thresh);
   cv::findContours(S_thresh, Sc, Shierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
 //  cout << "found the contours in the Saturation channel" << endl;
@@ -110,12 +106,19 @@ Point CarLocator::findCar(const Mat& src){
 //    drawContours(show, Sc, i, Scalar(255,0,0),1);
 //  }
 
-  for(size_t i = 0; i < carPoint.size(); i++){
-    circle( show, carPoint[0], 20, Scalar(0,255,0), 5, 8, 0 );
-    drawContours(show, carContour, i, Scalar(0,255,255));
+  // only try to draw it if there were points found.
+  if(carPoint.size() > 0)
+  {
+	for(size_t i = 0; i < carPoint.size(); i++){
+	circle( show, carPoint[0], 20, Scalar(0,255,0), 5, 8, 0 );
+	drawContours(show, carContour, i, Scalar(0,255,255));
+	}
+  } else {
+	  cerr << "No Car was found in the current image. Previous location was: " << History[History.size()-1] << endl;
+	  return Point(-1,-1);
   }
 
-  imshow("input Show",show);
+//  imshow("input Show",show);
   return carPoint[0];
 }
 

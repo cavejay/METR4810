@@ -88,7 +88,7 @@ int main (int argc, char* argv[])
   PID pid(0,0,0,10);
 
   // Car Localisation init
-  CarLocator cl = CarLocator();
+  CarLocator cl(in);
 
   // Initialise variables
   cv::Mat img, img1;
