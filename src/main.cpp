@@ -18,7 +18,6 @@
 #include <sstream>
 // Our .h's
 #include "startup.h"
-#include "CarLocator.h"
 #include "functions.h"
 #include "Rotate3d.h"
 #include "VStream.h"
@@ -26,6 +25,7 @@
 #include "PID.h"
 #include "sys_constants.h"
 #include "race_track_extraction.h"
+#include "fill_black.h"
 // Aruco .h's
 #include "src/marker.h"
 #include "src/aruco.h"
@@ -53,6 +53,18 @@ void show_usage(std::string name){
 	    std::cin.get();
 }
 
+void CallBackFunc(int event, int x, int y, int flags, void *ptr)
+{
+	Point* point = (Point*)ptr;
+	if (event == EVENT_LBUTTONDOWN)
+	{
+		cout<<"left button of the mouse is clicked (" << x << "," << y <<")" <<endl;
+		point->x = x;
+		point->y = y;
+	}
+
+}
+
 int main (int argc, char* argv[])
 {
   if (argc > 200) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
@@ -71,7 +83,7 @@ int main (int argc, char* argv[])
   // This overrides the cmdline for nowz
   in.inputSource = "still";
   in.camera_number = 0;
-  in.file_location = "Sample_Pictures/inPlace5.jpg";
+  in.file_location = "Sample_Pictures/inPlace1.jpg";
 
 
   /*
@@ -85,13 +97,23 @@ int main (int argc, char* argv[])
   // Initialise PID for pathing
   PID pid(0,0,0,10);
 
-  // Car Localisation init
-  CarLocator cl = CarLocator();
-
   // Initialise variables
   cv::Mat img, img1;
   cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThreshTrack;
   int threshMag = 160;
+
+  //GUI for software
+  int start_stop_bar = 0;
+  int pit_enter_exit_bar = 0;
+  namedWindow("SOFTWAREAAAAAAAA",1);
+  //For start/stop bar, 0 = stop, 1 = start
+  createTrackbar("Start/Stop","SOFTWAREAAAAAAAA",&start_stop_bar,1,0,0);
+  /*For Pit bar, 0 = no pit, 1 = enter pit, 2 = exit pit. Slide bar goes back to
+   * have a value of 0 once pit exit finishes (have not implemented yet)
+   */
+  createTrackbar("Pit No/enter/exit","SOFTWAREAAAAAAAA",&pit_enter_exit_bar,2,0,0);
+
+
 
   namedWindow("Contours", CV_WINDOW_FREERATIO);
 //  cv::createTrackbar( "Threshold Value", "Contours", &threshMag, 255, NULL );
@@ -100,12 +122,31 @@ int main (int argc, char* argv[])
     *  END of Setup
     */
 
+  /*
+   * BOB's Thresholding
+   *
+   */
+    Point xyz;
+    Mat a = Vs.pullImage(6060);
+    cvtColor(a, a, CV_BGR2GRAY);
+    a = race_track_extraction(a);
+    namedWindow("f_bw",WINDOW_AUTOSIZE);
+    imshow("f_bw", a);
+    setMouseCallback("f_bw",CallBackFunc,&xyz);
+
+    if(waitKey(300000) == 32)
+    a = fill_black(a,xyz);
+    imshow("f_bw", a);
+
+
+
 
    /*
     *  BEGINNING of functionality
     */
 
   int circleReset = 4;
+
   // Start Loop
   while(1)
   {
@@ -125,15 +166,8 @@ int main (int argc, char* argv[])
 
     frame_bgr = img.clone();
 
-    /*
-     * BOB's Thresholding
-     *
-     */
-      Mat a;
-      cvtColor(frame_bgr, a, CV_BGR2GRAY);
-      a = race_track_extraction(a,0.5,0.5,0.5,0.5);
-      namedWindow("f_bw",WINDOW_AUTOSIZE);
-      imshow("f_bw", a);
+
+
 
     /*
      * THRESHOLD IMAGE
@@ -170,170 +204,11 @@ int main (int argc, char* argv[])
     }
     drawContours(drawing, contours, contours.size()-2, colors[0], 1, 8, hierarchy, 0, Point());
     drawContours(drawing, contours, contours.size()-1, colors[1], 1, 8, hierarchy, 0, Point());
+
     /// Show in a window
     namedWindow("Contours", CV_WINDOW_AUTOSIZE);
-    imshow("Contours", drawing);
-
-    /*
-     * PATHING
-     * Jonathan Holland
-     * Updated by Michael Ball & Xavier Casley
-     */
-
-    // Assign the two tracks to the two largest contours
-    vector<Point> largest1 = contours[contours.size() - 1];
-    vector<Point> largest2 = contours[contours.size() - 2];
-
-    // Get the center of the vehicle given the AR tag has been recognised
-
-    // Grabbing center from the Aruco tag marker
-    // cv::Point2f carCenter = Markers[0].getCenter();
-
-    // Grabbing center for the simulation
-    cv::Point2f carCenter = Rsim.Position;
-
-    // Initialise local variables
-    double average1 = 0;
-    double average2 = 0;
-    double value = 0;
-    double totalValue1 = 0;
-    double totalValue2 = 0;
-    int count = 1;
-    int pNum1 = 0;
-    int pNum2 = 0;
-
-    // Assign a value to make the circle around the car
-    int preferedPoints = 20; // 20 is good, it gets about the same answer as 10
-    int minSidePoints = 5; // keep this value under half of preferedPoints
-    int circRadius;
-    circleReset--;
-    if(circleReset < 0)
-    {
-    	circRadius = getSearchRadius(preferedPoints, minSidePoints, carCenter, largest1, largest2);
-    	circleReset = 4;
-    }
-    Rsim.set_searchRadius(circRadius);
-
-    // Probably the outside of the track
-    for (size_t i = 0; i < largest1.size(); i++)
-    {
-      // Use pythagoras on the 2 dimensional plane to find the distances
-      value = sqrt(
-	  pow((largest1[i].x - carCenter.x), 2)
-	  + pow((largest1[i].y - carCenter.y), 2));
-      // If the value is within the circle radius
-      if (value < circRadius)
-      {
-    	  totalValue1 += value;
-    	  count += 1;
-      }
-    }
-    average1 = totalValue1 / count;
-    pNum1 = count;
-
-    value = 0;
-    count = 1;
-
-    // Do the same for largest2, the other contour probably the inside of the track
-    for (size_t i = 0; i < largest2.size(); i++)
-    {
-      value = sqrt(
-	  pow((largest2[i].x - carCenter.x), 2)
-	  + pow((largest2[i].y - carCenter.y), 2));
-
-      if (value < circRadius)
-      {
-	totalValue2 += value;
-	count += 1;
-      }
-    }
-    average2 = totalValue2 / count;
-    pNum2 = count;
-
-    if(pNum2 > 110) {
-    	pNum2 = 110;
-    }
-    if(pNum1 > 110) {
-    	pNum1 = 110;
-    }
-
-    // record error
-    pid.error(pNum1 - pNum2);
-
-    /* Info dump */
-    cout <<
-	"Total Distance Outside (1): " << totalValue1 << endl <<
-	"Total Distance Inside (2): " << totalValue2 << endl <<
-	"Average Outside (1): " << average1 << endl <<
-	"Average Inside (2): " << average2 << endl <<
-	"Error: " << error << endl <<
-	"Number of Points Outside (1): " << pNum1 << endl <<
-	"Number of Points Inside (2): " << pNum2 << endl;
-
-    /*
-     *  Beginning of PID Controller
-     *  Code by Michael
-     */
-    // Constants
-    pid.Kp(0.1);
-    pid.Ki(0.0005);
-    pid.Kd(0.1);
-
-    // Number of error values to use in the integration
-    pid.set_integrationLen(10);
-
-    /*
-     * Simulation Controller (may not work for actual car)
-     * Created by Jonathan Holland
-     * Edited by Michael Ball and Xavier Casley
-     */
-    // Minimum threshold to go straight
-    float straightThreshold = 0.99;
-    float forwardSpeed = 2;
-
-    // If one average is larger than the other, move towards that edge
-    // If differences are tiny just go straight
-    if((pNum1 >= straightThreshold*pNum2 && pNum1 <= pNum2 ) || (pNum1 >= pNum2 && pNum1 <= straightThreshold*pNum2))
-    {
-      // Tell the car to go straight
-      Rsim.move(forwardSpeed , 0);// Move the simulation
-      cout << "Go Straight\n";
-    }
-    else if (pNum2 > pNum1)
-    {
-      // Tell the car to go left
-
-      Rsim.move(forwardSpeed, 4*pid.p_i_d()); // Move the simulation
-//      Rsim.drive(2, -4); // Move the simulation
-      cout << "Turning Left\n";
-    }
-    // Assuming largest2 is the inside track (being smaller than largest 1)
-    else if (pNum1 > pNum2)
-    {
-      // Tell the car to go right
-
-      Rsim.move(forwardSpeed, 4*pid.p_i_d());// Move the simulation
-//      Rsim.drive(2, 4);// Move the simulation
-      cout << "Turning right\n";
-    }
-    else {
-      cout << "#####\nELSE HAPPENED\n#####" << endl;
-    }
-
-    Rsim.draw(drawing, true);// draw the simulation
-
-    // Give information to image:
-    stringstream ss1;
-    ss1 <<  "Number of Points Outside (1): " << pNum1;
-    stringstream ss2;
-    ss2 <<  "number of Points Inside (2): " << pNum2;
-    putText(drawing, ss1.str(),Point(10,30), FONT_HERSHEY_SIMPLEX,0.5,Scalar(255,255,255));
-    putText(drawing, ss2.str(),Point(10,60), FONT_HERSHEY_SIMPLEX,0.5,Scalar(255,255,255));
 
     //Draw image
-    // draw the simulation
-    Rsim.draw(drawing, circRadius);
-    Rsim.showDirection(drawing, pNum1, pNum2);
     imshow("Contours", drawing);
 
     // Wait for 'esc' key press for 30ms.

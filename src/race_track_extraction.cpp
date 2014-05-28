@@ -7,13 +7,11 @@
 
 #include "race_track_extraction.h"
 
-Mat race_track_extraction(Mat image,double top_const,
-		double bot_const,double left_const, double right_const)
+Mat race_track_extraction(Mat image)
 {
 	Mat f;
 	Mat f_bw;
 	f = image;
-
 	if(!f.data){
 		cout<<"Could not open or find the image"<<std::endl;
 		exit(EXIT_FAILURE);
@@ -48,7 +46,7 @@ Mat race_track_extraction(Mat image,double top_const,
 //		}
 //	}
 	bitwise_not(f_bw,f_bw);
-	floodFill(f_bw,Point(100,10),0,0,Scalar(),Scalar(),4);
+
 	removeSmallBlobs(f_bw, 10000);
 	namedWindow("after_complement",WINDOW_AUTOSIZE);
 	imshow("after_complement", f_bw);

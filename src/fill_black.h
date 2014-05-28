@@ -1,13 +1,12 @@
 /*
- * race_track_extraction.h
+ * fill_black.h
  *
- *  Created on: 2014年5月26日
+ *  Created on: 2014年5月28日
  *      Author: Administrator
  */
 
-#ifndef RACE_TRACK_EXTRACTION_H_
-#define RACE_TRACK_EXTRACTION_H_
-
+#ifndef FILL_BLACK_H_
+#define FILL_BLACK_H_
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv/highgui.h"
@@ -20,12 +19,8 @@
 
 using namespace cv;
 using namespace std;
-
-void removeSmallBlobs(Mat image, double size);
-
-Mat race_track_extraction(Mat image);
+Mat fill_black(Mat image,Point p);
 
 
 
-
-#endif /* RACE_TRACK_EXTRACTION_H_ */
+#endif /* FILL_BLACK_H_ */
