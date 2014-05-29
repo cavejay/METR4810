@@ -22,16 +22,20 @@
 
 #include "functions.h"
 #include "startup.h"
+#include "VStream.h"
+
 // Namespaces
 using namespace cv;
 using namespace std;
 
-class transformStitch {
+class camTrans {
 	// stores each camera's transformation matrices in as <port, transform matrice>
 	map<int, Mat> cameraTransforms;
+	map<int, Mat> cameraIMGs;
+	vector<int> ports;
 
 public:
-	transformStitch();
+	camTrans(VStream Vs);
 	void stitch(Mat& src1, Mat& src2, Mat& dst);
 	Mat cameraTransform(int Port);
 };
