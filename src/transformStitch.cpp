@@ -19,11 +19,11 @@ camTrans::camTrans(VStream Vs) {
 	// Images are labelled with their port number
 	for (int i =0; i < ports.size(); i ++ ){
 		cameraIMGs[ports[i]] = Vs.pullImage(ports[i]);
-
-		namedWindow("Camera at " + int2str(ports[i]),CV_WINDOW_KEEPRATIO);
+		String windowName = "Camera at " + int2str(ports[i]);
+		namedWindow(windowName,CV_WINDOW_KEEPRATIO);
+		setMouseCallback(windowName,mouseHandler, NULL );
 		imshow(int2str(ports[i]), cameraIMGs[ports[i]]);
-
-
+		if(waitKey() == 32){}
 
 	}
 
@@ -47,3 +47,6 @@ Mat camTrans::cameraTransform(int Port)
 	return cameraTransforms[Port];
 }
 
+//static void camTrans::mouseHandler(int event, int x, int y, int flags, void* this_){
+//
+//}

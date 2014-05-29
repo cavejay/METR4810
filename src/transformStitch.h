@@ -38,6 +38,8 @@ public:
 	camTrans(VStream Vs);
 	void stitch(Mat& src1, Mat& src2, Mat& dst);
 	Mat cameraTransform(int Port);
+
+	static void mouseHandler(int event, int x, int y, int flags, void* this_);
 };
 
 #endif /* TRANSFORMSTITCH_H_ */
