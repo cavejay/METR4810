@@ -67,8 +67,10 @@ def send(ser, mlr, mfb):
             b=[]
             "This is the left and right value 0-left, 255-right"
             b.append(mlr)
+            print("Sending mlr as: "+mlr)
             "This is the forward and back value 0-forwards, 255-backwards"
             b.append(mfb)
+            print("Sending mfb as: "+mlr)
             ba = bytearray(b)
             ser.write(b)
             return 0        

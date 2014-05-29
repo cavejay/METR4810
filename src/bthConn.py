@@ -11,78 +11,59 @@ import time
 import os
 
 
-class TextPrint:
-        def __init__(self):
-            self.reset()
-            self.font = pygame.font.Font(None, 20)
+def blue():
 
-        def printl(self, screen, textString):
-            textBitmap = self.font.render(textString, True, BLACK)
-            screen.blit(textBitmap, [self.x, self.y])
-            self.y += self.line_height
-            
-        def reset(self):
-            self.x = 10
-            self.y = 10
-            self.line_height = 15
-            
-        def indent(self):
-            self.x += 10
-            
-        def unindent(self):
-            self.x -= 10
-        
+        arr = []
+        arr.append("2")
 
-class Blue:
-    def __init__(self):
-        print("Running Setup\n")
-        
-        self.ser = None
+        return arr
+        """
+        #print("Running Setup\n")
         # Initialise Serial
-        port = 16
+        port = 5
         for x in range(0, 3):
             try:
-                print("Initialising serial...")
+                #print("Initialising serial...")
                 time.sleep(1.5)
-                self.ser = serial.Serial((port-1),9600)
-                self.ser.write("1")
-                print("\nSerial connected")
+                ser = serial.Serial((port-1),9600)
+                ser.write("1")
+                #print("\nSerial connected")
                 time.sleep(1)
-                print("Ready!")
+                #print("Ready!")
                 break
             except serial.SerialException as error:
-                print("Connection unsuccessful:")
-                print(error)
+                #print("Connection unsuccessful:")
+                #print(error)
                 if x == 2:
-                    print("\nCould not connect\n=================")
+                    #print("\nCould not connect\n=================")
                     time.sleep(3)
-                    print("Quitting")
+                    #print("Quitting")
                     time.sleep(2)
                     sys.exit()
                 else:
-                    print("Retrying in 3s...\n")
+                    #print("Retrying in 3s...\n")
                     time.sleep(3)
 
-
-        def send(self, mlr, mfb):
-            ##### SERIAL SENDING #####
-            b=[]
-            "This is the left and right value 0-left, 255-right"
-            b.append(mlr)
-            "This is the forward and back value 0-forwards, 255-backwards"
-            b.append(mfb)
-            ba = bytearray(b)
-            self.ser.write(b)
-
-            ##### TextPrint #####
-            textPrint.printl(screen, "Trigger value: {}"
-                                 .format(mfb))
-            textPrint.printl(screen, "Trigger value Bin: {}"
-                                 .format('{0:08b}'.format(mfb)))
-            textPrint.printl(screen, "Left Stick value: {}"
-                                 .format(mlr))
-            textPrint.printl(screen, "Left Stick value Bin: {}"
-                                 .format('{0:08b}'.format(mlr)))
-
+        return ser
+        """
         
-        
+def send(ser, mlr, mfb):
+
+        ser.append(mlr)
+        ser.append(mfb)
+        print(ser)
+        return 0
+
+        """
+        ##### SERIAL SENDING #####
+        b=[]
+        #This is the left and right value 0-left, 255-right
+        b.append(mlr)
+        #print("appending mlr: " + mlr)
+        #This is the forward and back value 0-forwards, 255-backwards
+        b.append(mfb)
+        #print("appending mlr: " + mfb)
+        ba = bytearray(b)
+        ser.write(b)
+        return 0        
+        """

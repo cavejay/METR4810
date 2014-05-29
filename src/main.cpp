@@ -28,6 +28,7 @@
 #include "embed.h"
 #include "race_track_extraction.h"
 #include "fill_black.h"
+#include "bluetooth.h"
 // Aruco .h's
 #include "src/marker.h"
 #include "src/aruco.h"
@@ -91,6 +92,7 @@ int main (int argc, char* argv[])
   /*
    * BEGINNING of Setup
    */
+  blue();
   VStream Vs(in);
 
   // Initialise Robo Simulation
@@ -122,11 +124,7 @@ int main (int argc, char* argv[])
   namedWindow("Contours", CV_WINDOW_FREERATIO);
 //  cv::createTrackbar( "Threshold Value", "Contours", &threshMag, 255, NULL );
 
-  // Need to thread the python interpreter
-  // Use embed.cpp to connect bluetooth
 
-//  PyObject* service = pyConn();
-//  sendPy(service,0,0);
 
 
    /*
@@ -353,34 +351,29 @@ int main (int argc, char* argv[])
     if((pNum1 >= straightThreshold*pNum2 && pNum1 <= pNum2 ) || (pNum1 >= pNum2 && pNum1 <= straightThreshold*pNum2))
     {
       // Tell the car to go straight
+      //move(128,0);
 
-      // Use the wrapper function sendPy to move the actual vehicle
-      //sendPy(service,128, 0); // first arg is moveleftright (0 to 255)
-
-    		  	  	   // Second arg is moveforwardback (0 to 255)
-
-      Rsim.move(forwardSpeed , 0);// Move the simulation
+      // Tell the simulation car to go straight
+      Rsim.move(forwardSpeed , 0);
       cout << "Go Straight\n";
     }
     else if (pNum2 > pNum1)
     {
       // Tell the car to go left
+      //move(0,0);
 
-      //sendPy(service,0, 0);
-
-      Rsim.move(forwardSpeed, 4*pid.p_i_d()); // Move the simulation
-//      Rsim.drive(2, -4); // Move the simulation
+      // Tell the simulation car to go left
+      Rsim.move(forwardSpeed, 4*pid.p_i_d());
       cout << "Turning Left\n";
     }
     // Assuming largest2 is the inside track (being smaller than largest 1)
     else if (pNum1 > pNum2)
     {
       // Tell the car to go right
+      //move(255,0);
 
-      //sendPy(service,255, 0);
-
-      Rsim.move(forwardSpeed, 4*pid.p_i_d());// Move the simulation
-//      Rsim.drive(2, 4);// Move the simulation
+      // Tell the simulation car to go right
+      Rsim.move(forwardSpeed, 4*pid.p_i_d());
       cout << "Turning right\n";
     }
     else {
@@ -415,6 +408,5 @@ int main (int argc, char* argv[])
   /*
    *  END of functionality
    */
-
 return 0;
 }
