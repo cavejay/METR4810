@@ -27,6 +27,7 @@
 #include "sys_constants.h"
 #include "embed.h"
 #include "race_track_extraction.h"
+#include "fill_black.h"
 // Aruco .h's
 #include "src/marker.h"
 #include "src/aruco.h"
@@ -54,6 +55,18 @@ void show_usage(std::string name){
 	    std::cin.get();
 }
 
+void CallBackFunc(int event, int x, int y, int flags, void *ptr)
+{
+	Point* point = (Point*)ptr;
+	if (event == EVENT_LBUTTONDOWN)
+	{
+		cout<<"left button of the mouse is clicked (" << x << "," << y <<")" <<endl;
+		point->x = x;
+		point->y = y;
+	}
+
+}
+
 int main (int argc, char* argv[])
 {
   if (argc > 200) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
@@ -75,7 +88,6 @@ int main (int argc, char* argv[])
   in.camera_number = 1;
   in.file_location = "Sample_Pictures/ARTag/1.png";
 
-
   /*
    * BEGINNING of Setup
    */
@@ -95,6 +107,18 @@ int main (int argc, char* argv[])
   cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThreshTrack;
   int threshMag = 160;
 
+  //GUI for software
+  int start_stop_bar = 0;
+  int pit_enter_exit_bar = 0;
+  namedWindow("SOFTWAREAAAAAAAA",1);
+  //For start/stop bar, 0 = stop, 1 = start
+  createTrackbar("Start/Stop","SOFTWAREAAAAAAAA",&start_stop_bar,1,0,0);
+  /*For Pit bar, 0 = no pit, 1 = enter pit, 2 = exit pit. Slide bar goes back to
+   * have a value of 0 once pit exit finishes (have not implemented yet)
+   */
+  createTrackbar("Pit No/enter/exit","SOFTWAREAAAAAAAA",&pit_enter_exit_bar,2,0,0);
+
+
   namedWindow("Contours", CV_WINDOW_FREERATIO);
 //  cv::createTrackbar( "Threshold Value", "Contours", &threshMag, 255, NULL );
 
@@ -108,6 +132,24 @@ int main (int argc, char* argv[])
    /*
     *  END of Setup
     */
+
+  /*
+   * BOB's Thresholding
+   *
+   */
+    Point xyz;
+    Mat a = Vs.pullImage(6060);
+    cvtColor(a, a, CV_BGR2GRAY);
+    a = race_track_extraction(a);
+    namedWindow("f_bw",WINDOW_AUTOSIZE);
+    imshow("f_bw", a);
+    setMouseCallback("f_bw",CallBackFunc,&xyz);
+
+    if(waitKey(300000) == 32)
+    a = fill_black(a,xyz);
+    imshow("f_bw", a);
+
+
 
 
    /*

@@ -55,6 +55,12 @@ bool less_vectors(const std::vector<Point>& vec1,const std::vector<Point>& vec2)
    return vec1.size() < vec2.size();
  }
 
+string int2str(int number)
+{
+   stringstream ss;//create a stringstream
+   ss << number;//add number to the stream
+   return ss.str();//return a string with the contents of the stream
+}
 
 /**
  * Returns the minimum radius around carCenter that provides at least
