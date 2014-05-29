@@ -17,7 +17,7 @@ VStream::VStream (inputVars data)
   this->file_loc = data.file_location;
   this->cameraNumber = data.camera_number;
   _inputFormat = hashit(data.inputSource);
-  this->ports(data.ports);
+  this->ports = data.ports;
 
   switch(_inputFormat)
     {
@@ -204,5 +204,5 @@ Mat VStream::roboGrab(char* host, int port){
 }
 
 vector<int> VStream::portNumbers(void){
-	return portNumbers;
+	return this->ports;
 }

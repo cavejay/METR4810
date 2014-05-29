@@ -47,6 +47,6 @@ Mat camTrans::cameraTransform(int Port)
 	return cameraTransforms[Port];
 }
 
-//static void camTrans::mouseHandler(int event, int x, int y, int flags, void* this_){
-//
-//}
+void camTrans::mouseHandler(int event, int x, int y, int flags, void* params){
+
+}

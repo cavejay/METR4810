@@ -70,6 +70,12 @@ void CallBackFunc(int event, int x, int y, int flags, void *ptr)
 
 int main (int argc, char* argv[])
 {
+	/**
+	 * Input Arguments
+	 * Data from files
+	 * setup and initialisation of classes
+	 */
+
   if (argc > 200) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
       show_usage(argv[0]); // Inform the user of how to use the program
       exit(0);
@@ -92,7 +98,11 @@ int main (int argc, char* argv[])
   /*
    * BEGINNING of Setup
    */
-  blue();
+
+  // initialise the bluetooth connection
+//  blue();
+
+  // initialise the vision feeds with the input commands
   VStream Vs(in);
 
   // Initialise Robo Simulation
@@ -104,58 +114,51 @@ int main (int argc, char* argv[])
   // Car Localisation init
   CarLocator cl(in);
 
-  // Initialise variables
-  cv::Mat img, img1;
-  cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThreshTrack;
-  int threshMag = 160;
-
-  //GUI for software
-  int start_stop_bar = 0;
-  int pit_enter_exit_bar = 0;
-  namedWindow("SOFTWAREAAAAAAAA",1);
-  //For start/stop bar, 0 = stop, 1 = start
-  createTrackbar("Start/Stop","SOFTWAREAAAAAAAA",&start_stop_bar,1,0,0);
-  /*For Pit bar, 0 = no pit, 1 = enter pit, 2 = exit pit. Slide bar goes back to
-   * have a value of 0 once pit exit finishes (have not implemented yet)
-   */
-  createTrackbar("Pit No/enter/exit","SOFTWAREAAAAAAAA",&pit_enter_exit_bar,2,0,0);
-
-
-  namedWindow("Contours", CV_WINDOW_FREERATIO);
-//  cv::createTrackbar( "Threshold Value", "Contours", &threshMag, 255, NULL );
+//  //GUI for software
+//  int start_stop_bar = 0;
+//  int pit_enter_exit_bar = 0;
+//  namedWindow("SOFTWAREAAAAAAAA",1);
+//  //For start/stop bar, 0 = stop, 1 = start
+//  createTrackbar("Start/Stop","SOFTWAREAAAAAAAA",&start_stop_bar,1,0,0);
+//  /*
+//   * For Pit bar, 0 = no pit, 1 = enter pit, 2 = exit pit. Slide bar goes back to
+//   * have a value of 0 once pit exit finishes (have not implemented yet)
+//   */
+//  createTrackbar("Pit No/enter/exit","SOFTWAREAAAAAAAA",&pit_enter_exit_bar,2,0,0);
+//  namedWindow("Contours", CV_WINDOW_FREERATIO);
+////  cv::createTrackbar( "Threshold Value", "Contours", &threshMag, 255, NULL );
+//
 
 
 
+	/*
+	 *  END of Setup
+	 */
 
    /*
-    *  END of Setup
+    * BOB's Thresholding
     */
-
-  /*
-   * BOB's Thresholding
-   *
-   */
-    Point xyz;
-    Mat a = Vs.pullImage(6060);
-    cvtColor(a, a, CV_BGR2GRAY);
-    a = race_track_extraction(a);
-    namedWindow("f_bw",WINDOW_AUTOSIZE);
-    imshow("f_bw", a);
-    setMouseCallback("f_bw",CallBackFunc,&xyz);
-
-    if(waitKey(300000) == 32)
-    a = fill_black(a,xyz);
-    imshow("f_bw", a);
-
-
-
+//    Point xyz;
+//    Mat a = Vs.pullImage(6060);
+//    cvtColor(a, a, CV_BGR2GRAY);
+//    a = race_track_extraction(a);
+//    namedWindow("f_bw",WINDOW_AUTOSIZE);
+//    imshow("f_bw", a);
+//    setMouseCallback("f_bw",CallBackFunc,&xyz);
+//
+//    if(waitKey(300000) == 32)
+//    a = fill_black(a,xyz);
+//    imshow("f_bw", a);
 
    /*
     *  BEGINNING of functionality
     */
+    // Initialise variables
+    cv::Mat img, img1;
+    cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThreshTrack;
+    int threshMag = 160;
 
   int circleReset = 4;
-
   // Start Loop
   while(1)
   {
@@ -200,7 +203,7 @@ int main (int argc, char* argv[])
     cv::cvtColor(frame_bgr, frame_hsv, cv::COLOR_BGR2HSV);
 
     // Try to find the car
-    Point car = cl.findCar(frame_hsv);
+//    Point car = cl.findCar(frame_hsv);
 
     cv::threshold(frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY);
     imshow("threshed'", ThreshTrack);

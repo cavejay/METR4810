@@ -54,13 +54,13 @@ int blue(void) // int argc, char* argv[]
 	        CSADDR_INFO * addr = (CSADDR_INFO *)pResults->lpcsaBuffer;
 	        char* addressAsString[1000];
 	        DWORD addressSize = sizeof(addressAsString);
-	        WSAAddressToString(addr->RemoteAddr.lpSockaddr,addr->RemoteAddr.iSockaddrLength,NULL,addressAsString, &addressSize);
-	        queryset2.lpszContext = addressAsString;
-	        GUID protocol = L2CAP_PROTOCOL_UUID;
-	        queryset2.lpServiceClassId = &protocol;
+//	        WSAAddressToString(addr->RemoteAddr.lpSockaddr,addr->RemoteAddr.iSockaddrLength,NULL,addressAsString, &addressSize);
+//	        queryset2.lpszContext = addressAsString;
+//	        GUID protocol = L2CAP_PROTOCOL_UUID;
+//	        queryset2.lpServiceClassId = &protocol;
 	        HANDLE hLookup2;
 	        INT result2;
-	        result2 = WSALookupServiceBegin(&queryset2, LUP_FLUSHCACHE |LUP_RETURN_NAME | |LUP_RETURN_TYPE| LUP_RETURN_BLOB | LUP_RETURN_COMMENT, &hLookup2);
+//	        result2 = WSALookupServiceBegin(&queryset2, LUP_FLUSHCACHE |LUP_RETURN_NAME | |LUP_RETURN_TYPE| LUP_RETURN_BLOB | LUP_RETURN_COMMENT, &hLookup2);
 	        if (result2 !=0){
 	        	std::cout << "An error occured while initializing query for services";
 	            exit(result);
