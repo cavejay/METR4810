@@ -27,7 +27,7 @@ struct inputVars {
   String filename = "METR4810_Settings.yml";
   String inputSource = "still";
   char* Host = "127.0.0.1";
-  vector<int> ports = {6060, 6061, 6062, 6063};
+  vector<int> ports;
   String file_location = "Sample_Pictures/demo-track.png";
   int camera_number = 0;
   bool multithreading = false;
