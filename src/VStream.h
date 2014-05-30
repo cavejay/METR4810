@@ -40,7 +40,7 @@ private:
   // Varibles
   int roboHeight;
   int roboWidth;
-  vector<int> ports;
+  int ports[4] = {6060,6061,6062,6063};
   int cameraNumber;
   Size vidSize;
 
@@ -49,7 +49,7 @@ private:
   inputFormat hashit(const String inString);
 
   // Types of inits
-  int roborealm(char* host);
+  int roborealm();
   int still();
   int video();
   int camera();
@@ -67,9 +67,6 @@ public:
 
   // Functions
   cv::Mat pullImage(int port = 0);
-
-  // return ports used for cameras
-  vector<int> portNumbers(void);
 
 
   virtual

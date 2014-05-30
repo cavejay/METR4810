@@ -17,8 +17,6 @@ VStream::VStream (inputVars data)
   this->file_loc = data.file_location;
   this->cameraNumber = data.camera_number;
   _inputFormat = hashit(data.inputSource);
-  this->ports(data.ports);
-
   switch(_inputFormat)
     {
       case VIDEO_FILE:
@@ -30,7 +28,7 @@ VStream::VStream (inputVars data)
         break;
 
       case ROBOREALM:
-	  roborealm(Host);
+	  roborealm();
         break;
 
       case STILL_IMAGE:
@@ -69,11 +67,11 @@ int VStream::video()
 /**
  * Initialises a connection to a roborealm API server and grabs the width and height of its camera
  */
-int VStream::roborealm(char* host)
+int VStream::roborealm()
 {
   int* p_width = &roboWidth;
   int* p_height = &roboHeight;
-  rr.connect(host,ports[0]);
+  rr.connect("localhost",6060);
   cout << ".......connected\n";
   bool success = rr.getDimension(p_width, p_height);
   rr.disconnect();
@@ -168,7 +166,7 @@ Mat VStream::roboGrab(char* host, int port){
   // Connect and grab stuff.
   cout << "running getImage()\n";
 
-  bool connected = rr.connect(host, port);
+  bool connected = rr.connect("localhost", port);
   if(!connected){
 	  cout << "ERROR: Could not connect to Roborealm." << endl;
 	  return img_out;
@@ -203,6 +201,3 @@ Mat VStream::roboGrab(char* host, int port){
   return img_out;
 }
 
-vector<int> VStream::portNumbers(void){
-	return portNumbers;
-}

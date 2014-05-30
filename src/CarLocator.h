@@ -12,10 +12,6 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv/highgui.h"
-#include "opencv2/calib3d/calib3d.hpp"
-#include "opencv2/nonfree/nonfree.hpp"
-#include "opencv2/core/core.hpp"
-#include "opencv2/features2d/features2d.hpp"
 // RobotRealm Lib
 #include "C++/MinGW/RR_API.h"
 // C libs
@@ -38,8 +34,7 @@ private:
   Mat getWAvg(void);
 
 public:
-  CarLocator (inputVars in);
-  void findCar_SURF(const Mat& src);
+  CarLocator ();
   Point findCar(const Mat& src);
 
 };

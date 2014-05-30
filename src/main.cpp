@@ -59,10 +59,41 @@ void CallBackFunc(int event, int x, int y, int flags, void *ptr)
 	if (event == EVENT_LBUTTONDOWN)
 	{
 		cout<<"left button of the mouse is clicked (" << x << "," << y <<")" <<endl;
-		point->x = x;
-		point->y = y;
-	}
 
+	}
+	point->x = x;
+	point->y = y;
+
+}
+
+void mouseHandler(int event, int x,int y, int flags, void *ptr)
+{
+
+	vector<Point>* point = (vector<Point>*)ptr;
+	if (event == EVENT_LBUTTONDOWN)
+	{
+		Point a(x,y);
+		point->push_back(a);
+	}
+	if (event == EVENT_RBUTTONDOWN)
+	{
+		point->pop_back();
+	}
+}
+
+void mouseHandler_cb(int event, int x,int y, int flags, void *ptr)
+{
+
+	vector<Point>* point = (vector<Point>*)ptr;
+	if (event == EVENT_LBUTTONDOWN)
+	{
+		Point a(x,y);
+		point->push_back(a);
+	}
+	if (event == EVENT_RBUTTONDOWN)
+	{
+		point->pop_back();
+	}
 }
 
 int main (int argc, char* argv[])
@@ -126,20 +157,68 @@ int main (int argc, char* argv[])
    * BOB's Thresholding
    *
    */
-    Point xyz;
-    Mat a = Vs.pullImage(6060);
-    cvtColor(a, a, CV_BGR2GRAY);
-    a = race_track_extraction(a);
-    namedWindow("f_bw",WINDOW_AUTOSIZE);
-    imshow("f_bw", a);
-    setMouseCallback("f_bw",CallBackFunc,&xyz);
-
-    if(waitKey(300000) == 32)
-    a = fill_black(a,xyz);
-    imshow("f_bw", a);
-
-
-
+	Point xyz;
+	Mat a = Vs.pullImage(6060);
+	cvtColor(a, a, CV_BGR2GRAY);
+  	while (1) {
+		a = race_track_extraction(a);
+		namedWindow("f_bw",WINDOW_AUTOSIZE);
+		imshow("f_bw", a);
+		setMouseCallback("f_bw",CallBackFunc,&xyz);
+		if(waitKey() == 32){}
+		a = fill_black(a,xyz);
+		imshow("f_bw", a);
+		if(waitKey() == 27)
+		{
+			cout << "Image preprocessing done!" << endl;
+			break;
+		}
+  	}
+    map<int, Mat> cameraIMGs;
+    int ports[4] = {6060,6061,6062,6063};
+    Mat temp;
+    Mat temp_after;
+    vector<String> pics;
+    vector<Point2f> points;
+    vector<Point2f> points_on_checkboard;
+    	pics.push_back("Tracktual/cam11.JPG");
+    	pics.push_back("Tracktual/cam21.JPG");
+    	pics.push_back("Tracktual/cam31.JPG");
+    	pics.push_back("Tracktual/cam41.JPG");
+    	//checker board: 4*8 tiles, each tile have 100*100 pixels
+    	for (int i = 0; i < pics.size(); i ++ ){
+    		//creating the windows for img and update that windows
+    		temp = imread(pics[i]);
+    		String windowName = "Camera at " + int2str(ports[i]);
+    		String windowName1 = "Camera at " + int2str(ports[i]) + "after transformation";
+    		namedWindow(windowName,CV_WINDOW_AUTOSIZE);
+    		namedWindow(windowName1,CV_WINDOW_AUTOSIZE);
+    		Mat temp_after = Mat::zeros(486,965,temp.type());
+    		imshow(windowName, temp);
+    		imshow(windowName1, temp_after);
+    		setMouseCallback(windowName,mouseHandler, &points);
+    		//creating the windows for cb and update that windows
+        	namedWindow("I'm a checkerboard",CV_WINDOW_AUTOSIZE);
+        	Mat checkerboard = imread("Sample_Pictures/checkerboard.jpg");
+        	cout << "asdasdasfadgadg"<<checkerboard.size() << endl;
+        	imshow("I'm a checkerboard",checkerboard);
+    		setMouseCallback("I'm a checkerboard",mouseHandler_cb, &points_on_checkboard);
+    		if(waitKey(30000000) == 32){}
+    		cameraIMGs[ports[i]] = getPerspectiveTransform(points, points_on_checkboard);
+    		cout << "size of vector points : " << points.size() << endl;
+    		cout << "size of vector points_on_cb : " << points_on_checkboard.size() << endl;
+    		cout << "Points on img"<< points << endl;
+    		cout << "Points on cb" << points_on_checkboard << endl;
+    		cout << "transform matrix :" << endl << cameraIMGs[ports[i]] << endl;
+    		warpPerspective(temp, temp_after, cameraIMGs[ports[i]], temp_after.size());
+    		imshow(windowName1,temp_after);
+    		if(waitKey(30000) == 32){}
+    		destroyWindow(windowName);
+    		destroyWindow(windowName1);
+        	destroyWindow("I'm a checkerboard");
+    		points_on_checkboard.clear();
+    		points.clear();
+    	}
 
    /*
     *  BEGINNING of functionality
@@ -147,11 +226,15 @@ int main (int argc, char* argv[])
 
   int circleReset = 4;
 
-  // Start Loop
+//  // Start Loop
   while(1)
   {
     // Grab current image from specified source
     img = Vs.pullImage(6060);
+
+
+
+
 
     // Check if image is empty.
     if (!img.empty())
