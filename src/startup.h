@@ -22,14 +22,20 @@ using namespace std;
 
 // Structs
 struct inputVars {
+	// init variables
   bool varsParsedSuccessfully = true;
   bool loadFile = false;
+
+  // VStream
   String filename = "METR4810_Settings.yml";
   String inputSource = "still";
-  char* Host = "127.0.0.1";
-  vector<int> ports;
+  char* host = "127.0.0.1";
+  int ports = 6060;
   String file_location = "Sample_Pictures/demo-track.png";
   int camera_number = 0;
+  int numCameras = 4;
+
+  // Running modes
   bool multithreading = false;
   bool Simulation = false;
   bool demo_mode = false;

@@ -40,7 +40,7 @@ private:
   // Varibles
   int roboHeight;
   int roboWidth;
-  vector<int> ports;
+  int ports;
   int cameraNumber;
   Size vidSize;
 
@@ -59,7 +59,7 @@ public:
   cv::VideoCapture cap;
   RR_API rr;
   int _inputFormat;
-  char* Host;
+  char* host;
   string file_loc;
 
   // Constructor
@@ -69,7 +69,7 @@ public:
   cv::Mat pullImage(int port = 0);
 
   // return ports used for cameras
-  vector<int> portNumbers(void);
+  int startingPort(void);
 
 
   virtual

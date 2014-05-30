@@ -28,7 +28,6 @@
 #include "embed.h"
 #include "race_track_extraction.h"
 #include "fill_black.h"
-#include "bluetooth.h"
 // Aruco .h's
 #include "src/marker.h"
 #include "src/aruco.h"
@@ -91,8 +90,9 @@ int main (int argc, char* argv[])
   }
 
   // This overrides the cmdline for nowz
-  in.inputSource = "camera";
-  in.camera_number = 1;
+  in.inputSource = "roborealm";
+  in.host = "169.254.88.211";
+  in.camera_number = 0;
   in.file_location = "Sample_Pictures/ARTag/1.png";
 
   /*
@@ -157,6 +157,7 @@ int main (int argc, char* argv[])
     cv::Mat img, img1;
     cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThreshTrack;
     int threshMag = 160;
+    Point carPoint;
 
   int circleReset = 4;
   // Start Loop
@@ -173,9 +174,9 @@ int main (int argc, char* argv[])
       cout << "The image has been procured successful\n";
     } else {
       // The image was empty :(
+      cerr << "The Pulled image was empty" << endl;
       return -1;
     }
-
     frame_bgr = img.clone();
 
 
@@ -183,11 +184,11 @@ int main (int argc, char* argv[])
      * BOB's Thresholding
      *
      */
-//      Mat a;
-//      cvtColor(frame_bgr, a, CV_BGR2GRAY);
-//      a = race_track_extraction(a,0.5,0.5,0.5,0.5);
-//      namedWindow("f_bw",WINDOW_AUTOSIZE);
-//      imshow("f_bw", a);
+      Mat a;
+      cvtColor(frame_bgr, a, CV_BGR2GRAY);
+      a = race_track_extraction(a);
+      namedWindow("f_bw",WINDOW_AUTOSIZE);
+      imshow("f_bw", a);
 
 
     /*
@@ -203,7 +204,8 @@ int main (int argc, char* argv[])
     cv::cvtColor(frame_bgr, frame_hsv, cv::COLOR_BGR2HSV);
 
     // Try to find the car
-//    Point car = cl.findCar(frame_hsv);
+    carPoint = cl.findCar(frame_hsv);
+    Rsim.Position = carPoint;
 
     cv::threshold(frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY);
     imshow("threshed'", ThreshTrack);
@@ -211,7 +213,7 @@ int main (int argc, char* argv[])
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
 
-    cv::findContours(ThreshTrack, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0)); // Changed CV_CHAIN_APPROX from simple to none
+    cv::findContours(a, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0)); // Changed CV_CHAIN_APPROX from simple to none
     cv::Mat drawing = cv::Mat::zeros(ThreshTrack.size(), CV_8UC3);
 
     // Sort vectors
@@ -248,7 +250,8 @@ int main (int argc, char* argv[])
     // cv::Point2f carCenter = Markers[0].getCenter();
 
     // Grabbing center for the simulation
-    cv::Point2f carCenter = Rsim.Position;
+//    cv::Point2f carCenter = Rsim.Position;
+    cv::Point2f carCenter = cl.carPoint;
 
     // Initialise local variables
     double average1 = 0;

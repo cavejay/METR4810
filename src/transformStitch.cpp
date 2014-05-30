@@ -7,12 +7,17 @@
 
 #include "transformStitch.h"
 
-camTrans::camTrans(VStream Vs) {
+camTrans::camTrans(VStream Vs, inputVars in) {
 	// TODO This should go through all the different camera's and find the transformation matrices for them
 	// and then add them to cameraTransforms
 
 	// Grab the port numbers we're looking at
-	ports = Vs.portNumbers();
+	int startingPort = Vs.startingPort();
+	int last = startingPort + in.numCameras;
+	while(startingPort < last){
+		ports.push_back(startingPort);
+		startingPort++;
+	}
 
 	// Something to hold the images
 	// Pull images from each of the cameras and place in a map.

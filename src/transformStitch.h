@@ -35,7 +35,7 @@ class camTrans {
 	vector<int> ports;
 
 public:
-	camTrans(VStream Vs);
+	camTrans(VStream Vs, inputVars in);
 	void stitch(Mat& src1, Mat& src2, Mat& dst);
 	Mat cameraTransform(int Port);
 

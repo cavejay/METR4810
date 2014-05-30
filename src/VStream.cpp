@@ -13,7 +13,7 @@
  */
 VStream::VStream (inputVars data)
 {
-  this->Host = data.Host;
+  this->host = data.host;
   this->file_loc = data.file_location;
   this->cameraNumber = data.camera_number;
   _inputFormat = hashit(data.inputSource);
@@ -30,7 +30,7 @@ VStream::VStream (inputVars data)
         break;
 
       case ROBOREALM:
-	  roborealm(Host);
+	  roborealm(host);
         break;
 
       case STILL_IMAGE:
@@ -73,7 +73,7 @@ int VStream::roborealm(char* host)
 {
   int* p_width = &roboWidth;
   int* p_height = &roboHeight;
-  rr.connect(host,ports[0]);
+  rr.connect(host,ports);
   cout << ".......connected\n";
   bool success = rr.getDimension(p_width, p_height);
   rr.disconnect();
@@ -99,7 +99,7 @@ int VStream::camera()
   cap.open(cameraNumber); // Load Video camera #0
   if (!cap.isOpened())  // if not success, exit program
   {
-    cout << "Cannot open camera '0' closing program" << endl;
+    cout << "Cannot open camera " << cameraNumber << " closing program" << endl;
     return -1;
   }
   else {
@@ -130,11 +130,16 @@ Mat VStream::pullImage(int port)
 
     case VIDEO_CAMERA:
       cap >> dst;
-      return dst;
+      if(!dst.empty()){
+    	  return dst;
+      } else {
+    	  cerr << "An empty image is being returned" << endl;
+    	  return dst;
+      }
       break;
 
     case ROBOREALM:
-      return roboGrab(Host, port);
+      return roboGrab(host, port);
       break;
 
     case STILL_IMAGE:
@@ -185,7 +190,7 @@ Mat VStream::roboGrab(char* host, int port){
 
   rr.disconnect();
   cout << "Disconnected\n";
-  cout << "Showing pixel data: \n" << data << endl;
+//  cout << "Showing pixel data: \n" << data << endl;
 
   // Make a Mat from the pixel data
   cv::Mat img(roboHeight, roboWidth, CV_8UC3, data);
@@ -203,6 +208,6 @@ Mat VStream::roboGrab(char* host, int port){
   return img_out;
 }
 
-vector<int> VStream::portNumbers(void){
+int VStream::startingPort(void){
 	return this->ports;
 }

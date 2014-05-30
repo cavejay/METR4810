@@ -41,7 +41,7 @@ inputVars getInputData(int argc, char* argv[])
 
     } else if ((arg == "-H") || (arg == "--host")) {
     	if (i + 1 < argc) {
-    	    toReturn.Host = argv[i++];
+    	    toReturn.host = argv[i++];
     	} else {
     	      std::cerr << "--host option requires one argument." << std::endl;
     	      toReturn.varsParsedSuccessfully = false;
@@ -108,7 +108,8 @@ inputVars readSettingsFile(String file){
   fs["Input Format"] >> toReturn.inputSource;
   String tempHost;
   fs["RoboRealm Host Address"] >> tempHost;
-  strcpy(toReturn.Host,tempHost.c_str());
+  strcpy(toReturn.host,tempHost.c_str());
+  fs["Starting Port"] >> toReturn.ports;
   fs["File Location"] >> toReturn.file_location;
   fs["Show debug images and print outs"] >> toReturn.showWorking;
 
