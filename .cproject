@@ -60,6 +60,7 @@
 									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\sources\modules\contrib\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\mingw64\x86_64-w64-mingw32\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;M:\Code\mingw64\x86_64-w64-mingw32\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\Program Files (x86)\MATLAB\R2014a\extern\include&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.include.files.781709221" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files" useByScannerDiscovery="false" valueType="includeFiles">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/sys_constants.h}&quot;"/>
@@ -82,6 +83,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/aruco_bin}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\OpenCV_BUILD\bin&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;M:\Code\openCV_metr\OpenCV_METR_BUILD\bin&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\Program Files (x86)\MATLAB\R2014a\bin\win32&quot;"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.1533111756" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="RR_COM_API"/>
@@ -98,6 +100,9 @@
 									<listOptionValue builtIn="false" value="bthprops"/>
 									<listOptionValue builtIn="false" value="WSock32"/>
 									<listOptionValue builtIn="false" value="WS2_32"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="libmat"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="libmx"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="libeng"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1973194854" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
