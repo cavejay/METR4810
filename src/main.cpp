@@ -28,6 +28,8 @@
 #include "sys_constants.h"
 #include "race_track_extraction.h"
 #include "matlab.h"
+#include "preProc.h"
+#include "birds_eye.h"
 
 // Aruco .h's
 #include "src/marker.h"
@@ -56,21 +58,6 @@ void show_usage(std::string name){
 	    std::cin.get();
 }
 
-
-//void mouseHandler_cb(int event, int x,int y, int flags, void *ptr)
-//{
-//
-//	vector<Point>* point = (vector<Point>*)ptr;
-//	if (event == EVENT_LBUTTONDOWN)
-//	{
-//		Point a(x,y);
-//		point->push_back(a);
-//	}
-//	if (event == EVENT_RBUTTONDOWN)
-//	{
-//		point->pop_back();
-//	}
-//}
 
 int main (int argc, char* argv[])
 {
@@ -124,21 +111,21 @@ int main (int argc, char* argv[])
  *
  */
 
-//  //GUI for software
-//  cout << "Making GUI" << endl;
-//  int start_stop_bar = 0;
-//  int pit_enter_exit_bar = 0;
-//  namedWindow("SOFTWAREAAAAAAAA",1);
-//  //For start/stop bar, 0 = stop, 1 = start
-//  createTrackbar("Start/Stop","SOFTWAREAAAAAAAA",&start_stop_bar,1,0,0);
-//  /*
-//   * For Pit bar, 0 = no pit, 1 = enter pit, 2 = exit pit. Slide bar goes back to
-//   * have a value of 0 once pit exit finishes (have not implemented yet)
-//   */
-//  createTrackbar("Pit No/enter/exit","SOFTWAREAAAAAAAA",&pit_enter_exit_bar,2,0,0);
-//  namedWindow("Contours", CV_WINDOW_FREERATIO);
-////  cv::createTrackbar( "Threshold Value", "Contours", &threshMag, 255, NULL );
-//
+  //GUI for software
+  cout << "Making GUI" << endl;
+  int start_stop_bar = 0;
+  int pit_enter_exit_bar = 0;
+  namedWindow("SOFTWAREAAAAAAAA",1);
+  //For start/stop bar, 0 = stop, 1 = start
+  createTrackbar("Start/Stop","SOFTWAREAAAAAAAA",&start_stop_bar,1,0,0);
+  /*
+   * For Pit bar, 0 = no pit, 1 = enter pit, 2 = exit pit. Slide bar goes back to
+   * have a value of 0 once pit exit finishes (have not implemented yet)
+   */
+  createTrackbar("Pit No/enter/exit","SOFTWAREAAAAAAAA",&pit_enter_exit_bar,2,0,0);
+  namedWindow("Contours", CV_WINDOW_FREERATIO);
+//  cv::createTrackbar( "Threshold Value", "Contours", &threshMag, 255, NULL );
+
 
   	cout << "Attempting Pre-Processing" << endl;
 	Point fillAt;
@@ -146,11 +133,13 @@ int main (int argc, char* argv[])
 	// pull an image from source
 	for(int i = in.ports; i < (in.numCameras+in.ports); i++){
 		Mat preproc = Vs.pullImage(i);
+
+		// extract the track as good as you can
+		preproc = race_track_extraction(preproc);
+
 		// Keep this loop going until it's broken
-		bool loopInv = true;
 		while (1) {
-			// extract the track as good as you can
-			preproc = race_track_extraction(preproc);
+		    destroyWindow("f_bw");
 			// Show us the image
 			namedWindow("Select a point to floodfill",WINDOW_AUTOSIZE);
 			setMouseCallback("Select a point to floodfill",grabClickPoint,&fillAt);
@@ -166,7 +155,7 @@ int main (int argc, char* argv[])
 			if(waitKey() == 27)
 			{
 			  cout << "Image preprocessing done!" << endl;
-			  destroyWindow("f_bw");
+
 			  finalThresholds[i] = preproc;
 			  break;
 			}
@@ -188,10 +177,9 @@ int main (int argc, char* argv[])
 		String originalWindowName = "Camera at " + int2str(i);
 		String transformWindowName = "Transformed Image from " + int2str(i);
 
-		// Make the windows
+		// Make the window and assign a mouse callback
 		namedWindow(originalWindowName,CV_WINDOW_AUTOSIZE);
 		setMouseCallback(originalWindowName, grabClickPointVector, &points);
-		namedWindow(transformWindowName,CV_WINDOW_AUTOSIZE);
 
 		// Create the checkerboard window, assign a mouse callback and show us the picture
 		namedWindow("Checkerboard",CV_WINDOW_AUTOSIZE);
@@ -205,8 +193,8 @@ int main (int argc, char* argv[])
 		imshow(originalWindowName, preTransform);
 
 		// Fill the picture frames
-		cout << "Click the corresponding points of the picture in window " << originalWindowName
-				<< "and Checkboard. Then press spacebar" << endl;
+		cout << "Click the corresponding points of the picture "
+				<< " and the Checkboard. Then press spacebar" << endl;
 		if(waitKey(3000000) == 32){}
 
 		// Grab the perspective transform from the points selected
@@ -220,15 +208,19 @@ int main (int argc, char* argv[])
 
 		// Transform the image
 		warpPerspective(preTransform, postTransform, cameraTransforms[i], postTransform.size());
+		cout << "warped the perspective" << endl;
 
 		// Display the transformed image in a window and run waitKey() to show it
+		namedWindow(transformWindowName,CV_WINDOW_AUTOSIZE);
 		imshow(transformWindowName,postTransform);
+		cout << "wait for a spacebar" << endl;
 		if(waitKey(30000) == 32){}
 
 		destroyWindow(originalWindowName);
 		destroyWindow(transformWindowName);
 		destroyWindow("Checkerboard");
 
+		cout << "clear the point vectors for the next camera" << endl;
 		checkerboardPoints.clear();
 		points.clear();
 	}
@@ -237,13 +229,13 @@ int main (int argc, char* argv[])
 	 * Combine the the images
 	 */
 
-	Mat totalTrack;
+	Mat totalTrack = finalThresholds[in.ports];
 
 
 	/**
 	 * Find the Contours
 	 */
-
+	cout << "Finding the Contours of the track for the path" << endl;
     // Contours are a vector of vectors of points
 	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
@@ -269,21 +261,33 @@ int main (int argc, char* argv[])
     namedWindow("Contours", CV_WINDOW_AUTOSIZE);
     imshow("Contours", drawing);
 
+    // Assign the two tracks to the two largest contours
+    vector<Point> largest1 = contours[contours.size() - 1];
+    vector<Point> largest2 = contours[contours.size() - 2];
 
+    waitKey(30);
 
 	cout << "Initialising Matlab interface" << endl;
 	// reference matlab setup here
 	Engine *ep = matConnBlue();
 	matSend(ep, "1");
-
 	/*
 	 *  END of Setup
 	 */
 
 
    /*
-    *  BEGINNING of functionality
+    *  Wait for Starting light
     */
+	if(in.startingLights == true){
+		int startingLightsValue = 0;
+		while(startingLightsValue < 2) {
+
+		}
+	}
+
+
+
     // Initialise variables
     cv::Mat img, img1;
     cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThreshTrack;
@@ -292,13 +296,12 @@ int main (int argc, char* argv[])
 
   int circleReset = 4;
   int steering = 127;
-
   // Start Loop
   cout << "Starting runtime loop" << cout;
   while(1)
   {
     // Grab current image from specified source
-    img = Vs.pullImage(6063);
+    img = Vs.pullImage(6060);
 
     // Check if image is empty.
     if (!img.empty())
@@ -314,6 +317,7 @@ int main (int argc, char* argv[])
     frame_bgr = img.clone();
 
     // Try to find the car
+    cvtColor(frame_bgr, frame_hsv, CV_BGR2HSV);
     carPoint = cl.findCar(frame_hsv);
     Rsim.Position = carPoint;
 
@@ -324,15 +328,6 @@ int main (int argc, char* argv[])
      * Jonathan Holland
      * Updated by Michael Ball & Xavier Casley
      */
-
-    // Assign the two tracks to the two largest contours
-    vector<Point> largest1 = contours[contours.size() - 1];
-    vector<Point> largest2 = contours[contours.size() - 2];
-
-    // Get the center of the vehicle given the AR tag has been recognised
-
-    // Grabbing center from the Aruco tag marker
-    // cv::Point2f carCenter = Markers[0].getCenter();
 
     // Grabbing center for the simulation
 //    cv::Point2f carCenter = Rsim.Position;

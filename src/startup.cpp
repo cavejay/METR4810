@@ -96,7 +96,9 @@ void createSettingsFile(void){
   fs << "Device ID of the camera connected" << 0;
 
   fs << "Advanced Settings" << "For deeper changes of the program" ;
+  fs << "Are starting lights present and working?" << false;
   fs << "Show debug images and print outs" << false;
+
   fs.release();
 }
 
@@ -118,6 +120,7 @@ inputVars readSettingsFile(String file){
 	  fs["File Location"] >> toReturn.file_location;
 	  fs["Device ID of the camera connected"] >> toReturn.cameraID;
 	  fs["Show debug images and print outs"] >> toReturn.showWorking;
+	  fs["Are starting lights present and working?"] >> toReturn.startingLights;
 	  cout << "Returning variables" << endl;
   } catch (...){
 	  cerr << "Settings file could not be opened.\n"

@@ -36,6 +36,7 @@ struct inputVars {
   int numCameras = 4;
 
   // Running modes
+  bool startingLights = true;
   bool multithreading = false;
   bool Simulation = false;
   bool demo_mode = false;
