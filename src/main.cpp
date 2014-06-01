@@ -56,47 +56,21 @@ void show_usage(std::string name){
 	    std::cin.get();
 }
 
-void grabClickPoint(int event, int x, int y, int flags, void *ptr)
-{
-	Point* point = (Point*)ptr;
-	if (event == EVENT_LBUTTONDOWN)
-	{
-		cout<<"left button of the mouse is clicked (" << x << "," << y <<")" <<endl;
-		point->x = x;
-		point->y = y;
-	}
 
-}
-
-void mouseHandler(int event, int x,int y, int flags, void *ptr)
-{
-
-	vector<Point>* point = (vector<Point>*)ptr;
-	if (event == EVENT_LBUTTONDOWN)
-	{
-		Point a(x,y);
-		point->push_back(a);
-	}
-	if (event == EVENT_RBUTTONDOWN)
-	{
-		point->pop_back();
-	}
-}
-
-void mouseHandler_cb(int event, int x,int y, int flags, void *ptr)
-{
-
-	vector<Point>* point = (vector<Point>*)ptr;
-	if (event == EVENT_LBUTTONDOWN)
-	{
-		Point a(x,y);
-		point->push_back(a);
-	}
-	if (event == EVENT_RBUTTONDOWN)
-	{
-		point->pop_back();
-	}
-}
+//void mouseHandler_cb(int event, int x,int y, int flags, void *ptr)
+//{
+//
+//	vector<Point>* point = (vector<Point>*)ptr;
+//	if (event == EVENT_LBUTTONDOWN)
+//	{
+//		Point a(x,y);
+//		point->push_back(a);
+//	}
+//	if (event == EVENT_RBUTTONDOWN)
+//	{
+//		point->pop_back();
+//	}
+//}
 
 int main (int argc, char* argv[])
 {
@@ -202,42 +176,100 @@ int main (int argc, char* argv[])
 	cout << "Attempting Selection and Transformation of images" << endl;
 	map<int, Mat> cameraTransforms;
 	vector<String> pics;
-	Mat temp, temp_after;
-	vector<Point2f> points, points_on_checkboard;
+	Mat preTransform, postTransform;
+	vector<Point2f> points, checkerboardPoints;
+	Mat checkerboard = imread("Sample_Pictures/checkerboard.jpg");
 	//checker board: 4*8 tiles, each tile have 100*100 pixels
 	for (int i = in.ports; i < (in.ports + in.numCameras); i++ ){
 		// Get an image from the camera
-		temp = Vs.pullImage(i);
-		String windowName = "Camera at " + int2str(ports[i]);
-		String windowName1 = "Camera at " + int2str(ports[i]) + "after transformation";
-		namedWindow(windowName,CV_WINDOW_AUTOSIZE);
-		namedWindow(windowName1,CV_WINDOW_AUTOSIZE);
-		Mat temp_after = Mat::zeros(486,965,temp.type());
-		imshow(windowName, temp);
-		imshow(windowName1, temp_after);
-		setMouseCallback(windowName,mouseHandler, &points);
-		//creating the windows for cb and update that windows
-		namedWindow("I'm a checkerboard",CV_WINDOW_AUTOSIZE);
-		Mat checkerboard = imread("Sample_Pictures/checkerboard.jpg");
-		cout << "asdasdasfadgadg"<<checkerboard.size() << endl;
-		imshow("I'm a checkerboard",checkerboard);
-		setMouseCallback("I'm a checkerboard",mouseHandler_cb, &points_on_checkboard);
-		if(waitKey(30000000) == 32){}
-		cameraIMGs[ports[i]] = getPerspectiveTransform(points, points_on_checkboard);
-		cout << "size of vector points : " << points.size() << endl;
-		cout << "size of vector points_on_cb : " << points_on_checkboard.size() << endl;
-		cout << "Points on img"<< points << endl;
-		cout << "Points on cb" << points_on_checkboard << endl;
-		cout << "transform matrix :" << endl << cameraIMGs[ports[i]] << endl;
-		warpPerspective(temp, temp_after, cameraIMGs[ports[i]], temp_after.size());
-		imshow(windowName1,temp_after);
+		preTransform = Vs.pullImage(i);
+
+		// Make the window Names
+		String originalWindowName = "Camera at " + int2str(i);
+		String transformWindowName = "Transformed Image from " + int2str(i);
+
+		// Make the windows
+		namedWindow(originalWindowName,CV_WINDOW_AUTOSIZE);
+		setMouseCallback(originalWindowName, grabClickPointVector, &points);
+		namedWindow(transformWindowName,CV_WINDOW_AUTOSIZE);
+
+		// Create the checkerboard window, assign a mouse callback and show us the picture
+		namedWindow("Checkerboard",CV_WINDOW_AUTOSIZE);
+		setMouseCallback("Checkerboard", grabClickPointVector, &checkerboardPoints);
+		imshow("Checkerboard",checkerboard);
+
+		// fill postTransform with black
+		postTransform = Mat::zeros(486,965,preTransform.type());
+
+		// Show image
+		imshow(originalWindowName, preTransform);
+
+		// Fill the picture frames
+		cout << "Click the corresponding points of the picture in window " << originalWindowName
+				<< "and Checkboard. Then press spacebar" << endl;
+		if(waitKey(3000000) == 32){}
+
+		// Grab the perspective transform from the points selected
+		cameraTransforms[i] = getPerspectiveTransform(points, checkerboardPoints);
+		cout << "You are transforming " << points.size() << " points into "
+				<< checkerboardPoints.size() << "other points" << endl;
+		cout << "Specfically you're matching:\n"
+				<< points << "\n to \n"
+				<< checkerboardPoints << endl;
+		cout << "The Transformation Matrix of this camera is:\n" << cameraTransforms[i] << endl;
+
+		// Transform the image
+		warpPerspective(preTransform, postTransform, cameraTransforms[i], postTransform.size());
+
+		// Display the transformed image in a window and run waitKey() to show it
+		imshow(transformWindowName,postTransform);
 		if(waitKey(30000) == 32){}
-		destroyWindow(windowName);
-		destroyWindow(windowName1);
-		destroyWindow("I'm a checkerboard");
-		points_on_checkboard.clear();
+
+		destroyWindow(originalWindowName);
+		destroyWindow(transformWindowName);
+		destroyWindow("Checkerboard");
+
+		checkerboardPoints.clear();
 		points.clear();
 	}
+
+	/**
+	 * Combine the the images
+	 */
+
+	Mat totalTrack;
+
+
+	/**
+	 * Find the Contours
+	 */
+
+    // Contours are a vector of vectors of points
+	vector<vector<Point> > contours;
+	vector<Vec4i> hierarchy;
+
+	cv::findContours(totalTrack, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0));
+
+	// Sort vectors
+	sort(contours.begin(), contours.end(), less_vectors);
+    cv::Mat drawing = cv::Mat::zeros(totalTrack.size(), CV_8UC3);
+
+    // Make more colours for the largest vectors
+    vector<Scalar> colors;
+    colors.push_back(Scalar(100,100,100));
+    colors.push_back(Scalar(200,200,200));
+    for (int i = 0; i < contours.size()-2; i++)
+    {
+      Scalar color = Scalar(0, 255, 100);
+      drawContours(drawing, contours, i, color, 1, 8, hierarchy, 0, Point());
+    }
+    drawContours(drawing, contours, contours.size()-2, colors[0], 1, 8, hierarchy, 0, Point());
+    drawContours(drawing, contours, contours.size()-1, colors[1], 1, 8, hierarchy, 0, Point());
+    /// Show in a window
+    namedWindow("Contours", CV_WINDOW_AUTOSIZE);
+    imshow("Contours", drawing);
+
+
 
 	cout << "Initialising Matlab interface" << endl;
 	// reference matlab setup here
@@ -281,49 +313,11 @@ int main (int argc, char* argv[])
     }
     frame_bgr = img.clone();
 
-
-    /*
-     * THRESHOLD IMAGE
-     * Michael Ball
-     * Updated by Jonathan Holland
-     *
-     */
-//    if(Vs._inputFormat != ROBOREALM){
-    cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
-    equalizeHist( frame_gry,frame_gry );
-
-    cv::cvtColor(frame_bgr, frame_hsv, cv::COLOR_BGR2HSV);
-
     // Try to find the car
     carPoint = cl.findCar(frame_hsv);
     Rsim.Position = carPoint;
 
-    cv::threshold(frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY);
-    imshow("threshed'", ThreshTrack);
-    // Contours are a vector of vectors of points
-    vector<vector<Point> > contours;
-    vector<Vec4i> hierarchy;
 
-    cv::findContours(a, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0)); // Changed CV_CHAIN_APPROX from simple to none
-    cv::Mat drawing = cv::Mat::zeros(ThreshTrack.size(), CV_8UC3);
-
-    // Sort vectors
-    sort(contours.begin(), contours.end(), less_vectors);
-
-    // Make more colours for the largest vectors
-    vector<Scalar> colors;
-    colors.push_back(Scalar(100,100,100));
-    colors.push_back(Scalar(200,200,200));
-    for (int i = 0; i < contours.size()-2; i++)
-    {
-      Scalar color = Scalar(0, 255, 100);
-      drawContours(drawing, contours, i, color, 1, 8, hierarchy, 0, Point());
-    }
-    drawContours(drawing, contours, contours.size()-2, colors[0], 1, 8, hierarchy, 0, Point());
-    drawContours(drawing, contours, contours.size()-1, colors[1], 1, 8, hierarchy, 0, Point());
-    /// Show in a window
-    namedWindow("Contours", CV_WINDOW_AUTOSIZE);
-    imshow("Contours", drawing);
 
     /*
      * PATHING

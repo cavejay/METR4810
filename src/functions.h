@@ -28,6 +28,8 @@ enum ED_SHAPE {
 
 // Functions
 void Draw_Circles(Mat& img, const vector<Vec3f>& circles);
+void grabClickPoint(int event, int x, int y, int flags, void *ptr);
+void grabClickPointVector(int event, int x,int y, int flags, void *ptr);
 void Dilation(const Mat& src, Mat& dst, ED_SHAPE dilation_shape, double dilation_size);
 void Erosion(const Mat& src, Mat& dst, ED_SHAPE erosion_shape, double erosion_size);
 bool less_vectors(const std::vector<Point>& vec1, const std::vector<Point>& vec2);

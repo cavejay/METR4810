@@ -5,8 +5,8 @@
  *      Author: Michael
  */
 
-#ifndef TRANSFORMSTITCH_H_
-#define TRANSFORMSTITCH_H_
+#ifndef PREPROC_H_
+#define PREPROC_H_
 
 // OpenCV
 #include "opencv2/highgui/highgui.hpp"
@@ -28,18 +28,18 @@
 using namespace cv;
 using namespace std;
 
-class camTrans {
-	// stores each camera's transformation matrices in as <port, transform matrice>
-	map<int, Mat> cameraTransforms;
-	map<int, Mat> cameraIMGs;
-	vector<int> ports;
+class preProc {
+
 
 public:
-	camTrans(VStream Vs, inputVars in);
-	void stitch(Mat& src1, Mat& src2, Mat& dst);
-	Mat cameraTransform(int Port);
+	// Variables
+	vector<vector<Point> > trackContours;
 
-	static void mouseHandler(int event, int x, int y, int flags, void* this_);
+
+	// Functions/Methods
+	preProc(VStream Vs, inputVars in);
+	void overlay(Mat& src1, Mat& src2, Mat& dst);
+
 };
 
-#endif /* TRANSFORMSTITCH_H_ */
+#endif /* PREPROC_H_ */

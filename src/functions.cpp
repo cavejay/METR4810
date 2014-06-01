@@ -22,6 +22,33 @@ void Draw_Circles(Mat& img, const vector<Vec3f>& circles)
     }
 }
 
+void grabClickPoint(int event, int x, int y, int flags, void *ptr)
+{
+	Point* point = (Point*)ptr;
+	if (event == EVENT_LBUTTONDOWN)
+	{
+		cout<<"left button of the mouse is clicked (" << x << "," << y <<")" <<endl;
+		point->x = x;
+		point->y = y;
+	}
+
+}
+
+void grabClickPointVector(int event, int x,int y, int flags, void *ptr)
+{
+
+	vector<Point>* point = (vector<Point>*)ptr;
+	if (event == EVENT_LBUTTONDOWN)
+	{
+		Point a(x,y);
+		point->push_back(a);
+	}
+	if (event == EVENT_RBUTTONDOWN)
+	{
+		point->pop_back();
+	}
+}
+
 
 void Dilation(const Mat& src, Mat& dst, ED_SHAPE dilation_shape, double dilation_size)
 {
