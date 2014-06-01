@@ -23,6 +23,7 @@
 #include "Rotate3d.h"
 #include "VStream.h"
 #include "RobotSim.h"
+#include "matlab.h"
 #include "PID.h"
 #include "sys_constants.h"
 #include "race_track_extraction.h"
