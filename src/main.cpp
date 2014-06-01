@@ -67,65 +67,43 @@ int main (int argc, char* argv[])
 	 * setup and initialisation of classes
 	 */
 
-  if (argc > 200) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
-      show_usage(argv[0]); // Inform the user of how to use the program
-      exit(0);
-  }
+	if (argc > 200) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
+	  show_usage(argv[0]); // Inform the user of how to use the program
+	  exit(0);
+	}
 
-  // Translate the input commands into somthing useful
-  inputVars in = getInputData(argc, argv);
-  if(!in.varsParsedSuccessfully){
-    exit(0);
-  } else if (in.loadFile){
-    // do the things that load le settings from le file. :3
+	// Translate the input commands into somthing useful
+	inputVars in = getInputData(argc, argv);
+	if(!in.varsParsedSuccessfully){
+	exit(0);
+	} else if (in.loadFile){
+	// do the things that load le settings from le file. :3
 	  in = readSettingsFile(in.filename);
-  }
+	}
 
-  // This overrides the cmdline for nowz
-  in.inputSource = "camera";
-  in.host = "169.254.88.211";
-  in.cameraID = 1;
-  in.numCameras = 1;
-  in.file_location = "Sample_Pictures/inPlace2-4.jpg";
+	// This overrides the cmdline for nowz
+	in.inputSource = "camera";
+	in.host = "169.254.88.211";
+	in.cameraID = 1;
+	in.numCameras = 1;
+	in.file_location = "Sample_Pictures/inPlace2-4.jpg";
 
-  /*
-   * BEGINNING of Setup
-   */
-  cout << "Creating classes" << endl;
+	/*
+	* BEGINNING of Setup
+	*/
+	cout << "Creating classes" << endl;
 
-  // initialise the vision feeds with the input commands
-  VStream Vs(in);
+	// initialise the vision feeds with the input commands
+	VStream Vs(in);
 
-  // Initialise Robo Simulation
-  RobotSim Rsim = RobotSim(Point2d(600,300),0,"Robot1", 2.0,Size(45,20));
+	// Initialise Robo Simulation
+	RobotSim Rsim = RobotSim(Point2d(600,300),0,"Robot1", 2.0,Size(45,20));
 
-  // Initialise PID for pathing
-  PID pid(0,0,0,10);
+	// Initialise PID for pathing
+	PID pid(0,0,0,10);
 
-  // Car Localisation init
-  CarLocator cl(in);
-
-/**
- * Bob Zhou
- * Updated by Michael Ball
- *
- */
-
-  //GUI for software
-  cout << "Making GUI" << endl;
-  int start_stop_bar = 0;
-  int pit_enter_exit_bar = 0;
-  namedWindow("SOFTWAREAAAAAAAA",1);
-  //For start/stop bar, 0 = stop, 1 = start
-  createTrackbar("Start/Stop","SOFTWAREAAAAAAAA",&start_stop_bar,1,0,0);
-  /*
-   * For Pit bar, 0 = no pit, 1 = enter pit, 2 = exit pit. Slide bar goes back to
-   * have a value of 0 once pit exit finishes (have not implemented yet)
-   */
-  createTrackbar("Pit No/enter/exit","SOFTWAREAAAAAAAA",&pit_enter_exit_bar,2,0,0);
-  namedWindow("Contours", CV_WINDOW_FREERATIO);
-//  cv::createTrackbar( "Threshold Value", "Contours", &threshMag, 255, NULL );
-
+	// Car Localisation init
+	CarLocator cl(in);
 
   	cout << "Attempting Pre-Processing" << endl;
 	Point fillAt;
@@ -161,6 +139,23 @@ int main (int argc, char* argv[])
 			}
 		}
 	}
+
+	/*  THIS DOESN'T WORK FOR SOME REASON
+	cout << "Which Camera's view contains the starting lights?" << endl;
+	String startingLightsPortStr; int startingLightsPort;
+	for(int i = in.ports; i < (in.numCameras+in.ports); i++){
+		String windowName = "Camera @ Port #" + int2str(i);
+		imshow(windowName, Vs.pullImage(i));
+	}
+	waitKey();
+	cout << "Please enter the port number of the camera the starting lights are in" << endl;
+	cin >> startingLightsPort;
+	cout << "Good Person" << endl;
+	for(int i = in.ports; i < (in.numCameras+in.ports); i++){
+			String windowName = "Camera @ Port #" + int2str(i);
+			destroyWindow(windowName);
+	}*/ int startingLightsPort = 6060;
+
 
 	cout << "Attempting Selection and Transformation of images" << endl;
 	map<int, Mat> cameraTransforms;
@@ -207,9 +202,10 @@ int main (int argc, char* argv[])
 		cout << "The Transformation Matrix of this camera is:\n" << cameraTransforms[i] << endl;
 
 		// Transform the image
-		warpPerspective(preTransform, postTransform, cameraTransforms[i], postTransform.size());
-		cout << "warped the perspective" << endl;
-
+		try{
+			warpPerspective(preTransform, postTransform, cameraTransforms[i], postTransform.size());
+			cout << "warped the perspective" << endl;
+		} catch (...){cerr << "warpPerspective FAILED :(" << endl;}
 		// Display the transformed image in a window and run waitKey() to show it
 		namedWindow(transformWindowName,CV_WINDOW_AUTOSIZE);
 		imshow(transformWindowName,postTransform);
@@ -275,6 +271,19 @@ int main (int argc, char* argv[])
 	 *  END of Setup
 	 */
 
+	cout << "GUI is being initiated into this realm." << cout;
+	//GUI for software
+	int start_stop_bar = 0;
+	int pit_enter_exit_bar = 0;
+	String GUIWindow = "User Interface";
+	namedWindow(GUIWindow,CV_WINDOW_NORMAL);
+	//For start/stop bar, 0 = stop, 1 = start
+	createTrackbar("Start/Stop",GUIWindow,&start_stop_bar,1,0,0);
+	/*
+	* For Pit bar, 0 = no pit, 1 = enter pit, 2 = exit pit. Slide bar goes back to
+	* have a value of 0 once pit exit finishes (have not implemented yet)
+	*/
+	createTrackbar("Pit No/enter/exit",GUIWindow,&pit_enter_exit_bar,2,0,0);
 
    /*
     *  Wait for Starting light
@@ -282,7 +291,7 @@ int main (int argc, char* argv[])
 	if(in.startingLights == true){
 		int startingLightsValue = 0;
 		while(startingLightsValue < 2) {
-
+			startingLightsValue = birds_eye(Vs.pullImage(startingLightsPort),60,60,60);
 		}
 	}
 
@@ -512,6 +521,7 @@ int main (int argc, char* argv[])
 	 */
 
 	// close matlab here
+  	cout << "Closing Matlab" << endl;
 	matDiscBlue(ep);
 	return 0;
 }
