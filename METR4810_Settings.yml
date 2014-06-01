@@ -1,5 +1,10 @@
 %YAML:1.0
-Input Format: roborealm
+Input Settings: "Read the included readme.md for more information about these settings"
+Input Format: still
 RoboRealm Host Address: localhost
+First port: 6060
+Number of cameras connected: 4
 File Location: "Sample_Pictures/demo-track.png"
+Device ID of the camera connected: 0
+Advanced Settings: For deeper changes of the program
 Show debug images and print outs: 0

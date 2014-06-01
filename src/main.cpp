@@ -86,21 +86,18 @@ int main (int argc, char* argv[])
     exit(0);
   } else if (in.loadFile){
     // do the things that load le settings from le file. :3
-	  readSettingsFile(in.filename);
+	  in = readSettingsFile(in.filename);
   }
 
   // This overrides the cmdline for nowz
-  in.inputSource = "roborealm";
+  in.inputSource = "still";
   in.host = "169.254.88.211";
-  in.camera_number = 0;
-  in.file_location = "Sample_Pictures/ARTag/1.png";
+  in.cameraID = 0;
+  in.file_location = "Sample_Pictures/demo-track.png";
 
   /*
    * BEGINNING of Setup
    */
-
-  // initialise the bluetooth connection
-//  blue();
 
   // initialise the vision feeds with the input commands
   VStream Vs(in);

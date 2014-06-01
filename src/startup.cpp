@@ -21,7 +21,7 @@ inputVars getInputData(int argc, char* argv[])
    	    toReturn.filename = string(argv[i++]); // Increment 'i' so we don't get the argument as the next argv[i].
    	    return toReturn;
    	} else { // Uh-oh, there was no argument to the destination option.
-   	      std::cerr << "--destination option requires one argument." << std::endl;
+   	      std::cerr << "--file option requires one argument." << std::endl;
    	      toReturn.varsParsedSuccessfully = false;
    	}
 
@@ -57,7 +57,7 @@ inputVars getInputData(int argc, char* argv[])
 
     } else if ((arg == "-c") || (arg == "--cameranumber")) {
 	if (i + 1 < argc) {
-	    toReturn.camera_number = atoi(argv[i++]);
+	    toReturn.cameraID = atoi(argv[i++]);
 	} else {
 	      std::cerr << "--cameranumber option requires one argument." << std::endl;
 	      toReturn.varsParsedSuccessfully = false;
@@ -85,34 +85,44 @@ void createSettingsFile(void){
 
   // Create an example file with all the default settings
   FileStorage fs("METR4810_Settings.yml", FileStorage::WRITE);
+  fs << "Input Settings" << "Read the included readme.md for more information about these settings";
   fs << "Input Format" << "roborealm";
   fs << "RoboRealm Host Address" << "localhost";
+  fs << "First port" << 6060;
+  fs << "Number of cameras connected" << 4;
+
   fs << "File Location" << "Sample_Pictures/demo-track.png";
+
+  fs << "Device ID of the camera connected" << 0;
+
+  fs << "Advanced Settings" << "For deeper changes of the program" ;
   fs << "Show debug images and print outs" << false;
   fs.release();
 }
 
 inputVars readSettingsFile(String file){
-  // TODO create the read from yml function.
   inputVars toReturn;
   // Check if the file can actually be opened
-  if(!(file.substr(file.size()-5,file.size()-1) == ".yml")){
-    toReturn.varsParsedSuccessfully;
-    cerr << "Settings file did not end in '.yml'" << endl;
-    return toReturn;
+  cout << "Opening settings file" << endl;
+  try {
+	  FileStorage fs(file, FileStorage::READ);
+	  // Read in dem vars
+	  fs["Input Format"] >> toReturn.inputSource;
+	  String tempHost;
+	  fs["RoboRealm Host Address"] >> tempHost;
+	  toReturn.host = new char[tempHost.length() + 1];
+	  strcpy(toReturn.host,tempHost.c_str());
+
+	  fs["First Port"] >> toReturn.ports;
+	  fs["Number of cameras connected"] >> toReturn.numCameras;
+	  fs["File Location"] >> toReturn.file_location;
+	  fs["Device ID of the camera connected"] >> toReturn.cameraID;
+	  fs["Show debug images and print outs"] >> toReturn.showWorking;
+	  cout << "Returning variables" << endl;
+  } catch (...){
+	  cerr << "Settings file could not be opened.\n"
+			  "Please check and ensure it ends in .yml" << endl;
   }
-
-  FileStorage fs(file, FileStorage::READ);
-
-  // Read in dem vars
-  fs["Input Format"] >> toReturn.inputSource;
-  String tempHost;
-  fs["RoboRealm Host Address"] >> tempHost;
-  strcpy(toReturn.host,tempHost.c_str());
-  fs["Starting Port"] >> toReturn.ports;
-  fs["File Location"] >> toReturn.file_location;
-  fs["Show debug images and print outs"] >> toReturn.showWorking;
-
   return toReturn;
 }
 

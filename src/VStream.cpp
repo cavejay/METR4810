@@ -15,7 +15,7 @@ VStream::VStream (inputVars data)
 {
   this->host = data.host;
   this->file_loc = data.file_location;
-  this->cameraNumber = data.camera_number;
+  this->cameraNumber = data.cameraID;
   _inputFormat = hashit(data.inputSource);
   this->ports = data.ports;
 

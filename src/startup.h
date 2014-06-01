@@ -32,7 +32,7 @@ struct inputVars {
   char* host = "127.0.0.1";
   int ports = 6060;
   String file_location = "Sample_Pictures/demo-track.png";
-  int camera_number = 0;
+  int cameraID = 0;
   int numCameras = 4;
 
   // Running modes
