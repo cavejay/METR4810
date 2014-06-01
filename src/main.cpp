@@ -20,13 +20,14 @@
 #include "startup.h"
 #include "CarLocator.h"
 #include "functions.h"
-#include "Rotate3d.h"
 #include "VStream.h"
 #include "RobotSim.h"
 #include "matlab.h"
 #include "PID.h"
 #include "sys_constants.h"
 #include "race_track_extraction.h"
+#include "matlab.h"
+
 // Aruco .h's
 #include "src/marker.h"
 #include "src/aruco.h"
@@ -242,6 +243,10 @@ int main (int argc, char* argv[])
 
 
 
+	// reference matlab setup here
+	Engine *ep = matConnBlue();
+	matSend(ep, "1");
+
 	/*
 	 *  END of Setup
 	 */
@@ -257,6 +262,7 @@ int main (int argc, char* argv[])
     Point carPoint;
 
   int circleReset = 4;
+  int steering = 127;
   // Start Loop
   while(1)
   {
@@ -450,65 +456,84 @@ int main (int argc, char* argv[])
 
     // If one average is larger than the other, move towards that edge
     // If differences are tiny just go straight
-    if((pNum1 >= straightThreshold*pNum2 && pNum1 <= pNum2 ) || (pNum1 >= pNum2 && pNum1 <= straightThreshold*pNum2))
-    {
-      // Tell the car to go straight
-      //move(128,0);
 
-      // Tell the simulation car to go straight
-      Rsim.move(forwardSpeed , 0);
-      cout << "Go Straight\n";
-    }
-    else if (pNum2 > pNum1)
-    {
-      // Tell the car to go left
-      //move(0,0);
+		// -35 to 35 are the pid.p_i_d() values
+		// Therefore multiply by 3.62
+		// Add 127
+		int pidTurnNum = (4*-pid.p_i_d());
+		steering = steering + pidTurnNum;
+		if (steering>254) {
+			steering = 254;
+		}
+		else if(steering < 1) {
+			steering = 1;
+		}
+		string pidTurnString = static_cast<ostringstream*>( &(ostringstream() << steering) )->str();
 
-      // Tell the simulation car to go left
-      Rsim.move(forwardSpeed, 4*pid.p_i_d());
-      cout << "Turning Left\n";
-    }
-    // Assuming largest2 is the inside track (being smaller than largest 1)
-    else if (pNum1 > pNum2)
-    {
-      // Tell the car to go right
-      //move(255,0);
+		if ((pNum1 >= straightThreshold * pNum2 && pNum1 <= pNum2) || (pNum1 >= pNum2 && pNum1 <= straightThreshold * pNum2)) {
 
-      // Tell the simulation car to go right
-      Rsim.move(forwardSpeed, 4*pid.p_i_d());
-      cout << "Turning right\n";
-    }
-    else {
-      cout << "#####\nELSE HAPPENED\n#####" << endl;
-    }
+			// Tell the car to go straight
+			matSend(ep, "200");
+			matSend(ep, pidTurnString);
 
-    Rsim.draw(drawing, true);// draw the simulation
+			// Tell the simulation car to go straight
+			Rsim.move(forwardSpeed, 0);
+			cout << "Go Straight\n";
+		} else if (pNum2 > pNum1) {
+			// Tell the car to go left
 
-    // Give information to image:
-    stringstream ss1;
-    ss1 <<  "Number of Points Outside (1): " << pNum1;
-    stringstream ss2;
-    ss2 <<  "number of Points Inside (2): " << pNum2;
-    putText(drawing, ss1.str(),Point(10,30), FONT_HERSHEY_SIMPLEX,0.5,Scalar(255,255,255));
-    putText(drawing, ss2.str(),Point(10,60), FONT_HERSHEY_SIMPLEX,0.5,Scalar(255,255,255));
+			matSend(ep, "200");
+			matSend(ep, pidTurnString);
 
-    //Draw image
-    // draw the simulation
-    Rsim.draw(drawing, circRadius);
-    Rsim.showDirection(drawing, pNum1, pNum2);
-    imshow("Contours", drawing);
+			// Tell the simulation car to go left
+			Rsim.move(forwardSpeed, 4 * pid.p_i_d());
+			cout << "Turning Left\n";
+		} else if (pNum1 > pNum2) {
 
-    // Wait for 'esc' key press for 30ms.
-    // If 'esc' key is pressed, break loop
-    if (waitKey(30) == 27)
-    {
-      cout << "User Exit" << endl;
-      break;
-    }
-  }
 
-  /*
-   *  END of functionality
-   */
-return 0;
+			// Tell the car to go right
+			matSend(ep, "200");
+			matSend(ep, pidTurnString);
+
+			// Tell the simulation car to go right
+			Rsim.move(forwardSpeed, 4 * pid.p_i_d());
+			cout << "Turning right\n";
+		} else {
+			cout << "#####\nELSE HAPPENED\n#####" << endl;
+		}
+
+		Rsim.draw(drawing, true);      // draw the simulation
+
+		// Give information to image:
+		stringstream ss1;
+		ss1 << "Number of Points Outside (1): " << pNum1;
+		stringstream ss2;
+		ss2 << "number of Points Inside (2): " << pNum2;
+		putText(drawing, ss1.str(), Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5,
+				Scalar(255, 255, 255));
+		putText(drawing, ss2.str(), Point(10, 60), FONT_HERSHEY_SIMPLEX, 0.5,
+				Scalar(255, 255, 255));
+
+		//Draw image
+		// draw the simulation
+		Rsim.draw(drawing, circRadius);
+		Rsim.showDirection(drawing, pNum1, pNum2);
+		imshow("Contours", drawing);
+
+		// Wait for 'esc' key press for 30ms.
+		// If 'esc' key is pressed, break loop
+		if (waitKey(30) == 27) {
+			cout << "User Exit" << endl;
+
+			break;
+		}
+	}
+
+	/*
+	 *  END of functionality
+	 */
+
+	// close matlab here
+	matDiscBlue(ep);
+	return 0;
 }

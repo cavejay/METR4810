@@ -101,6 +101,9 @@
 									<listOptionValue builtIn="false" value="bthprops"/>
 									<listOptionValue builtIn="false" value="WSock32"/>
 									<listOptionValue builtIn="false" value="WS2_32"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="libmat"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="libmx"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="libeng"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1973194854" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
