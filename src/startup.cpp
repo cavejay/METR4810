@@ -126,9 +126,17 @@ inputVars readSettingsFile(String file){
   return toReturn;
 }
 
+/**
+ * Needs to take an image of the starting tile
+ * and return a integer that shows what stage the starting lights are at
+ * 3 = 1 red
+ * 2 = 2 red
+ * 1 = green and 2 red and thus start
+ */
 int startingLights(const Mat& src){
   // TODO make a function to find the starting lights
-  return 0;
+
+	return 0;
 }
 
 

@@ -67,6 +67,36 @@ void CallBackFunc(int event, int x, int y, int flags, void *ptr)
 
 }
 
+void mouseHandler(int event, int x,int y, int flags, void *ptr)
+{
+
+	vector<Point>* point = (vector<Point>*)ptr;
+	if (event == EVENT_LBUTTONDOWN)
+	{
+		Point a(x,y);
+		point->push_back(a);
+	}
+	if (event == EVENT_RBUTTONDOWN)
+	{
+		point->pop_back();
+	}
+}
+
+void mouseHandler_cb(int event, int x,int y, int flags, void *ptr)
+{
+
+	vector<Point>* point = (vector<Point>*)ptr;
+	if (event == EVENT_LBUTTONDOWN)
+	{
+		Point a(x,y);
+		point->push_back(a);
+	}
+	if (event == EVENT_RBUTTONDOWN)
+	{
+		point->pop_back();
+	}
+}
+
 int main (int argc, char* argv[])
 {
 	/**
@@ -132,20 +162,6 @@ int main (int argc, char* argv[])
 	 *  END of Setup
 	 */
 
-   /*
-    * BOB's Thresholding
-    */
-//    Point xyz;
-//    Mat a = Vs.pullImage(6060);
-//    cvtColor(a, a, CV_BGR2GRAY);
-//    a = race_track_extraction(a);
-//    namedWindow("f_bw",WINDOW_AUTOSIZE);
-//    imshow("f_bw", a);
-//    setMouseCallback("f_bw",CallBackFunc,&xyz);
-//
-//    if(waitKey(300000) == 32)
-//    a = fill_black(a,xyz);
-//    imshow("f_bw", a);
 
    /*
     *  BEGINNING of functionality
