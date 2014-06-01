@@ -68,9 +68,13 @@ Mat race_track_extraction(Mat image)
 //	findContours(f_bw,contours,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_NONE);
 //	drawContours(f_bw,contours,-1,color,1,8,noArray(),1);
 
-
-
 	return f_bw;
+}
+
+Mat fill_black(Mat image,Point p)
+{
+	floodFill(image, p, 0,0,Scalar(),Scalar(),4);
+	return image;
 }
 
 void removeSmallBlobs(Mat image, double size)

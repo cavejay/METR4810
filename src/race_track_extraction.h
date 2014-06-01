@@ -25,6 +25,7 @@ void removeSmallBlobs(Mat image, double size);
 
 Mat race_track_extraction(Mat image);
 
+Mat fill_black(Mat image,Point p);
 
 
 
