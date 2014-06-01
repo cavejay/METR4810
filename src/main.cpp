@@ -35,316 +35,362 @@ using namespace cv;
 using namespace std;
 using namespace aruco;
 
-void show_usage(std::string name){
-  std::cerr << "Usage: " << name << " <option(s)> SOURCES\n"
-	    << "Options:\n"
-	    << "\t-h,--help\t\tShow this help message\n"
-	    << "\t-f,--file <filename>\tLoad the following settings and more, from a .yml file\n"
-	    << "\t-g,--generatefile\tCreates a settings file with the default settings\n"
-	    << "\t-s,--inputsource <input here>\tCan be 'roborealm', 'still', 'video' or 'camera'\n"
-	    << "\t-H,--host <HOST IP>\tSpecify the IP Address of the Roborealm Server\n"
-	    << "\t-d,--destination <DESTINATION>\tSpecify the path for the image or video file\n"
-	    << "\t-c,--cameranumber <CAMERANUMBER>\tSpecify which system camera to use. 0 is default\n"
-	    << "\t-sim,--showsimulation \tShows a simulation running on the given input source. This will ignore the car\n"
-	    << "\t-demo,--demonstration \tRuns a demo using the simulation and a pre-determined picture\n"
-	    << std::endl;
-	    std::cin.get();
+void show_usage(std::string name) {
+	std::cerr << "Usage: " << name << " <option(s)> SOURCES\n" << "Options:\n"
+			<< "\t-h,--help\t\tShow this help message\n"
+			<< "\t-f,--file <filename>\tLoad the following settings and more, from a .yml file\n"
+			<< "\t-g,--generatefile\tCreates a settings file with the default settings\n"
+			<< "\t-s,--inputsource <input here>\tCan be 'roborealm', 'still', 'video' or 'camera'\n"
+			<< "\t-H,--host <HOST IP>\tSpecify the IP Address of the Roborealm Server\n"
+			<< "\t-d,--destination <DESTINATION>\tSpecify the path for the image or video file\n"
+			<< "\t-c,--cameranumber <CAMERANUMBER>\tSpecify which system camera to use. 0 is default\n"
+			<< "\t-sim,--showsimulation \tShows a simulation running on the given input source. This will ignore the car\n"
+			<< "\t-demo,--demonstration \tRuns a demo using the simulation and a pre-determined picture\n"
+			<< std::endl;
+	std::cin.get();
 }
 
+int main(int argc, char* argv[]) {
+	if (argc > 200) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
+		show_usage(argv[0]); // Inform the user of how to use the program
+		exit(0);
+	}
 
-int main (int argc, char* argv[])
-{
-  if (argc > 200) { // Check the value of argc. If not enough parameters have been passed, inform user and exit.
-      show_usage(argv[0]); // Inform the user of how to use the program
-      exit(0);
-  }
+	// Translate the input commands into somthing useful
+	inputVars in = getInputData(argc, argv);
+	if (!in.varsParsedSuccessfully) {
+		exit(0);
+	} else if (in.loadFile) {
+		// do the things that load le settings from le file. :3
+	}
 
-  // Translate the input commands into somthing useful
-  inputVars in = getInputData(argc, argv);
-  if(!in.varsParsedSuccessfully){
-    exit(0);
-  } else if (in.loadFile){
-    // do the things that load le settings from le file. :3
-  }
+	// This overrides the cmdline for nowz
+	in.inputSource = "still";
+	in.camera_number = 0;
+	in.file_location = "Sample_Pictures/demo-track.png";
 
-  // This overrides the cmdline for nowz
-  in.inputSource = "camera";
-  in.camera_number = 0;
-  in.file_location = "Sample_Pictures/ARTag/1.png";
+	/*
+	 * BEGINNING of Setup
+	 */
+	// reference matlab setup here
+	Engine *ep = matConnBlue();
+	matSend(ep, "1");
 
 
-  /*
-   * BEGINNING of Setup
-   */
-  // reference matlab setup here
-  Engine *ep = matConnBlue();
+	VStream Vs(in);
 
-  VStream Vs(in);
+	// Initialise Robo Simulation
+	RobotSim Rsim = RobotSim(Point2d(600, 300), 0, "Robot1", 2.0, Size(45, 20));
 
-  // Initialise Robo Simulation
-  RobotSim Rsim = RobotSim(Point2d(600,300),0,"Robot1", 2.0,Size(45,20));
+	// Initialise PID for pathing
+	PID pid(0, 0, 0, 10);
 
-  // Initialise PID for pathing
-  PID pid(0,0,0,10);
+	// Initialise variables
+	cv::Mat img, img1;
+	cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThrushTrack;
+	int threshMag = 160;
 
-  // Initialise variables
-  cv::Mat img, img1;
-  cv::Mat frame_bgr, frame_hsv, frame_gry, frame_cny, ThreshTrack;
-  int threshMag = 160;
-
-  namedWindow("Contours", CV_WINDOW_FREERATIO);
+	namedWindow("Contours", CV_WINDOW_FREERATIO);
 //  cv::createTrackbar( "Threshold Value", "Contours", &threshMag, 255, NULL );
 
-   /*
-    *  END of Setup
-    */
+	/*
+	 *  END of Setup
+	 */
+	int steering = 127;
+	/*
+	 *  BEGINNING of functionality
+	 */
 
+	int circleReset = 4;
 
-   /*
-    *  BEGINNING of functionality
-    */
+	// Start Loop
+	while (1) {
+		// Grab current image from specified source
+		img = Vs.pullImage(6060);
 
-  int circleReset = 4;
+		// Check if image is empty.
+		if (!img.empty()) {
+			// Lets look at it?
+			cv::imshow("Grabbed Image", img);
+			cout << "The image has been procured successful\n";
+		} else {
+			// The image was empty :(
+			return -1;
+		}
 
-  // Start Loop
-  while(1)
-  {
-    // Grab current image from specified source
-    img = Vs.pullImage(6060);
+		frame_bgr = img.clone();
 
-    // Check if image is empty.
-    if (!img.empty())
-    {
-      // Lets look at it?
-      cv::imshow("Grabbed Image", img);
-      cout << "The image has been procured successful\n";
-    } else {
-      // The image was empty :(
-      return -1;
-    }
-
-    frame_bgr = img.clone();
-
-    /*
-     * THRESHOLD IMAGE
-     * Michael Ball
-     * Updated by Jonathan Holland
-     *
-     */
+		/*
+		 * THRESHOLD IMAGE
+		 * Michael Ball
+		 * Updated by Jonathan Holland
+		 *
+		 */
 //    if(Vs._inputFormat != ROBOREALM){
-    cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
-    equalizeHist( frame_gry,frame_gry );
+		cv::cvtColor(frame_bgr, frame_gry, cv::COLOR_BGR2GRAY);
+		equalizeHist(frame_gry, frame_gry);
 //    } else {
 //    	frame_gry = frame_bgr;
 //    }
-    cv::threshold(frame_gry, ThreshTrack, threshMag, 255, THRESH_BINARY);
-    imshow("threshed'", ThreshTrack);
-    // Contours are a vector of vectors of points
-    vector<vector<Point> > contours;
-    vector<Vec4i> hierarchy;
+		cv::threshold(frame_gry, ThrushTrack, threshMag, 255, THRESH_BINARY);
+		imshow("threshed'", ThrushTrack);
 
-    cv::findContours(ThreshTrack, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0)); // Changed CV_CHAIN_APPROX from simple to none
-    cv::Mat drawing = cv::Mat::zeros(ThreshTrack.size(), CV_8UC3);
+		/*
+		 *  Use the Threshed image ThrushTrack and copy the static pit lane onto
+		 *  it in the positions specified in setup by reading in the centers of
+		 *  the two tags
+		 */
 
-    // Sort vectors
-    sort(contours.begin(), contours.end(), less_vectors);
+		// clone thresholded track to get pittedImg (currently without pitlane)
+		Mat pittedImg = ThrushTrack.clone();
 
-    // Make more colours for the largest vectors
-    vector<Scalar> colors;
-    colors.push_back(Scalar(100,100,100));
-    colors.push_back(Scalar(200,200,200));
-    for (int i = 0; i < contours.size()-2; i++)
-    {
-      Scalar color = Scalar(0, 255, 100);
-      drawContours(drawing, contours, i, color, 1, 8, hierarchy, 0, Point());
-    }
-    drawContours(drawing, contours, contours.size()-2, colors[0], 1, 8, hierarchy, 0, Point());
-    drawContours(drawing, contours, contours.size()-1, colors[1], 1, 8, hierarchy, 0, Point());
-    /// Show in a window
-    namedWindow("Contours", CV_WINDOW_AUTOSIZE);
-    imshow("Contours", drawing);
+		// Pretend we have the static pit lane image
+		// Mat pitLane = imread("path");
+		Mat pitLane;
 
-    /*
-     * PATHING
-     * Jonathan Holland
-     * Updated by Michael Ball & Xavier Casley
-     */
-
-    // Assign the two tracks to the two largest contours
-    vector<Point> largest1 = contours[contours.size() - 1];
-    vector<Point> largest2 = contours[contours.size() - 2];
-
-    // Get the center of the vehicle given the AR tag has been recognised
-
-    // Grabbing center from the Aruco tag marker
-    // cv::Point2f carCenter = Markers[0].getCenter();
-
-    // Grabbing center for the simulation
-    cv::Point2f carCenter = Rsim.Position;
-
-    // Initialise local variables
-    double average1 = 0;
-    double average2 = 0;
-    double value = 0;
-    double totalValue1 = 0;
-    double totalValue2 = 0;
-    int count = 1;
-    int pNum1 = 0;
-    int pNum2 = 0;
-
-    // Assign a value to make the circle around the car
-    int preferedPoints = 20; // 20 is good, it gets about the same answer as 10
-    int minSidePoints = 5; // keep this value under half of preferedPoints
-    int circRadius;
-    circleReset--;
-    if(circleReset < 0)
-    {
-    	circRadius = getSearchRadius(preferedPoints, minSidePoints, carCenter, largest1, largest2);
-    	circleReset = 4;
-    }
-    Rsim.set_searchRadius(circRadius);
-
-    // Probably the outside of the track
-    for (size_t i = 0; i < largest1.size(); i++)
-    {
-      // Use pythagoras on the 2 dimensional plane to find the distances
-      value = sqrt(
-	  pow((largest1[i].x - carCenter.x), 2)
-	  + pow((largest1[i].y - carCenter.y), 2));
-      // If the value is within the circle radius
-      if (value < circRadius)
-      {
-    	  totalValue1 += value;
-    	  count += 1;
-      }
-    }
-    average1 = totalValue1 / count;
-    pNum1 = count;
-
-    value = 0;
-    count = 1;
-
-    // Do the same for largest2, the other contour probably the inside of the track
-    for (size_t i = 0; i < largest2.size(); i++)
-    {
-      value = sqrt(
-	  pow((largest2[i].x - carCenter.x), 2)
-	  + pow((largest2[i].y - carCenter.y), 2));
-
-      if (value < circRadius)
-      {
-	totalValue2 += value;
-	count += 1;
-      }
-    }
-    average2 = totalValue2 / count;
-    pNum2 = count;
-
-    if(pNum2 > 110) {
-    	pNum2 = 110;
-    }
-    if(pNum1 > 110) {
-    	pNum1 = 110;
-    }
-
-    // record error
-    pid.error(pNum1 - pNum2);
-
-    /* Info dump */
-    cout <<
-	"Total Distance Outside (1): " << totalValue1 << endl <<
-	"Total Distance Inside (2): " << totalValue2 << endl <<
-	"Average Outside (1): " << average1 << endl <<
-	"Average Inside (2): " << average2 << endl <<
-	"Error: " << error << endl <<
-	"Number of Points Outside (1): " << pNum1 << endl <<
-	"Number of Points Inside (2): " << pNum2 << endl;
-
-    /*
-     *  Beginning of PID Controller
-     *  Code by Michael
-     */
-    // Constants
-    pid.Kp(0.1);
-    pid.Ki(0.0005);
-    pid.Kd(0.1);
-
-    // Number of error values to use in the integration
-    pid.set_integrationLen(10);
-
-    /*
-     * Simulation Controller (may not work for actual car)
-     * Created by Jonathan Holland
-     * Edited by Michael Ball and Xavier Casley
-     */
-    // Minimum threshold to go straight
-    float straightThreshold = 0.99;
-    float forwardSpeed = 2;
-
-    // If one average is larger than the other, move towards that edge
-    // If differences are tiny just go straight
-    if((pNum1 >= straightThreshold*pNum2 && pNum1 <= pNum2 ) || (pNum1 >= pNum2 && pNum1 <= straightThreshold*pNum2))
-    {
-      // Tell the car to go straight
-      matSend(ep, "1");
-
-      // Tell the simulation car to go straight
-
-      Rsim.move(forwardSpeed , 0);
-      cout << "Go Straight\n";
-    }
-    else if (pNum2 > pNum1)
-    {
-      // Tell the car to go left
-      //move(0,0);
-
-      // Tell the simulation car to go left
-      Rsim.move(forwardSpeed, 4*pid.p_i_d());
-      cout << "Turning Left\n";
-    }
-    else if (pNum1 > pNum2)
-    {
-      // Tell the car to go right
-      //move(255,0);
-
-      // Tell the simulation car to go right
-      Rsim.move(forwardSpeed, 4*pid.p_i_d());
-      cout << "Turning right\n";
-    }
-    else {
-      cout << "#####\nELSE HAPPENED\n#####" << endl;
-    }
-
-    Rsim.draw(drawing, true);// draw the simulation
-
-    // Give information to image:
-    stringstream ss1;
-    ss1 <<  "Number of Points Outside (1): " << pNum1;
-    stringstream ss2;
-    ss2 <<  "number of Points Inside (2): " << pNum2;
-    putText(drawing, ss1.str(),Point(10,30), FONT_HERSHEY_SIMPLEX,0.5,Scalar(255,255,255));
-    putText(drawing, ss2.str(),Point(10,60), FONT_HERSHEY_SIMPLEX,0.5,Scalar(255,255,255));
-
-    //Draw image
-    // draw the simulation
-    Rsim.draw(drawing, circRadius);
-    Rsim.showDirection(drawing, pNum1, pNum2);
-    imshow("Contours", drawing);
-
-    // Wait for 'esc' key press for 30ms.
-    // If 'esc' key is pressed, break loop
-    if (waitKey(30) == 27)
-    {
-      cout << "User Exit" << endl;
-      break;
-    }
-  }
-
-  /*
-   *  END of functionality
-   */
+		// Get the points of the two tags (these should have been grabbed in setup)
+		// Get the distance between these two points
+		// This is the new length of the pitLane image to overlay (
+		// (how long we want to stretch it to)
+		// width is static
 
 
-  // close matlab here
-return 0;
+
+
+
+
+		/*
+		 * End of Pit lane overlay
+		 */
+
+
+
+		// Contours are a vector of vectors of points
+		vector<vector<Point> > contours;
+		vector<Vec4i> hierarchy;
+
+		cv::findContours(ThrushTrack, contours, hierarchy, CV_RETR_TREE,
+				CV_CHAIN_APPROX_NONE, Point(0, 0)); // Changed CV_CHAIN_APPROX from simple to none
+		cv::Mat drawing = cv::Mat::zeros(ThrushTrack.size(), CV_8UC3);
+
+		// Sort vectors
+		sort(contours.begin(), contours.end(), less_vectors);
+
+		// Make more colours for the largest vectors
+		vector<Scalar> colors;
+		colors.push_back(Scalar(100, 100, 100));
+		colors.push_back(Scalar(200, 200, 200));
+		for (int i = 0; i < contours.size() - 2; i++) {
+			Scalar color = Scalar(0, 255, 100);
+			drawContours(drawing, contours, i, color, 1, 8, hierarchy, 0,
+					Point());
+		}
+		drawContours(drawing, contours, contours.size() - 2, colors[0], 1, 8,
+				hierarchy, 0, Point());
+		drawContours(drawing, contours, contours.size() - 1, colors[1], 1, 8,
+				hierarchy, 0, Point());
+		/// Show in a window
+		namedWindow("Contours", CV_WINDOW_AUTOSIZE);
+		imshow("Contours", drawing);
+
+		/*
+		 * PATHING
+		 * Jonathan Holland
+		 * Updated by Michael Ball & Xavier Casley
+		 */
+
+		// Assign the two tracks to the two largest contours
+		vector<Point> largest1 = contours[contours.size() - 1];
+		vector<Point> largest2 = contours[contours.size() - 2];
+
+		// Get the center of the vehicle given the AR tag has been recognised
+
+		// Grabbing center from the Aruco tag marker
+		// cv::Point2f carCenter = Markers[0].getCenter();
+
+		// Grabbing center for the simulation
+		cv::Point2f carCenter = Rsim.Position;
+
+		// Initialise local variables
+		double average1 = 0;
+		double average2 = 0;
+		double value = 0;
+		double totalValue1 = 0;
+		double totalValue2 = 0;
+		int count = 1;
+		int pNum1 = 0;
+		int pNum2 = 0;
+
+		// Assign a value to make the circle around the car
+		int preferedPoints = 20; // 20 is good, it gets about the same answer as 10
+		int minSidePoints = 5; // keep this value under half of preferedPoints
+		int circRadius;
+		circleReset--;
+		if (circleReset < 0) {
+			circRadius = getSearchRadius(preferedPoints, minSidePoints,
+					carCenter, largest1, largest2);
+			circleReset = 4;
+		}
+		Rsim.set_searchRadius(circRadius);
+
+		// Probably the outside of the track
+		for (size_t i = 0; i < largest1.size(); i++) {
+			// Use pythagoras on the 2 dimensional plane to find the distances
+			value = sqrt(
+					pow((largest1[i].x - carCenter.x), 2)
+							+ pow((largest1[i].y - carCenter.y), 2));
+			// If the value is within the circle radius
+			if (value < circRadius) {
+				totalValue1 += value;
+				count += 1;
+			}
+		}
+		average1 = totalValue1 / count;
+		pNum1 = count;
+
+		value = 0;
+		count = 1;
+
+		// Do the same for largest2, the other contour probably the inside of the track
+		for (size_t i = 0; i < largest2.size(); i++) {
+			value = sqrt(
+					pow((largest2[i].x - carCenter.x), 2)
+							+ pow((largest2[i].y - carCenter.y), 2));
+
+			if (value < circRadius) {
+				totalValue2 += value;
+				count += 1;
+			}
+		}
+		average2 = totalValue2 / count;
+		pNum2 = count;
+
+		if (pNum2 > 110) {
+			pNum2 = 110;
+		}
+		if (pNum1 > 110) {
+			pNum1 = 110;
+		}
+
+		// record error
+		pid.error(pNum1 - pNum2);
+
+		/* Info dump */
+		cout << "Total Distance Outside (1): " << totalValue1 << endl
+				<< "Total Distance Inside (2): " << totalValue2 << endl
+				<< "Average Outside (1): " << average1 << endl
+				<< "Average Inside (2): " << average2 << endl << "Error: "
+				<< error << endl << "Number of Points Outside (1): " << pNum1
+				<< endl << "Number of Points Inside (2): " << pNum2 << endl;
+
+		/*
+		 *  Beginning of PID Controller
+		 *  Code by Michael
+		 */
+		// Constants
+		pid.Kp(0.1);
+		pid.Ki(0.0005);
+		pid.Kd(0.1);
+
+		// Number of error values to use in the integration
+		pid.set_integrationLen(10);
+
+		/*
+		 * Simulation Controller (may not work for actual car)
+		 * Created by Jonathan Holland
+		 * Edited by Michael Ball and Xavier Casley
+		 */
+		// Minimum threshold to go straight
+		float straightThreshold = 0.99;
+		float forwardSpeed = 2;
+
+		// If one average is larger than the other, move towards that edge
+		// If differences are tiny just go straight
+
+
+
+
+
+
+		// -35 to 35 are the pid.p_i_d() values
+		// Therefore multiply by 3.62
+		// Add 127
+		int pidTurnNum = (4*-pid.p_i_d());
+		steering = steering + pidTurnNum;
+		if (steering>254) {
+			steering = 254;
+		}
+		else if(steering < 1) {
+			steering = 1;
+		}
+		string pidTurnString = static_cast<ostringstream*>( &(ostringstream() << steering) )->str();
+
+		if ((pNum1 >= straightThreshold * pNum2 && pNum1 <= pNum2)
+				|| (pNum1 >= pNum2 && pNum1 <= straightThreshold * pNum2)) {
+
+			// Tell the car to go straight
+			matSend(ep, "200");
+			matSend(ep, pidTurnString);
+
+			// Tell the simulation car to go straight
+
+			Rsim.move(forwardSpeed, 0);
+			cout << "Go Straight\n";
+		} else if (pNum2 > pNum1) {
+			// Tell the car to go left
+
+			matSend(ep, "200");
+			matSend(ep, pidTurnString);
+
+			// Tell the simulation car to go left
+			Rsim.move(forwardSpeed, 4 * pid.p_i_d());
+			cout << "Turning Left\n";
+		} else if (pNum1 > pNum2) {
+
+
+			// Tell the car to go right
+			matSend(ep, "200");
+			matSend(ep, pidTurnString);
+
+			// Tell the simulation car to go right
+			Rsim.move(forwardSpeed, 4 * pid.p_i_d());
+			cout << "Turning right\n";
+		} else {
+			cout << "#####\nELSE HAPPENED\n#####" << endl;
+		}
+
+		Rsim.draw(drawing, true);      // draw the simulation
+
+		// Give information to image:
+		stringstream ss1;
+		ss1 << "Number of Points Outside (1): " << pNum1;
+		stringstream ss2;
+		ss2 << "number of Points Inside (2): " << pNum2;
+		putText(drawing, ss1.str(), Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5,
+				Scalar(255, 255, 255));
+		putText(drawing, ss2.str(), Point(10, 60), FONT_HERSHEY_SIMPLEX, 0.5,
+				Scalar(255, 255, 255));
+
+		//Draw image
+		// draw the simulation
+		Rsim.draw(drawing, circRadius);
+		Rsim.showDirection(drawing, pNum1, pNum2);
+		imshow("Contours", drawing);
+
+		// Wait for 'esc' key press for 30ms.
+		// If 'esc' key is pressed, break loop
+		if (waitKey(30) == 27) {
+			cout << "User Exit" << endl;
+
+			break;
+		}
+	}
+
+	/*
+	 *  END of functionality
+	 */
+
+	// close matlab here
+	matDiscBlue(ep);
+	return 0;
 }
