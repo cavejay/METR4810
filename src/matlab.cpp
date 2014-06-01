@@ -71,17 +71,11 @@ void matSend(Engine *ep, std::string msg) {
 	    return;
 	} else {
 		if(engPutVariable(ep, "msg", mx)) {
-			printf("Unable to put t2 into engine workspace\n");
-		std::cout << "Unable to convert message to mxArray\n";
-	    return;
-	} else {
-		if(engPutVariable(ep, "msg", mx)) {
 			std::cout << "Unable to put mx into engine workspace\n";
 		}
 		mxDestroyArray(mx);
 	}
 
-	engEvalString(ep, "fwrite(object, msg);");
 	engEvalString(ep, "x = uint8(str2num(msg));");
 	engEvalString(ep, "fwrite(object, x);");
 }

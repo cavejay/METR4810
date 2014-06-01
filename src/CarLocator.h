@@ -26,6 +26,7 @@
 #include <deque>
 
 #include "functions.h"
+#include "race_track_extraction.h"
 #include "startup.h"
 
 class CarLocator
