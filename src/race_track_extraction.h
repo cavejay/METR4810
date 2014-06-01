@@ -23,9 +23,9 @@ using namespace std;
 
 void removeSmallBlobs(Mat image, double size);
 
-Mat race_track_extraction(Mat image);
+Mat race_track_extraction(const Mat& image);
 
-Mat fill_black(Mat image,Point p);
+void fill_black(Mat& image,Point p);
 
 
 

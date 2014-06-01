@@ -122,11 +122,12 @@ int main (int argc, char* argv[])
   in.inputSource = "still";
   in.host = "169.254.88.211";
   in.cameraID = 0;
-  in.file_location = "Sample_Pictures/inPlace2-4.png";
+  in.file_location = "Sample_Pictures/inPlace2-4.jpg";
 
   /*
    * BEGINNING of Setup
    */
+  cout << "Creating classes" << endl;
 
   // initialise the vision feeds with the input commands
   VStream Vs(in);
@@ -140,7 +141,15 @@ int main (int argc, char* argv[])
   // Car Localisation init
   CarLocator cl(in);
 
+/**
+ * Bob Zhou
+ * Updated by Michael Ball
+ *
+ */
+
+
 //  //GUI for software
+//  cout << "Making GUI" << endl;
 //  int start_stop_bar = 0;
 //  int pit_enter_exit_bar = 0;
 //  namedWindow("SOFTWAREAAAAAAAA",1);
@@ -155,17 +164,15 @@ int main (int argc, char* argv[])
 ////  cv::createTrackbar( "Threshold Value", "Contours", &threshMag, 255, NULL );
 //
 
-
+  	cout << "Attempting Pre-Processing" << endl;
 	Point fillAt;
 	// pull an image from source
 	Mat preproc = Vs.pullImage(6060);
-	// make it gray
-	cvtColor(preproc, preproc, CV_BGR2GRAY);
 	// Keep this loop going until it's broken
-	while (1) {
+	bool loopInv = true;
+	while (1  && loopInv) {
 		// extract the track as good as you can
 		preproc = race_track_extraction(preproc);
-
 		// Show us the image
 		namedWindow("Select a point to floodfill",WINDOW_AUTOSIZE);
 		setMouseCallback("Select a point to floodfill",grabClickPoint,&fillAt);
@@ -173,59 +180,65 @@ int main (int argc, char* argv[])
 
 		// waitkey to show us an image
 		if(waitKey() == 32){}
-		preproc = fill_black(preproc,fillAt);
+		//fill the picture from point fillAt
+		destroyWindow("Select a point to floodfill");
+		fill_black(preproc,fillAt);
+		// show use the magic
 		imshow("f_bw", preproc);
 		if(waitKey() == 27)
 		{
 		  cout << "Image preprocessing done!" << endl;
+		  destroyWindow("f_bw");
 		  break;
 		}
 	}
-  map<int, Mat> cameraIMGs;
-  int ports[4] = {6060,6061,6062,6063};
-  Mat temp;
-  Mat temp_after;
-  vector<String> pics;
-  vector<Point2f> points;
-  vector<Point2f> points_on_checkboard;
-      pics.push_back("Tracktual/cam11.JPG");
-      pics.push_back("Tracktual/cam21.JPG");
-      pics.push_back("Tracktual/cam31.JPG");
-      pics.push_back("Tracktual/cam41.JPG");
-      //checker board: 4*8 tiles, each tile have 100*100 pixels
-      for (int i = 0; i < pics.size(); i ++ ){
-          //creating the windows for img and update that windows
-          temp = imread(pics[i]);
-          String windowName = "Camera at " + int2str(ports[i]);
-          String windowName1 = "Camera at " + int2str(ports[i]) + "after transformation";
-          namedWindow(windowName,CV_WINDOW_AUTOSIZE);
-          namedWindow(windowName1,CV_WINDOW_AUTOSIZE);
-          Mat temp_after = Mat::zeros(486,965,temp.type());
-          imshow(windowName, temp);
-          imshow(windowName1, temp_after);
-          setMouseCallback(windowName,mouseHandler, &points);
-          //creating the windows for cb and update that windows
-          namedWindow("I'm a checkerboard",CV_WINDOW_AUTOSIZE);
-          Mat checkerboard = imread("Sample_Pictures/checkerboard.jpg");
-          cout << "asdasdasfadgadg"<<checkerboard.size() << endl;
-          imshow("I'm a checkerboard",checkerboard);
-          setMouseCallback("I'm a checkerboard",mouseHandler_cb, &points_on_checkboard);
-          if(waitKey(30000000) == 32){}
-          cameraIMGs[ports[i]] = getPerspectiveTransform(points, points_on_checkboard);
-          cout << "size of vector points : " << points.size() << endl;
-          cout << "size of vector points_on_cb : " << points_on_checkboard.size() << endl;
-          cout << "Points on img"<< points << endl;
-          cout << "Points on cb" << points_on_checkboard << endl;
-          cout << "transform matrix :" << endl << cameraIMGs[ports[i]] << endl;
-          warpPerspective(temp, temp_after, cameraIMGs[ports[i]], temp_after.size());
-          imshow(windowName1,temp_after);
-          if(waitKey(30000) == 32){}
-          destroyWindow(windowName);
-          destroyWindow(windowName1);
-          destroyWindow("I'm a checkerboard");
-          points_on_checkboard.clear();
-          points.clear();
-      }
+
+	cout << "Attempting Selection and Transformation of images" << endl;
+	map<int, Mat> cameraIMGs;
+	int ports[4] = {6060,6061,6062,6063};
+	Mat temp;
+	Mat temp_after;
+	vector<String> pics;
+	vector<Point2f> points;
+	vector<Point2f> points_on_checkboard;
+	  pics.push_back("Tracktual/cam11.JPG");
+	  pics.push_back("Tracktual/cam21.JPG");
+	  pics.push_back("Tracktual/cam31.JPG");
+	  pics.push_back("Tracktual/cam41.JPG");
+	  //checker board: 4*8 tiles, each tile have 100*100 pixels
+	  for (int i = 0; i < pics.size(); i ++ ){
+		  //creating the windows for img and update that windows
+		  temp = imread(pics[i]);
+		  String windowName = "Camera at " + int2str(ports[i]);
+		  String windowName1 = "Camera at " + int2str(ports[i]) + "after transformation";
+		  namedWindow(windowName,CV_WINDOW_AUTOSIZE);
+		  namedWindow(windowName1,CV_WINDOW_AUTOSIZE);
+		  Mat temp_after = Mat::zeros(486,965,temp.type());
+		  imshow(windowName, temp);
+		  imshow(windowName1, temp_after);
+		  setMouseCallback(windowName,mouseHandler, &points);
+		  //creating the windows for cb and update that windows
+		  namedWindow("I'm a checkerboard",CV_WINDOW_AUTOSIZE);
+		  Mat checkerboard = imread("Sample_Pictures/checkerboard.jpg");
+		  cout << "asdasdasfadgadg"<<checkerboard.size() << endl;
+		  imshow("I'm a checkerboard",checkerboard);
+		  setMouseCallback("I'm a checkerboard",mouseHandler_cb, &points_on_checkboard);
+		  if(waitKey(30000000) == 32){}
+		  cameraIMGs[ports[i]] = getPerspectiveTransform(points, points_on_checkboard);
+		  cout << "size of vector points : " << points.size() << endl;
+		  cout << "size of vector points_on_cb : " << points_on_checkboard.size() << endl;
+		  cout << "Points on img"<< points << endl;
+		  cout << "Points on cb" << points_on_checkboard << endl;
+		  cout << "transform matrix :" << endl << cameraIMGs[ports[i]] << endl;
+		  warpPerspective(temp, temp_after, cameraIMGs[ports[i]], temp_after.size());
+		  imshow(windowName1,temp_after);
+		  if(waitKey(30000) == 32){}
+		  destroyWindow(windowName);
+		  destroyWindow(windowName1);
+		  destroyWindow("I'm a checkerboard");
+		  points_on_checkboard.clear();
+		  points.clear();
+	  }
 
 
 
@@ -269,7 +282,6 @@ int main (int argc, char* argv[])
      *
      */
       Mat a;
-      cvtColor(frame_bgr, a, CV_BGR2GRAY);
       a = race_track_extraction(a);
       namedWindow("f_bw",WINDOW_AUTOSIZE);
       imshow("f_bw", a);
