@@ -19,7 +19,6 @@
 // Our .h's
 #include "startup.h"
 #include "functions.h"
-#include "Rotate3d.h"
 #include "VStream.h"
 #include "RobotSim.h"
 #include "PID.h"
