@@ -154,22 +154,22 @@ vector<Point2f> findCorner(Point xy) {
 	int x1, x2, y1, y2;
 
 	// mod the x and y of point by 100 to find how far away and then minus this remainder to get the sides
-	if((xy.x % 100) != 0) {
-		x1 = xy.x - (xy.x % 100);
-		x2 = xy.x + (100 - (xy.x % 100));
+	if((xy.x % 150) != 0) {
+		x1 = xy.x - (xy.x % 150);
+		x2 = xy.x + (150 - (xy.x % 150));
 	}
 	else {
 		x1 = xy.x;
-		x2 = xy.x + 100;
+		x2 = xy.x + 150;
 	}
 
-	if((xy.y % 100) != 0) {
-		y1 = xy.y - (xy.y % 100);
-		y2 = xy.y + (100 - (xy.y % 100));
+	if((xy.y % 150) != 0) {
+		y1 = xy.y - (xy.y % 150);
+		y2 = xy.y + (150 - (xy.y % 150));
 	}
 	else {
 		y1 = xy.y;
-		y2 = xy.y + 100;
+		y2 = xy.y + 150;
 	}
 
 	//combine the four sides to make the four corners
