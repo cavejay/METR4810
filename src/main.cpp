@@ -82,10 +82,11 @@ int main (int argc, char* argv[])
 	}
 
 	// This overrides the cmdline for nowz
-	in.inputSource = "still";
+	in.inputSource = "roborealm";
 	in.host = "169.254.88.211";
+	in.ports = 6060;
 	in.cameraID = 1;
-	in.numCameras = 1;
+	in.numCameras = 2;
 	in.file_location = "Sample_Pictures/inPlace2-4.jpg";
 
 	/*
@@ -113,35 +114,40 @@ int main (int argc, char* argv[])
 	map<int, Mat> finalThresholds;
 	// pull an image from source
 	for(int i = in.ports; i < (in.numCameras+in.ports); i++){
+		try {
 		Mat preproc = Vs.pullImage(i);
 
-		// extract the track as good as you can
-		preproc = race_track_extraction(preproc);
+			// extract the track as good as you can
+			preproc = race_track_extraction(preproc);
 
-		// Keep this loop going until it's broken
-		while (1) {
-		    destroyWindow("f_bw");
-			// Show us the image
-			namedWindow("Select a point to floodfill",WINDOW_AUTOSIZE);
-			setMouseCallback("Select a point to floodfill",grabClickPoint,&fillAt);
-			imshow("Select a point to floodfill", preproc);
+			// Keep this loop going until it's broken
+			while (1) {
+				destroyWindow("f_bw");
+				// Show us the image
+				namedWindow("Select a point to floodfill",WINDOW_AUTOSIZE);
+				setMouseCallback("Select a point to floodfill",grabClickPoint,&fillAt);
+				imshow("Select a point to floodfill", preproc);
 
-			// waitkey to show us an image
-			if(waitKey() == 32){}
-			//fill the picture from point fillAt
-			destroyWindow("Select a point to floodfill");
-			fill_black(preproc,fillAt);
-			// show use the magic
-			imshow("f_bw", preproc);
-			if(waitKey() == 27)
-			{
-			  cout << "Image preprocessing done!" << endl;
+				// waitkey to show us an image
+				if(waitKey() == 32){}
+				//fill the picture from point fillAt
+				destroyWindow("Select a point to floodfill");
+				fill_black(preproc,fillAt);
+				// show use the magic
+				imshow("f_bw", preproc);
+				if(waitKey() == 27)
+				{
+				  cout << "Image preprocessing done!" << endl;
 
-			  finalThresholds[i] = preproc;
-			  break;
+				  finalThresholds[i] = preproc;
+				  break;
+				}
 			}
+		} catch (...) {
+			cerr << "Port " << i << "failed to be retrieved" << endl;
 		}
 	}
+
 
 	/*  THIS DOESN'T WORK FOR SOME REASON
 	cout << "Which Camera's view contains the starting lights?" << endl;
@@ -161,20 +167,22 @@ int main (int argc, char* argv[])
 
 
 	cout << "Attempting Selection and Transformation of images" << endl;
-	map<int, Mat> cameraTransforms;
-	vector<String> pics;
+	map<int, Mat> cameraTransforms, transformedIMGs, preProcIMGs;
 	Mat preTransform, postTransform;
 	Point checkerboardSquare;
 	vector<Point2f> checkerboardPoints;
 	Mat checkerboard = imread("Sample_Pictures/checkerboard.jpg");
 	//checker board: 4*8 tiles, each tile have 100*100 pixels
-	for (int i = in.ports; i < (in.ports + in.numCameras); i++ ){
+	for (int portNum = in.ports; portNum < (6062); portNum++ ){
 		// Get an image from the camera
-		preTransform = Vs.pullImage(i);
+		preTransform = Vs.pullImage(portNum);
+
+		// Store the image for use later
+		preProcIMGs[portNum] = preTransform;
 
 		// Make the window Names
-		String originalWindowName = "Camera at " + int2str(i);
-		String transformWindowName = "Transformed Image from " + int2str(i);
+		String originalWindowName = "Camera at " + int2str(portNum);
+		String transformWindowName = "Transformed Image from " + int2str(portNum);
 
 		// Make the window and assign a mouse callback
 		namedWindow(originalWindowName,CV_WINDOW_AUTOSIZE);
@@ -204,14 +212,18 @@ int main (int argc, char* argv[])
 		cout << "You're matching:\n"
 				<< proc.transformPoints << "\n to \n"
 				<< checkerboardPoints << endl;
-		cameraTransforms[i] = getPerspectiveTransform(proc.transformPoints, checkerboardPoints);
+		cameraTransforms[portNum] = getPerspectiveTransform(proc.transformPoints, checkerboardPoints);
 
-		cout << "The Transformation Matrix of this camera is:\n" << cameraTransforms[i] << endl;
+		cout << "The Transformation Matrix of this camera is:\n" << cameraTransforms[portNum] << endl;
 
 		// Transform the image
 		try{
-			warpPerspective(preTransform, postTransform, cameraTransforms[i], postTransform.size());
+			warpPerspective(preTransform, postTransform, cameraTransforms[portNum], postTransform.size());
+
+			// Store the image
+			transformedIMGs[portNum] = postTransform.clone();
 			cout << "warped the perspective" << endl;
+
 		} catch (...){cerr << "warpPerspective FAILED :(" << endl;}
 		// Display the transformed image in a window and run waitKey() to show it
 		namedWindow(transformWindowName,CV_WINDOW_AUTOSIZE);
@@ -228,6 +240,8 @@ int main (int argc, char* argv[])
 		proc.transformPoints.clear();
 	}
 
+
+	cout << "Piecing all the images together" << endl;
 	/**
 	 * Combine the the images
 	 */

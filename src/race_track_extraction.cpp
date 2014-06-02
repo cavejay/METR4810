@@ -23,7 +23,7 @@ Mat race_track_extraction(const Mat& img)
 		exit(EXIT_FAILURE);
 	}
 	imshow("original", img);
-	threshold(img_gry,img_bw,40,255,THRESH_BINARY);
+	threshold(img_gry,img_bw,100,255,THRESH_BINARY);
 	imshow("gray", img_gry);
 	imshow("thresh", img_bw);
 	// Show us what it looks like
@@ -54,7 +54,7 @@ Mat race_track_extraction(const Mat& img)
 	erode(img_bw,img_bw,SE_square);
 
 	// Then remove more small objects
-	removeSmallBlobs(img_bw, 90000);
+//	removeSmallBlobs(img_bw, 90000);
 
 	return img_bw;
 }

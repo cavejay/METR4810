@@ -39,8 +39,10 @@ void grabClickPointVector(int event, int x,int y, int flags, void *ptr)
 	preProc *proc = (preProc*)ptr;
 	if (event == EVENT_LBUTTONDOWN)	{
 		proc->transformPoints.push_back(Point(x,y));
-	} else if (event == EVENT_LBUTTONDOWN) {
+		cout<<"left button of the mouse is clicked (" << x << "," << y <<")" <<endl;
+	} else if (event == EVENT_RBUTTONDOWN) {
 		proc->transformPoints.pop_back();
+		cout << "The Last point, you clicked was removed from your selection" << endl;
 	}
 
 }
