@@ -27,6 +27,7 @@
 #include "PID.h"
 #include "sys_constants.h"
 #include "race_track_extraction.h"
+#include "race_track_extraction_pit.h"
 #include "matlab.h"
 #include "preProc.h"
 #include "birds_eye.h"
@@ -86,7 +87,7 @@ int main (int argc, char* argv[])
 	in.host = "169.254.88.211";
 	in.ports = 6060;
 	in.cameraID = 1;
-	in.numCameras = 2;
+	in.numCameras = 3;
 	in.file_location = "Sample_Pictures/inPlace2-4.jpg";
 
 	/*
@@ -108,45 +109,6 @@ int main (int argc, char* argv[])
 
 	// Start the Pre-processing
 	preProc proc = preProc();
-
-  	cout << "Attempting Pre-Processing" << endl;
-	Point fillAt;
-	map<int, Mat> finalThresholds;
-	// pull an image from source
-	for(int i = in.ports; i < (in.numCameras+in.ports); i++){
-		try {
-		Mat preproc = Vs.pullImage(i);
-
-			// extract the track as good as you can
-			preproc = race_track_extraction(preproc);
-
-			// Keep this loop going until it's broken
-			while (1) {
-				destroyWindow("f_bw");
-				// Show us the image
-				namedWindow("Select a point to floodfill",WINDOW_AUTOSIZE);
-				setMouseCallback("Select a point to floodfill",grabClickPoint,&fillAt);
-				imshow("Select a point to floodfill", preproc);
-
-				// waitkey to show us an image
-				if(waitKey() == 32){}
-				//fill the picture from point fillAt
-				destroyWindow("Select a point to floodfill");
-				fill_black(preproc,fillAt);
-				// show use the magic
-				imshow("f_bw", preproc);
-				if(waitKey() == 27)
-				{
-				  cout << "Image preprocessing done!" << endl;
-
-				  finalThresholds[i] = preproc;
-				  break;
-				}
-			}
-		} catch (...) {
-			cerr << "Port " << i << "failed to be retrieved" << endl;
-		}
-	}
 
 
 	/*  THIS DOESN'T WORK FOR SOME REASON
@@ -173,7 +135,7 @@ int main (int argc, char* argv[])
 	vector<Point2f> checkerboardPoints;
 	Mat checkerboard = imread("Sample_Pictures/checkerboard.jpg");
 	//checker board: 4*8 tiles, each tile have 100*100 pixels
-	for (int portNum = in.ports; portNum < (6062); portNum++ ){
+	for (int portNum = in.ports; portNum < (in.ports + in.numCameras); portNum++ ){
 		// Get an image from the camera
 		preTransform = Vs.pullImage(portNum);
 
@@ -218,7 +180,7 @@ int main (int argc, char* argv[])
 
 		// Transform the image
 		try{
-			warpPerspective(preTransform, postTransform, cameraTransforms[portNum], postTransform.size());
+			warpPerspective(preTransform, postTransform, cameraTransforms[portNum], checkerboard.size(),INTER_LINEAR);
 
 			// Store the image
 			transformedIMGs[portNum] = postTransform.clone();
@@ -246,9 +208,86 @@ int main (int argc, char* argv[])
 	 * Combine the the images
 	 */
 
-	Mat totalTrack = finalThresholds[in.ports];
+	//
+	Mat totalTrack = transformedIMGs[6060].clone();
+	const Vec3i black = Point3i(0,0,0);
+	Vec3i *bgrPixel;
 
+	// Return some information
+	cout << "About to scan the image and add missing pieces" << endl;
+	cout << "Size: " << totalTrack.rows << ", " << totalTrack.cols << endl;
+	cout << "rows" << transformedIMGs[6061].rows << "cols" << transformedIMGs[6061].cols << endl;
+//	if(waitKey(30000)==32){}
+	// Make the Variables
+	Rect ROI (Point(0,0), Point(800,400));
+	Mat totalTrackROI, gray, mask, maskInv, img1_bg, img2_fg;
+	// For each camera after the first
+	for(int port = 6061; port < (6060+in.numCameras); port++){
+		totalTrackROI = totalTrack(ROI);
+		// Now create a mask of logo and create its inverse mask also
+		cvtColor(transformedIMGs[port], gray, CV_BGR2GRAY);
+		threshold(gray, mask, 5, 255, THRESH_BINARY);
+		bitwise_not(mask, maskInv);
+//		imshow("maskInv", maskInv);
 
+		// Now black-out the area of logo in ROI
+		bitwise_and(totalTrackROI, totalTrackROI,img1_bg, maskInv);
+//		imshow("img1_bg", img1_bg);
+
+//		// Take only region of logo from logo image.
+//		bitwise_and(totalTrack, totalTrack, img2_fg, mask);
+//		imshow("img2_fg", img2_fg);
+
+		// Put logo in ROI and modify the main image
+		add(img1_bg, transformedIMGs[port], totalTrack);
+	}
+
+	cout << "show blended track" << endl;
+	imshow("blended track", totalTrack);
+	if(waitKey(300000)==32){}
+	destroyWindow("blended track");
+
+	cout << "Attempting Thresholding" << endl;
+	Point fillAt;
+	Mat preproc, pitLane;
+
+	try {
+		// extract the track as good as you can
+		preproc = race_track_extraction_pit(totalTrack);
+		pitLane = race_track_extraction_pit(totalTrack);
+		Mat SE_square = getStructuringElement(MORPH_RECT,cv::Size(8,8),Point(-1,-1));
+		dilate(pitLane,pitLane,SE_square);
+		erode(pitLane,pitLane,SE_square);
+		// Keep this loop going until it's broken
+		while (1) {
+			destroyWindow("f_bw");
+			vector<Point> black;
+			namedWindow("Draw a rectangle of Occlusion", WINDOW_AUTOSIZE);
+			imshow("Draw a rectangle of Occlusion", pitLane);
+			setMouseCallback("Draw a rectangle of Occlusion", mouseHandler_pit, &black);
+			if(waitKey() == 32){} // Wait for a spacebar
+			destroyWindow("Draw a rectangle of Occlusion");
+			rectangle(pitLane, black[0], black[1], 0 , -1, 8, 0);
+			// Show us the image
+			namedWindow("Select a point to floodfill",WINDOW_AUTOSIZE);
+			setMouseCallback("Select a point to floodfill",grabClickPoint,&fillAt);
+			imshow("Select a point to floodfill", preproc);
+			// waitkey to show us an image
+			if(waitKey() == 32){}
+			//fill the picture from point fillAt
+			destroyWindow("Select a point to floodfill");
+			fill_black(preproc,fillAt);
+			// show use the magic
+			imshow("f_bw", preproc);
+			if(waitKey() == 27)
+			{
+			  cout << "Image preprocessing done!" << endl;
+			  break;
+			}
+		}
+	} catch (...) {
+		cerr << "An Error caused the thresholding to fail" << endl;
+	}
 	/**
 	 * Find the Contours
 	 */
@@ -256,8 +295,7 @@ int main (int argc, char* argv[])
     // Contours are a vector of vectors of points
 	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
-
-	cv::findContours(totalTrack, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0));
+	cv::findContours(preproc, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0));
 
 	// Sort vectors
 	sort(contours.begin(), contours.end(), less_vectors);

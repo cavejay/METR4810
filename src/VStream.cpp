@@ -201,7 +201,7 @@ Mat VStream::roboGrab(char* host, int port){
   if (!img_out.empty())
   {
     cout << "Frame has data, and is being shown" << endl;
-    cv::imshow("Grabbed Image", img_out);
+//    cv::imshow("Grabbed Image", img_out);
   } else {
     cout << "Frame is empty" << endl;
   }

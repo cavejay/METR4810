@@ -31,7 +31,20 @@ void grabClickPoint(int event, int x, int y, int flags, void *ptr)
 		point->x = x;
 		point->y = y;
 	}
+}
 
+void mouseHandler_pit(int event, int x,int y, int flags, void *ptr)
+{
+	vector<Point>* point = (vector<Point>*)ptr;
+	if (event == EVENT_LBUTTONDOWN)
+	{
+		Point a(x,y);
+		point->push_back(a);
+	}
+	if (event == EVENT_RBUTTONDOWN)
+	{
+		point->pop_back();
+	}
 }
 
 void grabClickPointVector(int event, int x,int y, int flags, void *ptr)

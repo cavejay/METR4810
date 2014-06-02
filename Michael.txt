@@ -1,0 +1,83 @@
+Mat findTransformMatrix(cv::Mat& src) 
+{
+	 cv::Point2f source_points[4];
+     cv::Point2f dest_points[4];
+	 cv::Point2f p;
+	 cv::Mat transform_matrix; //Temporary matrix
+
+
+	 //Create a window
+     namedWindow("Please select 4 grid coordinates", 1);
+	 //show the image
+     imshow("Please select 4 grid coordinates", src);
+      //set the callback function for any mouse event
+	 setMouseCallback("Please select 4 grid coordinates", CallBackFunc, (void*)&source_points);
+
+     // Wait until user press some key
+     waitKey(0);
+
+	 for (int i = 0; i<4; i++) 
+	 {
+		 
+		 cout << "source_points["<< i <<"] == (" << source_points[i].x << ", " << source_points[i].y << ")" << endl;
+
+	 }
+	 calcDestPoints(source_points, dest_points);
+	 transform_matrix = cv::getPerspectiveTransform(source_points, dest_points);
+	 return transform_matrix;
+}
+
+//Mouse callback function for image transformation
+void CallBackFunc(int event, int x, int y, int flags, void* ptr)
+{
+    Point2f *p = (Point2f*)ptr;
+	static int i = 0;
+
+	if  ( event == EVENT_LBUTTONDOWN )
+	{
+		p[i].x = x;
+		p[i].y = y;
+		cout << "Left button of the mouse is clicked - position (" << x << ", " << y << ")" << endl;
+		cout << "Point is (" << p[i].x << ", " << p[i].y << ")" << endl;
+		//calcDestPoints(x, y, i, dest_points);
+		if (++i == 4) 
+		{
+			cout << "Press any key to continue" << endl;
+			destroyWindow("Please select 4 grid coordinates");
+
+		}
+	}
+}
+
+void calcDestPoints(cv::Point2f source_points[4], cv::Point2f dest_points[4]) 
+{
+	int scale = 200; 
+	for (int i = 0; i < 4; i++) 
+	{
+		if ( i == 0 ) 
+		{ 
+			dest_points[i] = source_points[i];
+			cout << "The destination co-ord for point" << i + 1 << " is (" << dest_points[i].x << ", " << dest_points[i].y << ")" << endl;
+
+		}
+		else if ( i == 1 ) 
+		{
+			dest_points[i].x = source_points[0].x + scale;
+			dest_points[i].y = source_points[0].y;
+			cout << "The destination co-ord for point" << i + 1 << " is (" << dest_points[i].x << ", " << dest_points[i].y << ")" << endl;
+		}
+		else if ( i == 2 ) 
+		{
+			dest_points[i].x = source_points[0].x + scale;
+			dest_points[i].y = source_points[0].y - scale;
+			cout << "The destination co-ord for point" << i + 1 << " is (" << dest_points[i].x << ", " << dest_points[i].y << ")" << endl;
+		}
+		else if ( i == 3)
+		{
+			dest_points[i].x = source_points[0].x;
+			dest_points[i].y = source_points[0].y - scale;
+			cout << "The destination co-ord for point" << i + 1 << " is (" << dest_points[i].x << ", " << dest_points[i].y << ")" << endl;
+		}
+	}
+
+}
