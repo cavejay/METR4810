@@ -36,17 +36,13 @@ void grabClickPoint(int event, int x, int y, int flags, void *ptr)
 
 void grabClickPointVector(int event, int x,int y, int flags, void *ptr)
 {
+	preProc *proc = (preProc*)ptr;
+	if (event == EVENT_LBUTTONDOWN)	{
+		proc->transformPoints.push_back(Point(x,y));
+	} else if (event == EVENT_LBUTTONDOWN) {
+		proc->transformPoints.pop_back();
+	}
 
-	vector<Point>* point = (vector<Point>*)ptr;
-	if (event == EVENT_LBUTTONDOWN)
-	{
-		Point a(x,y);
-		point->push_back(a);
-	}
-	if (event == EVENT_RBUTTONDOWN)
-	{
-		point->pop_back();
-	}
 }
 
 
@@ -57,7 +53,8 @@ void Dilation(const Mat& src, Mat& dst, ED_SHAPE dilation_shape, double dilation
   else if( dilation_shape == 1 ){ dilation_type = MORPH_CROSS; }
   else if( dilation_shape == 2) { dilation_type = MORPH_ELLIPSE; }
 
-  Mat element = getStructuringElement( dilation_type, Size( 2*dilation_size + 1, 2*dilation_size+1 ), Point( dilation_size, dilation_size ) );
+  Mat element = getStructuringElement( dilation_type, Size( 2*dilation_size + 1, 2*dilation_size+1 ),
+		  Point( dilation_size, dilation_size ) );
   /// Apply the dilation operation
   cv::dilate( src, dst, element);
 }
@@ -136,7 +133,39 @@ int getSearchRadius(int preferedPoints, int sideMinimum, Point2f carCenter, vect
   return circRadius;
 }
 
+vector<Point2f> findCorner(Point xy) {
+	// Checkerboard parts are 120.5 pixels wide and high
 
+	int x1, x2, y1, y2;
+
+	// mod the x and y of point by 100 to find how far away and then minus this remainder to get the sides
+	if((xy.x % 100) != 0) {
+		x1 = xy.x - (xy.x % 100);
+		x2 = xy.x + (100 - (xy.x % 100));
+	}
+	else {
+		x1 = xy.x;
+		x2 = xy.x + 100;
+	}
+
+	if((xy.y % 100) != 0) {
+		y1 = xy.y - (xy.y % 100);
+		y2 = xy.y + (100 - (xy.y % 100));
+	}
+	else {
+		y1 = xy.y;
+		y2 = xy.y + 100;
+	}
+
+	//combine the four sides to make the four corners
+	Point topleft(x1,y1); Point botright(x2,y2);
+	Point topright(x2,y1); Point botleft(x1,y2);
+	vector<Point2f> corners;
+	corners.push_back(topleft);	corners.push_back(topright);
+	corners.push_back(botleft);	corners.push_back(botright);
+
+	return corners;
+}
 
 
 

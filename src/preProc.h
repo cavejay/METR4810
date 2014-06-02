@@ -1,5 +1,5 @@
 /*
- * transformStitch.h
+ * preProc.h
  *
  *  Created on: 28/05/2014
  *      Author: Michael
@@ -29,15 +29,18 @@ using namespace cv;
 using namespace std;
 
 class preProc {
-
-
 public:
 	// Variables
+	// Temporary variable to handle click points
+	vector<Point2f> transformPoints;
+
+	// The 2 largest contours used for pathing
 	vector<vector<Point> > trackContours;
 
 
 	// Functions/Methods
-	preProc(VStream Vs, inputVars in);
+	preProc();
+//	preProc(VStream Vs, inputVars in);
 	void overlay(Mat& src1, Mat& src2, Mat& dst);
 
 };

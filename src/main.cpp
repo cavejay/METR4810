@@ -82,7 +82,7 @@ int main (int argc, char* argv[])
 	}
 
 	// This overrides the cmdline for nowz
-	in.inputSource = "camera";
+	in.inputSource = "still";
 	in.host = "169.254.88.211";
 	in.cameraID = 1;
 	in.numCameras = 1;
@@ -104,6 +104,9 @@ int main (int argc, char* argv[])
 
 	// Car Localisation init
 	CarLocator cl(in);
+
+	// Start the Pre-processing
+	preProc proc = preProc();
 
   	cout << "Attempting Pre-Processing" << endl;
 	Point fillAt;
@@ -161,7 +164,8 @@ int main (int argc, char* argv[])
 	map<int, Mat> cameraTransforms;
 	vector<String> pics;
 	Mat preTransform, postTransform;
-	vector<Point2f> points, checkerboardPoints;
+	Point checkerboardSquare;
+	vector<Point2f> checkerboardPoints;
 	Mat checkerboard = imread("Sample_Pictures/checkerboard.jpg");
 	//checker board: 4*8 tiles, each tile have 100*100 pixels
 	for (int i = in.ports; i < (in.ports + in.numCameras); i++ ){
@@ -174,31 +178,34 @@ int main (int argc, char* argv[])
 
 		// Make the window and assign a mouse callback
 		namedWindow(originalWindowName,CV_WINDOW_AUTOSIZE);
-		setMouseCallback(originalWindowName, grabClickPointVector, &points);
+		setMouseCallback(originalWindowName, grabClickPointVector, &proc);
 
 		// Create the checkerboard window, assign a mouse callback and show us the picture
 		namedWindow("Checkerboard",CV_WINDOW_AUTOSIZE);
-		setMouseCallback("Checkerboard", grabClickPointVector, &checkerboardPoints);
+		setMouseCallback("Checkerboard", grabClickPoint, &checkerboardSquare);
 		imshow("Checkerboard",checkerboard);
 
 		// fill postTransform with black
-		postTransform = Mat::zeros(486,965,preTransform.type());
+//		postTransform = Mat::zeros(486,965,CV_32F);
 
 		// Show image
 		imshow(originalWindowName, preTransform);
 
 		// Fill the picture frames
-		cout << "Click the corresponding points of the picture "
-				<< " and the Checkboard. Then press spacebar" << endl;
+		cout << "Click the corresponding points of the picture \n"
+				<< "and a square of the checkerboard. Then press spacebar" << endl;
 		if(waitKey(3000000) == 32){}
+		// Get the points of the square that was clicked.
+		cout << "Point on checkerboard" << checkerboardSquare << endl;
+		checkerboardPoints = findCorner(checkerboardSquare);
+		cout << "CheckerboardPoints: " << checkerboardPoints << endl;
 
 		// Grab the perspective transform from the points selected
-		cameraTransforms[i] = getPerspectiveTransform(points, checkerboardPoints);
-		cout << "You are transforming " << points.size() << " points into "
-				<< checkerboardPoints.size() << "other points" << endl;
-		cout << "Specfically you're matching:\n"
-				<< points << "\n to \n"
+		cout << "You're matching:\n"
+				<< proc.transformPoints << "\n to \n"
 				<< checkerboardPoints << endl;
+		cameraTransforms[i] = getPerspectiveTransform(proc.transformPoints, checkerboardPoints);
+
 		cout << "The Transformation Matrix of this camera is:\n" << cameraTransforms[i] << endl;
 
 		// Transform the image
@@ -209,7 +216,7 @@ int main (int argc, char* argv[])
 		// Display the transformed image in a window and run waitKey() to show it
 		namedWindow(transformWindowName,CV_WINDOW_AUTOSIZE);
 		imshow(transformWindowName,postTransform);
-		cout << "wait for a spacebar" << endl;
+		cout << "Wait for a spacebar" << endl;
 		if(waitKey(30000) == 32){}
 
 		destroyWindow(originalWindowName);
@@ -218,7 +225,7 @@ int main (int argc, char* argv[])
 
 		cout << "clear the point vectors for the next camera" << endl;
 		checkerboardPoints.clear();
-		points.clear();
+		proc.transformPoints.clear();
 	}
 
 	/**
@@ -295,7 +302,8 @@ int main (int argc, char* argv[])
 		}
 	}
 
-
+	// Close all dem windows
+	destroyAllWindows();
 
     // Initialise variables
     cv::Mat img, img1;
@@ -303,13 +311,15 @@ int main (int argc, char* argv[])
     int threshMag = 160;
     Point carPoint;
 
-  int circleReset = 4;
-  int steering = 127;
-  // Start Loop
-  cout << "Starting runtime loop" << cout;
-  while(1)
-  {
-    // Grab current image from specified source
+	int circleReset = 4;
+	int steering = 127;
+	// Start Loop
+	cout << "Starting runtime loop" << cout;
+	while(1) {
+	// Make the frame for showing output
+	cv::Mat drawing = cv::Mat::zeros(totalTrack.size(), CV_8UC3);
+
+	// Grab current image from specified source
     img = Vs.pullImage(6060);
 
     // Check if image is empty.
