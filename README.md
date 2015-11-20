@@ -7,6 +7,7 @@ This was a 4th year project based course that required students to work in small
 
 This repo acts as an archive for the work undertaken during that course.
 
+---
 
 INSTRUCTIONS FOR SETUP:
 
